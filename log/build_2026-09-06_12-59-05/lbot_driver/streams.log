@@ -1,0 +1,45 @@
+[0.042s] Invoking command in '/home/lzy/lbot_ws/build/lbot_driver': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_driver -- -j24 -l24
+[0.085s] [100%] Built target lbot_driver
+[0.090s] Invoked command in '/home/lzy/lbot_ws/build/lbot_driver' returned '0': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_driver -- -j24 -l24
+[0.091s] Invoking command in '/home/lzy/lbot_ws/build/lbot_driver': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_driver
+[0.094s] -- Install configuration: ""
+[0.094s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/lbot_driver/lbot_driver
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/launch
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/launch/lbot_start_driver.launch.py
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/config
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/config/lbot_config.yaml
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/lib_install.sh
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1.0.5
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1.0.5
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so
+[0.095s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1.0.5
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so.1.0.5
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so
+[0.096s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so.1
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so.1.0.0
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so.1
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/package_run_dependencies/lbot_driver
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/parent_prefix_path/lbot_driver
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.sh
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.dsv
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/path.sh
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/path.dsv
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.bash
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.sh
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.zsh
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.dsv
+[0.097s] -- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/package.dsv
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/packages/lbot_driver
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig.cmake
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig-version.cmake
+[0.097s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/package.xml
+[0.097s] Invoked command in '/home/lzy/lbot_ws/build/lbot_driver' returned '0': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_driver

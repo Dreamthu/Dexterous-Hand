@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbot_arm_interfaces/srv/SetFrame_Response",
+      "fields": [
+        {
+          "name": "success",
+          "type": {
+            "type_id": 15,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbot_arm_interfaces/srv/SetFrame_Response",
+      "hash_string": "RIHS01_3acd47c498c2aad93db3f9c3104d8afac6fb304fc06ba37c6d7ee4e16dc35372"
+    }
+  ]
+}

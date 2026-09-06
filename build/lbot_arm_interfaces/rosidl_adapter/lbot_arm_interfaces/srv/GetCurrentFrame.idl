@@ -1,0 +1,20 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/GetCurrentFrame.srv
+// generated code does not contain a copyright notice
+
+#include "lbot_arm_interfaces/msg/LbotFrame.idl"
+
+module lbot_arm_interfaces {
+  module srv {
+    struct GetCurrentFrame_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct GetCurrentFrame_Response {
+      string name;
+
+      lbot_arm_interfaces::msg::LbotFrame frame;
+
+      boolean success;
+    };
+  };
+};

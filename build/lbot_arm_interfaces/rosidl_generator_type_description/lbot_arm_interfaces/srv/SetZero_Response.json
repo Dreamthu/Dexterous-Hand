@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbot_arm_interfaces/srv/SetZero_Response",
+      "fields": [
+        {
+          "name": "success",
+          "type": {
+            "type_id": 15,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbot_arm_interfaces/srv/SetZero_Response",
+      "hash_string": "RIHS01_9e62019fd3809401e97def6b24482f71ab6891e0165eb17dc86e26fd082af7b1"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbot_arm_interfaces/srv/SetEmergency_Request",
+      "fields": [
+        {
+          "name": "emergency",
+          "type": {
+            "type_id": 15,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbot_arm_interfaces/srv/SetEmergency_Request",
+      "hash_string": "RIHS01_149dee74799ba2062c8a6f917a675a29b15bbf9a58cc49aa4c090cb7fe3cb412"
+    }
+  ]
+}

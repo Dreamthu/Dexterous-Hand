@@ -1,0 +1,38 @@
+[ 20%] Building CXX object CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.o
+[ 40%] Linking CXX shared library liblbot_motion.so
+[ 60%] Built target lbot_motion
+[ 80%] Building CXX object CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.o
+[100%] Linking CXX executable motion_demo_node
+[100%] Built target motion_demo_node
+-- Install configuration: ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so" to ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node" to ""
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_planner.hpp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_device.hpp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch/motion_demo.launch.py
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/README.md
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/package_run_dependencies/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/parent_prefix_path/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.bash
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.zsh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/packages/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_libraries-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig-version.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.xml

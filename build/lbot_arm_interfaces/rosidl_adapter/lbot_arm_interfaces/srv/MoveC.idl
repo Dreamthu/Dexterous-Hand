@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/MoveC.srv
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Vector3.idl"
+
+module lbot_arm_interfaces {
+  module srv {
+    struct MoveC_Request {
+      geometry_msgs::msg::Vector3 position;
+
+      geometry_msgs::msg::Vector3 euler;
+
+      float speed;
+
+      float acce;
+
+      boolean block;
+    };
+    struct MoveC_Response {
+      boolean success;
+    };
+  };
+};

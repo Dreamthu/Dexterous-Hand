@@ -1,0 +1,16 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/SetFrame.srv
+// generated code does not contain a copyright notice
+
+#include "lbot_arm_interfaces/msg/LbotFrame.idl"
+
+module lbot_arm_interfaces {
+  module srv {
+    struct SetFrame_Request {
+      lbot_arm_interfaces::msg::LbotFrame frame;
+    };
+    struct SetFrame_Response {
+      boolean success;
+    };
+  };
+};

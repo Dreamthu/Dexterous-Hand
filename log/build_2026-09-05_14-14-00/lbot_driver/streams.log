@@ -1,0 +1,173 @@
+[0.039s] Invoking command in '/home/lzy/lbot_ws/build/lbot_driver': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake /home/lzy/lbot_ws/src/lbot_driver -DCMAKE_INSTALL_PREFIX=/home/lzy/lbot_ws/install/lbot_driver
+[0.087s] -- The C compiler identification is GNU 13.3.0
+[0.271s] -- The CXX compiler identification is GNU 13.3.0
+[0.478s] -- Detecting C compiler ABI info
+[0.578s] -- Detecting C compiler ABI info - done
+[0.582s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.582s] -- Detecting C compile features
+[0.582s] -- Detecting C compile features - done
+[0.618s] -- Detecting CXX compiler ABI info
+[0.719s] -- Detecting CXX compiler ABI info - done
+[0.723s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.723s] -- Detecting CXX compile features
+[0.723s] -- Detecting CXX compile features - done
+[0.724s] -- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.797s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[0.849s] -- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)
+[0.908s] -- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[0.913s] -- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[0.920s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.927s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.974s] -- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[0.977s] -- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+[1.024s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+[1.082s] -- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") 
+[1.117s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.219s] -- Found std_msgs: 5.3.8 (/opt/ros/jazzy/share/std_msgs/cmake)
+[1.226s] -- Found std_srvs: 5.3.8 (/opt/ros/jazzy/share/std_srvs/cmake)
+[1.235s] -- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+[1.257s] -- Found tf2: 0.36.21 (/opt/ros/jazzy/share/tf2/cmake)
+[1.260s] -- Found tf2_geometry_msgs: 0.36.21 (/opt/ros/jazzy/share/tf2_geometry_msgs/cmake)
+[1.283s] -- Found eigen3_cmake_module: 0.3.1 (/opt/ros/jazzy/share/eigen3_cmake_module/cmake)
+[1.284s] -- Found Eigen3: TRUE (found version "3.4.0") 
+[1.284s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[1.379s] -- Found lbot_arm_interfaces: 0.0.0 (/home/lzy/lbot_ws/install/lbot_arm_interfaces/share/lbot_arm_interfaces/cmake)
+[1.451s] -- Configuring done (1.4s)
+[1.462s] -- Generating done (0.0s)
+[1.464s] -- Build files have been written to: /home/lzy/lbot_ws/build/lbot_driver
+[1.471s] Invoked command in '/home/lzy/lbot_ws/build/lbot_driver' returned '0': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake /home/lzy/lbot_ws/src/lbot_driver -DCMAKE_INSTALL_PREFIX=/home/lzy/lbot_ws/install/lbot_driver
+[1.472s] Invoking command in '/home/lzy/lbot_ws/build/lbot_driver': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_driver -- -j24 -l24
+[1.499s] [ 50%] [32mBuilding CXX object CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o[0m
+[13.711s] [100%] [32m[1mLinking CXX executable lbot_driver[0m
+[14.193s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LBot::connect_robot()':
+[14.193s] lbot_driver.cpp:(.text+0x1f2a): undefined reference to `lbot::LbotApi::lbot_init(char const*)'
+[14.194s] /usr/bin/ld: lbot_driver.cpp:(.text+0x2150): undefined reference to `lbot::LbotApi::lbot_start_state_monitor(void (*)(lbot_full_state_t const*), void (*)(int, char const*))'
+[14.195s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LBot::disconnect_robot()':
+[14.195s] lbot_driver.cpp:(.text+0x2c88): undefined reference to `lbot::LbotApi::lbot_stop_state_monitor()'
+[14.196s] /usr/bin/ld: lbot_driver.cpp:(.text+0x2e64): undefined reference to `lbot::LbotApi::lbot_cleanup()'
+[14.197s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LBot::get_robot_info()':
+[14.197s] lbot_driver.cpp:(.text+0x31c9): undefined reference to `lbot::LbotApi::lbot_get_controller_info(lbot_handle_t*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)'
+[14.198s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LBot::left_joint_follow_callback(std::shared_ptr<lbot_arm_interfaces::msg::FollowJoint_<std::allocator<void> > >)':
+[14.198s] lbot_driver.cpp:(.text+0x420e): undefined reference to `lbot::LbotApi::lbot_joint_follow(lbot_handle_t*, lbot_arm_t, std::vector<double, std::allocator<double> > const&)'
+[14.199s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LBot::right_joint_follow_callback(std::shared_ptr<lbot_arm_interfaces::msg::FollowJoint_<std::allocator<void> > >)':
+[14.199s] lbot_driver.cpp:(.text+0x4a00): undefined reference to `lbot::LbotApi::lbot_joint_follow(lbot_handle_t*, lbot_arm_t, std::vector<double, std::allocator<double> > const&)'
+[14.200s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::move_joint_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Response_<std::allocator<void> > >)':
+[14.200s] lbot_driver.cpp:(.text+0x8af8): undefined reference to `lbot::LbotApi::lbot_move_joint(lbot_handle_t*, lbot_arm_t, double const*, double, double, bool)'
+[14.200s] /usr/bin/ld: lbot_driver.cpp:(.text+0x8e73): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.201s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::move_pose_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Response_<std::allocator<void> > >)':
+[14.201s] lbot_driver.cpp:(.text+0x95ec): undefined reference to `lbot::LbotApi::lbot_move_pose(lbot_handle_t*, lbot_arm_t, lbot_position_t const*, lbot_euler_t const*, double, double, bool)'
+[14.202s] /usr/bin/ld: lbot_driver.cpp:(.text+0x9967): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.202s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::move_linear_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Response_<std::allocator<void> > >)':
+[14.202s] lbot_driver.cpp:(.text+0x9d46): undefined reference to `lbot::LbotApi::lbot_move_linear(lbot_handle_t*, lbot_arm_t, lbot_position_t const*, lbot_euler_t const*, double, double, bool)'
+[14.203s] /usr/bin/ld: lbot_driver.cpp:(.text+0xa0c1): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.203s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::forward_kinematics_callback(std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Response_<std::allocator<void> > >)':
+[14.203s] lbot_driver.cpp:(.text+0xa5e3): undefined reference to `lbot::LbotApi::lbot_forward_kinematics(lbot_handle_t*, lbot_arm_t, double const*, lbot_position_t*, lbot_euler_t*)'
+[14.204s] /usr/bin/ld: lbot_driver.cpp:(.text+0xaa67): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.204s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::inverse_kinematics_callback(std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Response_<std::allocator<void> > >)':
+[14.205s] lbot_driver.cpp:(.text+0xb0ed): undefined reference to `lbot::LbotApi::lbot_inverse_kinematics(lbot_handle_t*, lbot_arm_t, double const*, lbot_position_t const*, lbot_euler_t const*, double*)'
+[14.205s] /usr/bin/ld: lbot_driver.cpp:(.text+0xb4c1): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.206s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::set_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Response_<std::allocator<void> > >)':
+[14.206s] lbot_driver.cpp:(.text+0xb89d): undefined reference to `lbot::LbotApi::lbot_set_tool_frame(lbot_handle_t*, lbot_arm_t, char const*, lbot_position_t const*, lbot_euler_t const*)'
+[14.206s] /usr/bin/ld: lbot_driver.cpp:(.text+0xbc2d): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.207s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::get_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Response_<std::allocator<void> > >)':
+[14.207s] lbot_driver.cpp:(.text+0xbf18): undefined reference to `lbot::LbotApi::lbot_get_tool_frame(lbot_handle_t*, lbot_arm_t, char const*, lbot_position_t*, lbot_euler_t*)'
+[14.208s] /usr/bin/ld: lbot_driver.cpp:(.text+0xc3e6): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.210s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::get_current_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Response_<std::allocator<void> > >)':
+[14.210s] lbot_driver.cpp:(.text+0xc6ff): undefined reference to `lbot::LbotApi::lbot_get_current_tool_frame(lbot_handle_t*, lbot_arm_t, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, lbot_position_t&, lbot_euler_t&)'
+[14.211s] /usr/bin/ld: lbot_driver.cpp:(.text+0xcbc6): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.213s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::change_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Response_<std::allocator<void> > >)':
+[14.213s] lbot_driver.cpp:(.text+0xcea3): undefined reference to `lbot::LbotApi::lbot_change_tool_frame(lbot_handle_t*, lbot_arm_t, char const*)'
+[14.213s] /usr/bin/ld: lbot_driver.cpp:(.text+0xd23b): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.215s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::delete_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Response_<std::allocator<void> > >)':
+[14.215s] lbot_driver.cpp:(.text+0xd511): undefined reference to `lbot::LbotApi::lbot_delete_tool_frame(lbot_handle_t*, lbot_arm_t, char const*)'
+[14.215s] /usr/bin/ld: lbot_driver.cpp:(.text+0xd8a9): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.216s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::get_all_tool_frames_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Response_<std::allocator<void> > >)':
+[14.216s] lbot_driver.cpp:(.text+0xdb7c): undefined reference to `lbot::LbotApi::lbot_get_all_tool_frames(lbot_handle_t*, lbot_arm_t, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)'
+[14.217s] /usr/bin/ld: lbot_driver.cpp:(.text+0xdf32): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.217s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::set_zero_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Response_<std::allocator<void> > >)':
+[14.217s] lbot_driver.cpp:(.text+0xe1bc): undefined reference to `lbot::LbotApi::lbot_set_zero(lbot_handle_t*, lbot_arm_t)'
+[14.218s] /usr/bin/ld: lbot_driver.cpp:(.text+0xe537): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.219s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::set_enable_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Response_<std::allocator<void> > >)':
+[14.219s] lbot_driver.cpp:(.text+0xe807): undefined reference to `lbot::LbotApi::lbot_enable_arm(lbot_handle_t*, lbot_arm_t, bool)'
+[14.219s] /usr/bin/ld: lbot_driver.cpp:(.text+0xed7e): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.220s] /usr/bin/ld: lbot_driver.cpp:(.text+0xef8a): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.220s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::set_emergency_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Response_<std::allocator<void> > >)':
+[14.220s] lbot_driver.cpp:(.text+0xf347): undefined reference to `lbot::LbotApi::lbot_emergency_stop(lbot_handle_t*, lbot_arm_t, bool)'
+[14.221s] /usr/bin/ld: lbot_driver.cpp:(.text+0xf8be): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.221s] /usr/bin/ld: lbot_driver.cpp:(.text+0xfaca): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.222s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l6_set_joint_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.222s] lbot_driver.cpp:(.text+0xff21): undefined reference to `lbot::LbotApi::lbot_l6_set_position(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.223s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l6_set_force_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.223s] lbot_driver.cpp:(.text+0x10397): undefined reference to `lbot::LbotApi::lbot_l6_set_effort(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.224s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l6_set_speed_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.224s] lbot_driver.cpp:(.text+0x1080d): undefined reference to `lbot::LbotApi::lbot_l6_set_velocity(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.224s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l10_set_joint_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.224s] lbot_driver.cpp:(.text+0x10c83): undefined reference to `lbot::LbotApi::lbot_l10_set_position(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.225s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l10_set_force_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.225s] lbot_driver.cpp:(.text+0x110f9): undefined reference to `lbot::LbotApi::lbot_l10_set_effort(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.226s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::LeftArmServiceNode::left_hand_l10_set_speed_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.226s] lbot_driver.cpp:(.text+0x1156f): undefined reference to `lbot::LbotApi::lbot_l10_set_velocity(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.226s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::move_joint_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJ_Response_<std::allocator<void> > >)':
+[14.226s] lbot_driver.cpp:(.text+0x145d8): undefined reference to `lbot::LbotApi::lbot_move_joint(lbot_handle_t*, lbot_arm_t, double const*, double, double, bool)'
+[14.227s] /usr/bin/ld: lbot_driver.cpp:(.text+0x14953): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.227s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::move_pose_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveJP_Response_<std::allocator<void> > >)':
+[14.227s] lbot_driver.cpp:(.text+0x14d9e): undefined reference to `lbot::LbotApi::lbot_move_pose(lbot_handle_t*, lbot_arm_t, lbot_position_t const*, lbot_euler_t const*, double, double, bool)'
+[14.228s] /usr/bin/ld: lbot_driver.cpp:(.text+0x15119): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.228s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::move_linear_callback(std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::MoveL_Response_<std::allocator<void> > >)':
+[14.229s] lbot_driver.cpp:(.text+0x154f8): undefined reference to `lbot::LbotApi::lbot_move_linear(lbot_handle_t*, lbot_arm_t, lbot_position_t const*, lbot_euler_t const*, double, double, bool)'
+[14.229s] /usr/bin/ld: lbot_driver.cpp:(.text+0x15873): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.230s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::forward_kinematics_callback(std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ForwardKinematics_Response_<std::allocator<void> > >)':
+[14.230s] lbot_driver.cpp:(.text+0x15d95): undefined reference to `lbot::LbotApi::lbot_forward_kinematics(lbot_handle_t*, lbot_arm_t, double const*, lbot_position_t*, lbot_euler_t*)'
+[14.231s] /usr/bin/ld: lbot_driver.cpp:(.text+0x16219): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.232s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::inverse_kinematics_callback(std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::InverseKinematics_Response_<std::allocator<void> > >)':
+[14.232s] lbot_driver.cpp:(.text+0x1689f): undefined reference to `lbot::LbotApi::lbot_inverse_kinematics(lbot_handle_t*, lbot_arm_t, double const*, lbot_position_t const*, lbot_euler_t const*, double*)'
+[14.233s] /usr/bin/ld: lbot_driver.cpp:(.text+0x16c73): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.234s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::set_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetFrame_Response_<std::allocator<void> > >)':
+[14.234s] lbot_driver.cpp:(.text+0x1704f): undefined reference to `lbot::LbotApi::lbot_set_tool_frame(lbot_handle_t*, lbot_arm_t, char const*, lbot_position_t const*, lbot_euler_t const*)'
+[14.234s] /usr/bin/ld: lbot_driver.cpp:(.text+0x173df): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.235s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::get_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetFrame_Response_<std::allocator<void> > >)':
+[14.235s] lbot_driver.cpp:(.text+0x176ca): undefined reference to `lbot::LbotApi::lbot_get_tool_frame(lbot_handle_t*, lbot_arm_t, char const*, lbot_position_t*, lbot_euler_t*)'
+[14.235s] /usr/bin/ld: lbot_driver.cpp:(.text+0x17b98): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.236s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::get_current_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetCurrentFrame_Response_<std::allocator<void> > >)':
+[14.236s] lbot_driver.cpp:(.text+0x17eb1): undefined reference to `lbot::LbotApi::lbot_get_current_tool_frame(lbot_handle_t*, lbot_arm_t, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, lbot_position_t&, lbot_euler_t&)'
+[14.237s] /usr/bin/ld: lbot_driver.cpp:(.text+0x18378): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.237s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::change_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::ChangeFrame_Response_<std::allocator<void> > >)':
+[14.237s] lbot_driver.cpp:(.text+0x18655): undefined reference to `lbot::LbotApi::lbot_change_tool_frame(lbot_handle_t*, lbot_arm_t, char const*)'
+[14.238s] /usr/bin/ld: lbot_driver.cpp:(.text+0x189ed): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.238s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::delete_tool_frame_callback(std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::DeleteFrame_Response_<std::allocator<void> > >)':
+[14.239s] lbot_driver.cpp:(.text+0x18cc3): undefined reference to `lbot::LbotApi::lbot_delete_tool_frame(lbot_handle_t*, lbot_arm_t, char const*)'
+[14.239s] /usr/bin/ld: lbot_driver.cpp:(.text+0x1905b): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.240s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::get_all_tool_frames_callback(std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::GetAllFrames_Response_<std::allocator<void> > >)':
+[14.240s] lbot_driver.cpp:(.text+0x1932e): undefined reference to `lbot::LbotApi::lbot_get_all_tool_frames(lbot_handle_t*, lbot_arm_t, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >&)'
+[14.240s] /usr/bin/ld: lbot_driver.cpp:(.text+0x196e4): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.241s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::set_zero_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetZero_Response_<std::allocator<void> > >)':
+[14.241s] lbot_driver.cpp:(.text+0x1996e): undefined reference to `lbot::LbotApi::lbot_set_zero(lbot_handle_t*, lbot_arm_t)'
+[14.242s] /usr/bin/ld: lbot_driver.cpp:(.text+0x19ce9): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.243s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::set_enable_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEnable_Response_<std::allocator<void> > >)':
+[14.243s] lbot_driver.cpp:(.text+0x19fb9): undefined reference to `lbot::LbotApi::lbot_enable_arm(lbot_handle_t*, lbot_arm_t, bool)'
+[14.244s] /usr/bin/ld: lbot_driver.cpp:(.text+0x1a530): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.245s] /usr/bin/ld: lbot_driver.cpp:(.text+0x1a73c): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.246s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::set_emergency_callback(std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Request_<std::allocator<void> > >, std::shared_ptr<lbot_arm_interfaces::srv::SetEmergency_Response_<std::allocator<void> > >)':
+[14.246s] lbot_driver.cpp:(.text+0x1aaf9): undefined reference to `lbot::LbotApi::lbot_emergency_stop(lbot_handle_t*, lbot_arm_t, bool)'
+[14.248s] /usr/bin/ld: lbot_driver.cpp:(.text+0x1b070): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.249s] /usr/bin/ld: lbot_driver.cpp:(.text+0x1b27c): undefined reference to `lbot::LbotApi::lbot_get_last_error[abi:cxx11](lbot_handle_t*)'
+[14.251s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l6_set_joint_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.251s] lbot_driver.cpp:(.text+0x1b6d3): undefined reference to `lbot::LbotApi::lbot_l6_set_position(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.253s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l6_set_force_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.253s] lbot_driver.cpp:(.text+0x1bb49): undefined reference to `lbot::LbotApi::lbot_l6_set_effort(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.254s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l6_set_speed_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.254s] lbot_driver.cpp:(.text+0x1bfbf): undefined reference to `lbot::LbotApi::lbot_l6_set_velocity(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.254s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l10_set_joint_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.254s] lbot_driver.cpp:(.text+0x1c435): undefined reference to `lbot::LbotApi::lbot_l10_set_position(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.255s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l10_set_force_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.255s] lbot_driver.cpp:(.text+0x1c8ab): undefined reference to `lbot::LbotApi::lbot_l10_set_effort(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.256s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `lbot_driver::RightArmServiceNode::right_hand_l10_set_speed_callback(std::shared_ptr<std_msgs::msg::UInt8MultiArray_<std::allocator<void> > >)':
+[14.256s] lbot_driver.cpp:(.text+0x1cd21): undefined reference to `lbot::LbotApi::lbot_l10_set_velocity(lbot_handle_t*, lbot_arm_t, std::vector<unsigned char, std::allocator<unsigned char> > const&)'
+[14.256s] /usr/bin/ld: CMakeFiles/lbot_driver.dir/src/lbot_driver.cpp.o: in function `__static_initialization_and_destruction_0()':
+[14.256s] lbot_driver.cpp:(.text+0x209e4): undefined reference to `lbot::LbotApi::LbotApi()'
+[14.257s] /usr/bin/ld: lbot_driver.cpp:(.text+0x209ff): undefined reference to `lbot::LbotApi::~LbotApi()'
+[14.331s] collect2: error: ld returned 1 exit status
+[14.332s] gmake[2]: *** [CMakeFiles/lbot_driver.dir/build.make:232: lbot_driver] Error 1
+[14.333s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/lbot_driver.dir/all] Error 2
+[14.333s] gmake: *** [Makefile:146: all] Error 2
+[14.334s] Invoked command in '/home/lzy/lbot_ws/build/lbot_driver' returned '2': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_driver -- -j24 -l24

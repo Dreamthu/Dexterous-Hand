@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbot_arm_interfaces/srv/GetCurrentFrame_Request",
+      "fields": [
+        {
+          "name": "structure_needs_at_least_one_member",
+          "type": {
+            "type_id": 3,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbot_arm_interfaces/srv/GetCurrentFrame_Request",
+      "hash_string": "RIHS01_24005fa4026624d2432d647239ac99bb40fd81a1766683a597bb8629a4e5c199"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbot_arm_interfaces/srv/ForwardKinematics_Request",
+      "fields": [
+        {
+          "name": "joints",
+          "type": {
+            "type_id": 154,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbot_arm_interfaces/srv/ForwardKinematics_Request",
+      "hash_string": "RIHS01_956ed9e8b6216b642b4a67ac6861f7d4a3c4002fb306ca994ddf5b3a61153911"
+    }
+  ]
+}

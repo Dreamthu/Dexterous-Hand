@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/SetZero.srv
+// generated code does not contain a copyright notice
+
+
+module lbot_arm_interfaces {
+  module srv {
+    struct SetZero_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct SetZero_Response {
+      boolean success;
+    };
+  };
+};

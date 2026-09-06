@@ -1,0 +1,47 @@
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+-- Found lbot_arm_interfaces: 0.0.0 (/home/lzy/lbot_ws/install/lbot_arm_interfaces/share/lbot_arm_interfaces/cmake)
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/lzy/lbot_ws/build/lbot_motion
+[ 60%] Built target lbot_motion
+[100%] Built target motion_demo_node
+-- Install configuration: ""
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node" to ""
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_planner.hpp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_device.hpp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch/motion_demo.launch.py
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/README.md
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/package_run_dependencies/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/parent_prefix_path/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.bash
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.zsh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/packages/lbot_motion
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_libraries-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig-version.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.xml

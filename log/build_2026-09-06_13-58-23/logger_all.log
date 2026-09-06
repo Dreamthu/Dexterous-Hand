@@ -1,0 +1,548 @@
+[0.273s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--packages-select', 'lbot_motion']
+[0.273s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=24, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=['lbot_motion'], packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x76e807172390>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x76e807172090>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x76e807172090>>, mixin_verb=('build',))
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.311s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.311s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/lzy/lbot_ws'
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.311s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.329s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extensions ['ignore', 'ignore_ament_install']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extension 'ignore'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extension 'ignore_ament_install'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extensions ['colcon_pkg']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extension 'colcon_pkg'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extensions ['colcon_meta']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extension 'colcon_meta'
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extensions ['ros']
+[0.330s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_arm_interfaces) by extension 'ros'
+[0.333s] DEBUG:colcon.colcon_core.package_identification:Package 'src/lbot_arm_interfaces' with type 'ros.ament_cmake' and name 'lbot_arm_interfaces'
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extensions ['ignore', 'ignore_ament_install']
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extension 'ignore'
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extension 'ignore_ament_install'
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extensions ['colcon_pkg']
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extension 'colcon_pkg'
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extensions ['colcon_meta']
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extension 'colcon_meta'
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extensions ['ros']
+[0.333s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_demo) by extension 'ros'
+[0.333s] DEBUG:colcon.colcon_core.package_identification:Package 'src/lbot_demo' with type 'ros.ament_cmake' and name 'lbot_demo'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extensions ['ignore', 'ignore_ament_install']
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extension 'ignore'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extension 'ignore_ament_install'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extensions ['colcon_pkg']
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extension 'colcon_pkg'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extensions ['colcon_meta']
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extension 'colcon_meta'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extensions ['ros']
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_driver) by extension 'ros'
+[0.334s] DEBUG:colcon.colcon_core.package_identification:Package 'src/lbot_driver' with type 'ros.ament_cmake' and name 'lbot_driver'
+[0.334s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extensions ['ignore', 'ignore_ament_install']
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extension 'ignore'
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extension 'ignore_ament_install'
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extensions ['colcon_pkg']
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extension 'colcon_pkg'
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extensions ['colcon_meta']
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extension 'colcon_meta'
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extensions ['ros']
+[0.335s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_motion) by extension 'ros'
+[0.335s] DEBUG:colcon.colcon_core.package_identification:Package 'src/lbot_motion' with type 'ros.ament_cmake' and name 'lbot_motion'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extensions ['ignore', 'ignore_ament_install']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extension 'ignore'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extension 'ignore_ament_install'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extensions ['colcon_pkg']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extension 'colcon_pkg'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extensions ['colcon_meta']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extension 'colcon_meta'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extensions ['ros']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(src/lbot_teleop) by extension 'ros'
+[0.336s] DEBUG:colcon.colcon_core.package_identification:Package 'src/lbot_teleop' with type 'ros.ament_cmake' and name 'lbot_teleop'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['ignore', 'ignore_ament_install']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'ignore'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'ignore_ament_install'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['colcon_pkg']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'colcon_pkg'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['colcon_meta']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'colcon_meta'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['ros']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'ros'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['cmake', 'python']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'cmake'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'python'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extensions ['python_setup_py']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源) by extension 'python_setup_py'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['ignore', 'ignore_ament_install']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'ignore'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'ignore_ament_install'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['colcon_pkg']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'colcon_pkg'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['colcon_meta']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'colcon_meta'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['ros']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'ros'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['cmake', 'python']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'cmake'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'python'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extensions ['python_setup_py']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets) by extension 'python_setup_py'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['ignore', 'ignore_ament_install']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'ignore'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'ignore_ament_install'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['colcon_pkg']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'colcon_pkg'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['colcon_meta']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'colcon_meta'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['ros']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'ros'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['cmake', 'python']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'cmake'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'python'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extensions ['python_setup_py']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components) by extension 'python_setup_py'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['ignore', 'ignore_ament_install']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'ignore'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'ignore_ament_install'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['colcon_pkg']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'colcon_pkg'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['colcon_meta']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'colcon_meta'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['ros']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'ros'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['cmake', 'python']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'cmake'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'python'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extensions ['python_setup_py']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms) by extension 'python_setup_py'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['ignore', 'ignore_ament_install']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'ignore'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'ignore_ament_install'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['colcon_pkg']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'colcon_pkg'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['colcon_meta']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'colcon_meta'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['ros']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'ros'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['cmake', 'python']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'cmake'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'python'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extensions ['python_setup_py']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm) by extension 'python_setup_py'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['ignore', 'ignore_ament_install']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'colcon_meta'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['ros']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'ros'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['cmake', 'python']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'cmake'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'python'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extensions ['python_setup_py']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants) by extension 'python_setup_py'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['ignore', 'ignore_ament_install']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'colcon_meta'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['ros']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'ros'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['cmake', 'python']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'cmake'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'python'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extensions ['python_setup_py']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left) by extension 'python_setup_py'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['ignore', 'ignore_ament_install']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'colcon_meta'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['ros']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'ros'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['cmake', 'python']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'cmake'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'python'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extensions ['python_setup_py']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/left/meshes) by extension 'python_setup_py'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'ignore_ament_install'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['colcon_pkg']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'colcon_pkg'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['colcon_meta']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'colcon_meta'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['ros']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'ros'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['cmake', 'python']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'cmake'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'python'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extensions ['python_setup_py']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right) by extension 'python_setup_py'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'ignore_ament_install'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['colcon_pkg']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'colcon_pkg'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['colcon_meta']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'colcon_meta'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['ros']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'ros'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['cmake', 'python']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'cmake'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'python'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extensions ['python_setup_py']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/arms/lkls73_arm/variants/right/meshes) by extension 'python_setup_py'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'ignore_ament_install'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['colcon_pkg']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'colcon_pkg'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['colcon_meta']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'colcon_meta'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['ros']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'ros'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['cmake', 'python']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'cmake'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'python'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extensions ['python_setup_py']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases) by extension 'python_setup_py'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'ignore_ament_install'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['colcon_pkg']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'colcon_pkg'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['colcon_meta']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'colcon_meta'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['ros']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'ros'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['cmake', 'python']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'cmake'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'python'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extensions ['python_setup_py']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso) by extension 'python_setup_py'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'ignore_ament_install'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['colcon_pkg']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'colcon_pkg'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['colcon_meta']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'colcon_meta'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['ros']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'ros'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['cmake', 'python']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'cmake'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'python'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extensions ['python_setup_py']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants) by extension 'python_setup_py'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['ignore', 'ignore_ament_install']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'ignore'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'ignore_ament_install'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['colcon_pkg']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'colcon_pkg'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['colcon_meta']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'colcon_meta'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['ros']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'ros'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['cmake', 'python']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'cmake'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'python'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extensions ['python_setup_py']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default) by extension 'python_setup_py'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['ignore', 'ignore_ament_install']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'ignore'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'ignore_ament_install'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['colcon_pkg']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'colcon_pkg'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['colcon_meta']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'colcon_meta'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['ros']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'ros'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['cmake', 'python']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'cmake'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'python'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extensions ['python_setup_py']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/bases/lkls73_torso/variants/default/meshes) by extension 'python_setup_py'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['ignore', 'ignore_ament_install']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'ignore'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'ignore_ament_install'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['colcon_pkg']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'colcon_pkg'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['colcon_meta']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'colcon_meta'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['ros']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'ros'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['cmake', 'python']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'cmake'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'python'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extensions ['python_setup_py']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands) by extension 'python_setup_py'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['ignore', 'ignore_ament_install']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'ignore'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'ignore_ament_install'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['colcon_pkg']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'colcon_pkg'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['colcon_meta']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'colcon_meta'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['ros']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'ros'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['cmake', 'python']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'cmake'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'python'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extensions ['python_setup_py']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6) by extension 'python_setup_py'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['ignore', 'ignore_ament_install']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'ignore'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'ignore_ament_install'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['colcon_pkg']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'colcon_pkg'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['colcon_meta']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'colcon_meta'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['ros']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'ros'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['cmake', 'python']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'cmake'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'python'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extensions ['python_setup_py']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants) by extension 'python_setup_py'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['ignore', 'ignore_ament_install']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'ignore'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'ignore_ament_install'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['colcon_pkg']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'colcon_pkg'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['colcon_meta']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'colcon_meta'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['ros']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'ros'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['cmake', 'python']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'cmake'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'python'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extensions ['python_setup_py']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left) by extension 'python_setup_py'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['ignore', 'ignore_ament_install']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'ignore'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'ignore_ament_install'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['colcon_pkg']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'colcon_pkg'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['colcon_meta']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'colcon_meta'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['ros']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'ros'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['cmake', 'python']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'cmake'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'python'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extensions ['python_setup_py']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/left/meshes) by extension 'python_setup_py'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['ignore', 'ignore_ament_install']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'ignore'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'ignore_ament_install'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['colcon_pkg']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'colcon_pkg'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['colcon_meta']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'colcon_meta'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['ros']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'ros'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['cmake', 'python']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'cmake'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'python'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extensions ['python_setup_py']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right) by extension 'python_setup_py'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['ignore', 'ignore_ament_install']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'ignore'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'ignore_ament_install'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['colcon_pkg']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'colcon_pkg'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['colcon_meta']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'colcon_meta'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['ros']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'ros'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['cmake', 'python']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'cmake'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'python'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extensions ['python_setup_py']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/components/hands/linkerhand_o6/variants/right/meshes) by extension 'python_setup_py'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['ignore', 'ignore_ament_install']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'ignore'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'ignore_ament_install'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['colcon_pkg']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'colcon_pkg'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['colcon_meta']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'colcon_meta'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['ros']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'ros'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['cmake', 'python']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'cmake'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'python'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extensions ['python_setup_py']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations) by extension 'python_setup_py'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['ignore', 'ignore_ament_install']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'ignore'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'ignore_ament_install'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['colcon_pkg']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'colcon_pkg'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['colcon_meta']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'colcon_meta'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['ros']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'ros'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['cmake', 'python']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'cmake'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'python'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extensions ['python_setup_py']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(开发资源/assets/workstations/lkls73_i1_o6_bimanual) by extension 'python_setup_py'
+[0.347s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.347s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.347s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.347s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.347s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.362s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'lbot_arm_interfaces' in 'src/lbot_arm_interfaces'
+[0.362s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'lbot_demo' in 'src/lbot_demo'
+[0.362s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'lbot_driver' in 'src/lbot_driver'
+[0.362s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'lbot_teleop' in 'src/lbot_teleop'
+[0.362s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.362s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.364s] WARNING:colcon.colcon_ros.prefix_path.ament:The path '/home/lzy/lbot_ws/install/lbot_camera_motion' in the environment variable AMENT_PREFIX_PATH doesn't exist
+[0.364s] WARNING:colcon.colcon_ros.prefix_path.catkin:The path '/home/lzy/lbot_ws/install/lbot_camera_motion' in the environment variable CMAKE_PREFIX_PATH doesn't exist
+[0.368s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 6 installed packages in /home/lzy/lbot_ws/install
+[0.370s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 287 installed packages in /opt/ros/jazzy
+[0.370s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_args' from command line to 'None'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_target' from command line to 'None'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_clean_cache' from command line to 'False'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_clean_first' from command line to 'False'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'cmake_force_configure' from command line to 'False'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'ament_cmake_args' from command line to 'None'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'catkin_cmake_args' from command line to 'None'
+[0.430s] Level 5:colcon.colcon_core.verb:set package 'lbot_motion' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.430s] DEBUG:colcon.colcon_core.verb:Building package 'lbot_motion' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/lzy/lbot_ws/build/lbot_motion', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/lzy/lbot_ws/install/lbot_motion', 'merge_install': False, 'path': '/home/lzy/lbot_ws/src/lbot_motion', 'symlink_install': False, 'test_result_base': None}
+[0.430s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.430s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.431s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/lzy/lbot_ws/src/lbot_motion' with build type 'ament_cmake'
+[0.431s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/lzy/lbot_ws/src/lbot_motion'
+[0.435s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.435s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.435s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.517s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/lzy/lbot_ws/build/lbot_motion': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_motion:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_driver:/home/lzy/lbot_ws/install/lbot_demo:/home/lzy/lbot_ws/install/lbot_camera_motion:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/home/lzy/lbot_ws/install/nut_sorting_task:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/home/lzy/lbot_ws/install/lbot_motion/lib:/home/lzy/lbot_ws/install/lbot_driver/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/home/lzy/lbot_ws/build/nut_sorting_task:/home/lzy/lbot_ws/install/nut_sorting_task/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_motion -- -j24 -l24
+[0.659s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/lzy/lbot_ws/build/lbot_motion' returned '0': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_motion:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_driver:/home/lzy/lbot_ws/install/lbot_demo:/home/lzy/lbot_ws/install/lbot_camera_motion:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/home/lzy/lbot_ws/install/nut_sorting_task:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/home/lzy/lbot_ws/install/lbot_motion/lib:/home/lzy/lbot_ws/install/lbot_driver/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/home/lzy/lbot_ws/build/nut_sorting_task:/home/lzy/lbot_ws/install/nut_sorting_task/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_motion -- -j24 -l24
+[0.665s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/lzy/lbot_ws/build/lbot_motion': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_motion:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_driver:/home/lzy/lbot_ws/install/lbot_demo:/home/lzy/lbot_ws/install/lbot_camera_motion:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/home/lzy/lbot_ws/install/nut_sorting_task:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/home/lzy/lbot_ws/install/lbot_motion/lib:/home/lzy/lbot_ws/install/lbot_driver/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/home/lzy/lbot_ws/build/nut_sorting_task:/home/lzy/lbot_ws/install/nut_sorting_task/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_motion
+[0.673s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(lbot_motion)
+[0.673s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/lzy/lbot_ws/build/lbot_motion' returned '0': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_motion:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_driver:/home/lzy/lbot_ws/install/lbot_demo:/home/lzy/lbot_ws/install/lbot_camera_motion:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/home/lzy/lbot_ws/install/nut_sorting_task:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/home/lzy/lbot_ws/install/lbot_motion/lib:/home/lzy/lbot_ws/install/lbot_driver/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/home/lzy/lbot_ws/build/nut_sorting_task:/home/lzy/lbot_ws/install/nut_sorting_task/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_motion
+[0.678s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion' for CMake module files
+[0.678s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion' for CMake config files
+[0.678s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'cmake_prefix_path')
+[0.678s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.ps1'
+[0.679s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.dsv'
+[0.680s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.sh'
+[0.680s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib'
+[0.680s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'ld_library_path_lib')
+[0.680s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.ps1'
+[0.681s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.dsv'
+[0.681s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.sh'
+[0.681s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/bin'
+[0.681s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'path')
+[0.681s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.ps1'
+[0.681s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.dsv'
+[0.681s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.sh'
+[0.681s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib/pkgconfig/lbot_motion.pc'
+[0.682s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib/python3.12/site-packages'
+[0.682s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/bin'
+[0.682s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'pythonscriptspath')
+[0.682s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.ps1'
+[0.682s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.dsv'
+[0.682s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.sh'
+[0.682s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.ps1'
+[0.683s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv'
+[0.683s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.sh'
+[0.684s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.bash'
+[0.684s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.zsh'
+[0.685s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/lzy/lbot_ws/install/lbot_motion/share/colcon-core/packages/lbot_motion)
+[0.685s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(lbot_motion)
+[0.685s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion' for CMake module files
+[0.685s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion' for CMake config files
+[0.686s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'cmake_prefix_path')
+[0.686s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.ps1'
+[0.686s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.dsv'
+[0.686s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/cmake_prefix_path.sh'
+[0.686s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib'
+[0.686s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'ld_library_path_lib')
+[0.686s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.ps1'
+[0.686s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.dsv'
+[0.687s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/ld_library_path_lib.sh'
+[0.687s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/bin'
+[0.687s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'path')
+[0.687s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.ps1'
+[0.687s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.dsv'
+[0.687s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/path.sh'
+[0.687s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib/pkgconfig/lbot_motion.pc'
+[0.687s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/lib/python3.12/site-packages'
+[0.687s] Level 1:colcon.colcon_core.environment:checking '/home/lzy/lbot_ws/install/lbot_motion/bin'
+[0.687s] Level 1:colcon.colcon_core.shell:create_environment_hook('lbot_motion', 'pythonscriptspath')
+[0.688s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.ps1'
+[0.688s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.dsv'
+[0.688s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/hook/pythonscriptspath.sh'
+[0.688s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.ps1'
+[0.688s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv'
+[0.689s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.sh'
+[0.689s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.bash'
+[0.689s] INFO:colcon.colcon_core.shell:Creating package script '/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.zsh'
+[0.689s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/lzy/lbot_ws/install/lbot_motion/share/colcon-core/packages/lbot_motion)
+[0.689s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[0.689s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[0.689s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[0.689s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[0.699s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[0.699s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[0.699s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[0.703s] DEBUG:colcon.colcon_notification.desktop_notification.notify2:Failed to initialize notify2: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.Notifications was not provided by any .service files
+[0.703s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[0.703s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/lzy/lbot_ws/install/local_setup.ps1'
+[0.704s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/lzy/lbot_ws/install/_local_setup_util_ps1.py'
+[0.704s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/lzy/lbot_ws/install/setup.ps1'
+[0.705s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/lzy/lbot_ws/install/local_setup.sh'
+[0.705s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/lzy/lbot_ws/install/_local_setup_util_sh.py'
+[0.706s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/lzy/lbot_ws/install/setup.sh'
+[0.706s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/lzy/lbot_ws/install/local_setup.bash'
+[0.707s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/lzy/lbot_ws/install/setup.bash'
+[0.707s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/lzy/lbot_ws/install/local_setup.zsh'
+[0.708s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/lzy/lbot_ws/install/setup.zsh'

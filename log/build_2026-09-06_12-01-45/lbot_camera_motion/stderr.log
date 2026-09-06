@@ -1,0 +1,16 @@
+/home/lzy/lbot_ws/src/lbot_camera_motion/src/camera_motion_node.cpp: In member function ‘bool CameraMotionNode::run()’:
+/home/lzy/lbot_ws/src/lbot_camera_motion/src/camera_motion_node.cpp:90:34: error: ‘const struct ArmStep’ has no member named ‘first’
+   90 |         if (!apply_arm_step(step.first, step.second)) { arm_success = false; break; }
+      |                                  ^~~~~
+/home/lzy/lbot_ws/src/lbot_camera_motion/src/camera_motion_node.cpp:90:46: error: ‘const struct ArmStep’ has no member named ‘second’
+   90 |         if (!apply_arm_step(step.first, step.second)) { arm_success = false; break; }
+      |                                              ^~~~~~
+/home/lzy/lbot_ws/src/lbot_camera_motion/src/camera_motion_node.cpp:94:33: error: ‘const struct ArmStep’ has no member named ‘first’
+   94 |         if (!apply_arm_step(it->first, -it->second)) { arm_success = false; break; }
+      |                                 ^~~~~
+/home/lzy/lbot_ws/src/lbot_camera_motion/src/camera_motion_node.cpp:94:45: error: ‘const struct ArmStep’ has no member named ‘second’
+   94 |         if (!apply_arm_step(it->first, -it->second)) { arm_success = false; break; }
+      |                                             ^~~~~~
+gmake[2]: *** [CMakeFiles/camera_motion_node.dir/build.make:76: CMakeFiles/camera_motion_node.dir/src/camera_motion_node.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/camera_motion_node.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

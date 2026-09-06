@@ -1,0 +1,68 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+-- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") 
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+-- Found lbot_arm_interfaces: 0.0.0 (/home/lzy/lbot_ws/install/lbot_arm_interfaces/share/lbot_arm_interfaces/cmake)
+-- Configuring done (1.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/lzy/lbot_ws/build/lbot_motion
+[ 20%] Building CXX object CMakeFiles/lbot_motion.dir/src/motion_device.cpp.o
+[ 40%] Building CXX object CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.o
+[ 60%] Linking CXX shared library liblbot_motion.so
+[ 60%] Built target lbot_motion
+[ 80%] Building CXX object CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.o
+[100%] Linking CXX executable motion_demo_node
+[100%] Built target motion_demo_node
+-- Install configuration: ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so" to ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/bin/motion_demo_node
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/bin/motion_demo_node" to ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/include
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_planner.hpp
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_device.hpp
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch/motion_demo.launch.py
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/README.md
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/package_run_dependencies/lbot_motion
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/parent_prefix_path/lbot_motion
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.bash
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.zsh
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/packages/lbot_motion
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_libraries-extras.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig-version.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.xml

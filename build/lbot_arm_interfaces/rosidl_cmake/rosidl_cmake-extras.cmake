@@ -1,0 +1,4 @@
+# generated from rosidl_cmake/cmake/rosidl_cmake-extras.cmake.in
+
+set(lbot_arm_interfaces_IDL_FILES "srv/MoveJ.idl;srv/MoveL.idl;srv/MoveC.idl;srv/MoveJP.idl;srv/InverseKinematics.idl;srv/ForwardKinematics.idl;srv/SetFrame.idl;srv/SetString.idl;srv/GetFrame.idl;srv/GetCurrentFrame.idl;srv/ChangeFrame.idl;srv/DeleteFrame.idl;srv/GetAllFrames.idl;srv/SetZero.idl;srv/SetEmergency.idl;srv/SetEnable.idl;msg/ArmState.idl;msg/LbotPose.idl;msg/LbotFrame.idl;msg/FollowJoint.idl")
+set(lbot_arm_interfaces_INTERFACE_FILES "srv/MoveJ.srv;srv/MoveL.srv;srv/MoveC.srv;srv/MoveJP.srv;srv/InverseKinematics.srv;srv/ForwardKinematics.srv;srv/SetFrame.srv;srv/SetString.srv;srv/GetFrame.srv;srv/GetCurrentFrame.srv;srv/ChangeFrame.srv;srv/DeleteFrame.srv;srv/GetAllFrames.srv;srv/SetZero.srv;srv/SetEmergency.srv;srv/SetEnable.srv;msg/ArmState.msg;msg/LbotPose.msg;msg/LbotFrame.msg;msg/FollowJoint.msg")

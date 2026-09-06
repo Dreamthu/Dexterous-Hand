@@ -1,0 +1,54 @@
+[INFO] [launch]: All log files can be found below /home/lzy/.ros/log/2026-09-05-14-54-44-472608-WIN-PLQOOSSF61U-39007
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [lbot_driver-1]: process started with pid [39016]
+[lbot_driver-1] [0m[INFO] [1788591284.516546178] [lbot_driver]: Starting LBot Driver with separate service nodes...[0m
+[lbot_driver-1] [0m[INFO] [1788591284.679064409] [robot1.lbot_main_node]: Connected to LBot at 192.168.10.21[0m
+[lbot_driver-1] [0m[INFO] [1788591284.683286190] [robot1.lbot_main_node]: Robot Model: A7_V2, Controller Version: v1.1.2.1[0m
+[lbot_driver-1] [0m[INFO] [1788591284.783401405] [robot1.lbot_main_node]: State monitor started successfully[0m
+[lbot_driver-1] [0m[INFO] [1788591284.783458814] [robot1.lbot_main_node]: LBot main node initialized successfully[0m
+[lbot_driver-1] [0m[INFO] [1788591284.789058938] [robot1.lbot_left_arm_node]: Left arm service node initialized[0m
+[lbot_driver-1] [0m[INFO] [1788591284.794025176] [robot1.lbot_right_arm_node]: Right arm service node initialized[0m
+[lbot_driver-1] [0m[INFO] [1788591284.794416594] [left_arm_executor]: Left arm service executor spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591284.794444349] [main_executor]: Main node executor spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591284.794494933] [lbot_driver]: All nodes ready, spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591284.794664318] [right_arm_executor]: Right arm service executor spinning...[0m
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[lbot_driver-1] [0m[INFO] [1788591285.838261014] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[lbot_driver-1] [0m[INFO] [1788591285.838379072] [lbot_driver]: Shutdown signal received, stopping...[0m
+[lbot_driver-1] [0m[INFO] [1788591285.838387282] [robot1.lbot_main_node]: Disconnecting from LBot...[0m
+[lbot_driver-1] Failed to publish log message to rosout: publisher's context is invalid, at ./src/rcl/publisher.c:423
+[lbot_driver-1] [0m[INFO] [1788591285.838396874] [robot1.lbot_main_node]: Stopping state monitor...[0m
+[lbot_driver-1] Failed to publish log message to rosout: publisher's context is invalid, at ./src/rcl/publisher.c:423
+[lbot_driver-1] [0m[INFO] [1788591285.838402086] [robot1.lbot_main_node]: Cleaning up LBot connection...[0m
+[lbot_driver-1] Failed to publish log message to rosout: publisher's context is invalid, at ./src/rcl/publisher.c:423
+[INFO] [lbot_driver-1]: sending signal 'SIGINT' to process[lbot_driver-1]
+[lbot_driver-1] [0m[INFO] [1788591285.938528000] [robot1.lbot_main_node]: Disconnected from LBot successfully[0m
+[lbot_driver-1] Failed to publish log message to rosout: publisher's context is invalid, at ./src/rcl/publisher.c:423
+[lbot_driver-1] [0m[INFO] [1788591285.938575434] [lbot_driver]: Cleanup completed[0m
+[lbot_driver-1] [0m[INFO] [1788591285.938936894] [lbot_driver]: LBot Driver stopped[0m
+[lbot_driver-1] [0m[INFO] [1788591285.939647030] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[INFO] [lbot_driver-1]: process has finished cleanly [pid 39016]
+[INFO] [launch]: All log files can be found below /home/lzy/.ros/log/2026-09-05-14-54-48-629135-WIN-PLQOOSSF61U-39045
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [lbot_driver-1]: process started with pid [39051]
+[lbot_driver-1] [0m[INFO] [1788591288.670931974] [lbot_driver]: Starting LBot Driver with separate service nodes...[0m
+[lbot_driver-1] [0m[INFO] [1788591288.831819918] [robot1.lbot_main_node]: Connected to LBot at 192.168.10.21[0m
+[lbot_driver-1] [0m[INFO] [1788591288.836004274] [robot1.lbot_main_node]: Robot Model: A7_V2, Controller Version: v1.1.2.1[0m
+[lbot_driver-1] [0m[INFO] [1788591288.936108200] [robot1.lbot_main_node]: State monitor started successfully[0m
+[lbot_driver-1] [0m[INFO] [1788591288.936159371] [robot1.lbot_main_node]: LBot main node initialized successfully[0m
+[lbot_driver-1] [0m[INFO] [1788591288.941515179] [robot1.lbot_left_arm_node]: Left arm service node initialized[0m
+[lbot_driver-1] [0m[INFO] [1788591288.946612959] [robot1.lbot_right_arm_node]: Right arm service node initialized[0m
+[lbot_driver-1] [0m[INFO] [1788591288.946855582] [main_executor]: Main node executor spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591288.946896418] [left_arm_executor]: Left arm service executor spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591288.946863693] [lbot_driver]: All nodes ready, spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788591288.947067473] [right_arm_executor]: Right arm service executor spinning...[0m
+[lbot_driver-1] [0m[INFO] [1788594071.490543893] [robot1.lbot_left_arm_node]: Left arm forward kinematics calculated successfully[0m
+[lbot_driver-1] [0m[INFO] [1788594096.702489097] [robot1.lbot_left_arm_node]: Left arm forward kinematics calculated successfully[0m
+[lbot_driver-1] [0m[INFO] [1788594522.779122489] [robot1.lbot_left_arm_node]: [16051919 ms] Left arm move_joint started[0m
+[lbot_driver-1] [0m[INFO] [1788594525.362021134] [robot1.lbot_left_arm_node]: Left arm move_joint executed successfully[0m
+[lbot_driver-1] [0m[INFO] [1788594525.362081801] [robot1.lbot_left_arm_node]: [16054502 ms] Left arm move_joint returned after 2582 ms[0m
+[lbot_driver-1] [0m[INFO] [1788594525.362605727] [robot1.lbot_left_arm_node]: [16054503 ms] Left arm move_joint started[0m
+[lbot_driver-1] [0m[INFO] [1788594527.933194753] [robot1.lbot_left_arm_node]: Left arm move_joint executed successfully[0m
+[lbot_driver-1] [0m[INFO] [1788594527.933234771] [robot1.lbot_left_arm_node]: [16057073 ms] Left arm move_joint returned after 2570 ms[0m
+[lbot_driver-1] [0m[INFO] [1788594530.514885154] [robot1.lbot_right_arm_node]: Right arm move_joint executed successfully[0m
+[lbot_driver-1] [0m[INFO] [1788594534.783967565] [robot1.lbot_right_arm_node]: Right arm move_joint executed successfully[0m

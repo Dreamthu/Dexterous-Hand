@@ -1,0 +1,62 @@
+[0.070s] Invoking command in '/home/lzy/lbot_ws/build/lbot_demo': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_demo -- -j24 -l24
+[0.100s] [ 12%] Built target demo_lkls_movel
+[0.101s] [ 12%] Built target demo_ik
+[0.101s] [ 18%] Built target demo_lkls_i1_movej
+[0.101s] [ 31%] Built target demo_lkls_i1_movejp
+[0.101s] [ 28%] Built target demo_lkls_movejp
+[0.101s] [ 53%] Built target demo_lkrs_movel
+[0.102s] [ 56%] Built target demo_lkls_movej
+[0.102s] [ 56%] Built target demo_lkrs_movejp
+[0.102s] [ 53%] Built target demo_fk
+[0.102s] [ 62%] Building CXX object CMakeFiles/demo_motion_test.dir/src/demo_motion_test.cpp.o
+[0.102s] [ 65%] Built target demo_lkls_i1_movel
+[0.102s] [ 71%] Built target demo_hand_l10_control
+[0.103s] [ 78%] Built target demo_lkrs_movej
+[0.103s] [ 84%] Built target demo_hand_l6_control
+[0.105s] [ 90%] Built target demo_emergency_enable
+[0.106s] [ 96%] Built target demo_tool_frame
+[4.171s] [100%] Linking CXX executable demo_motion_test
+[4.371s] [100%] Built target demo_motion_test
+[4.377s] Invoked command in '/home/lzy/lbot_ws/build/lbot_demo' returned '0': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_demo -- -j24 -l24
+[4.381s] Invoking command in '/home/lzy/lbot_ws/build/lbot_demo': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_demo
+[4.385s] -- Install configuration: ""
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movel
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movej
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movejp
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movel
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movej
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movejp
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movel
+[4.385s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movej
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movejp
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_fk
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_ik
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_tool_frame
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_emergency_enable
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_hand_l6_control
+[4.386s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_hand_l10_control
+[4.386s] -- Installing: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_motion_test
+[4.389s] -- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_motion_test" to ""
+[4.389s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch
+[4.389s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/lbot_start_smoke_test.launch.py
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/__pycache__
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/__pycache__/lbot_start_motion_test.launch.cpython-312.pyc
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/__pycache__/lbot_start_smoke_test.launch.cpython-312.pyc
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/lbot_start_motion_test.launch.py
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/lbot_start_demo.launch.py
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/package_run_dependencies/lbot_demo
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/parent_prefix_path/lbot_demo
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.sh
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.dsv
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/path.sh
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/path.dsv
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.bash
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.sh
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.zsh
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.dsv
+[4.390s] -- Installing: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/package.dsv
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/packages/lbot_demo
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig.cmake
+[4.390s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig-version.cmake
+[4.391s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/package.xml
+[4.391s] Invoked command in '/home/lzy/lbot_ws/build/lbot_demo' returned '0': AMENT_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy LD_LIBRARY_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_demo

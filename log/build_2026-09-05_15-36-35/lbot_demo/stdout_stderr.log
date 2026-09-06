@@ -1,0 +1,49 @@
+[ 13%] Built target demo_lkrs_movej
+[ 13%] Built target demo_lkrs_movel
+[ 26%] Built target demo_lkrs_movejp
+[ 26%] Built target demo_lkls_movejp
+[ 33%] Built target demo_lkls_i1_movel
+[ 40%] Built target demo_fk
+[ 46%] Built target demo_ik
+[ 53%] Built target demo_lkls_movej
+[ 60%] Built target demo_lkls_i1_movejp
+[ 66%] Built target demo_lkls_movel
+[ 86%] Built target demo_tool_frame
+[ 83%] Built target demo_lkls_i1_movej
+[ 86%] Built target demo_hand_l10_control
+[ 93%] Built target demo_emergency_enable
+[100%] Built target demo_hand_l6_control
+-- Install configuration: ""
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movel
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movej
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkrs_movejp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movel
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movej
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_movejp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movel
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movej
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_lkls_i1_movejp
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_fk
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_ik
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_tool_frame
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_emergency_enable
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_hand_l6_control
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/lib/lbot_demo/demo_hand_l10_control
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch
+-- Installing: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/lbot_start_smoke_test.launch.py
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/launch/lbot_start_demo.launch.py
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/package_run_dependencies/lbot_demo
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/parent_prefix_path/lbot_demo
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/path.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/environment/path.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.bash
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.sh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.zsh
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/local_setup.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/package.dsv
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/ament_index/resource_index/packages/lbot_demo
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/cmake/lbot_demoConfig-version.cmake
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_demo/share/lbot_demo/package.xml

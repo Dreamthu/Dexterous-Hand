@@ -1,0 +1,21 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/MoveJ.srv
+// generated code does not contain a copyright notice
+
+
+module lbot_arm_interfaces {
+  module srv {
+    struct MoveJ_Request {
+      sequence<float> joints;
+
+      float speed;
+
+      float acce;
+
+      boolean block;
+    };
+    struct MoveJ_Response {
+      boolean success;
+    };
+  };
+};

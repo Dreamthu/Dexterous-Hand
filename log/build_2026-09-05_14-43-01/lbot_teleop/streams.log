@@ -1,0 +1,24 @@
+[0.065s] Invoking command in '/home/lzy/lbot_ws/build/lbot_teleop': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_demo:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_teleop -- -j24 -l24
+[0.095s] [100%] Built target demo_teleop
+[0.101s] Invoked command in '/home/lzy/lbot_ws/build/lbot_teleop' returned '0': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_demo:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_teleop -- -j24 -l24
+[0.101s] Invoking command in '/home/lzy/lbot_ws/build/lbot_teleop': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_demo:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_teleop
+[0.105s] -- Install configuration: ""
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/lib/lbot_teleop/demo_teleop
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/launch
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/launch/lbot_start_teleop.launch.py
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/ament_index/resource_index/package_run_dependencies/lbot_teleop
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/ament_index/resource_index/parent_prefix_path/lbot_teleop
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/environment/ament_prefix_path.sh
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/environment/ament_prefix_path.dsv
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/environment/path.sh
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/environment/path.dsv
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/local_setup.bash
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/local_setup.sh
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/local_setup.zsh
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/local_setup.dsv
+[0.106s] -- Installing: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/package.dsv
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/ament_index/resource_index/packages/lbot_teleop
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/cmake/lbot_teleopConfig.cmake
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/cmake/lbot_teleopConfig-version.cmake
+[0.106s] -- Up-to-date: /home/lzy/lbot_ws/install/lbot_teleop/share/lbot_teleop/package.xml
+[0.107s] Invoked command in '/home/lzy/lbot_ws/build/lbot_teleop' returned '0': CMAKE_PREFIX_PATH=/home/lzy/lbot_ws/install/lbot_arm_interfaces:/home/lzy/lbot_ws/install/lbot_teleop:/home/lzy/lbot_ws/install/lbot_demo:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_teleop

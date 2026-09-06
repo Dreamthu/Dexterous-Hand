@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from lbot_arm_interfaces/msg/LbotPose.msg
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Vector3.idl"
+
+module lbot_arm_interfaces {
+  module msg {
+    struct LbotPose {
+      geometry_msgs::msg::Vector3 euler;
+
+      geometry_msgs::msg::Vector3 position;
+    };
+  };
+};

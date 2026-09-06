@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from lbot_arm_interfaces/srv/GetAllFrames.srv
+// generated code does not contain a copyright notice
+
+
+module lbot_arm_interfaces {
+  module srv {
+    struct GetAllFrames_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct GetAllFrames_Response {
+      sequence<string> names;
+
+      boolean success;
+    };
+  };
+};

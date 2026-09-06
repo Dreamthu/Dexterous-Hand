@@ -1,0 +1,118 @@
+[0.000000] (-) TimerEvent: {}
+[0.000069] (-) JobUnselected: {'identifier': 'lbot_arm_interfaces'}
+[0.000087] (-) JobUnselected: {'identifier': 'lbot_demo'}
+[0.000095] (-) JobUnselected: {'identifier': 'lbot_driver'}
+[0.000102] (-) JobUnselected: {'identifier': 'lbot_teleop'}
+[0.000109] (lbot_motion) JobQueued: {'identifier': 'lbot_motion', 'dependencies': OrderedDict({'lbot_arm_interfaces': '/home/lzy/lbot_ws/install/lbot_arm_interfaces'})}
+[0.000119] (lbot_motion) JobStarted: {'identifier': 'lbot_motion'}
+[0.074565] (lbot_motion) JobProgress: {'identifier': 'lbot_motion', 'progress': 'cmake'}
+[0.075621] (lbot_motion) JobProgress: {'identifier': 'lbot_motion', 'progress': 'build'}
+[0.075639] (lbot_motion) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/lzy/lbot_ws/build/lbot_motion', '--', '-j24', '-l24'], 'cwd': '/home/lzy/lbot_ws/build/lbot_motion', 'env': OrderedDict({'LESSOPEN': '| /usr/bin/lesspipe %s', 'HTTPS_PROXY': 'http://127.0.0.1:7897', 'CODEX_CI': '1', 'no_proxy': '172.31.*,172.30.*,172.29.*,172.28.*,172.27.*,172.26.*,172.25.*,172.24.*,172.23.*,172.22.*,172.21.*,172.20.*,172.19.*,172.18.*,172.17.*,172.16.*,10.*,192.168.*,127.*,localhost,<local>', 'USER': 'lzy', 'all_proxy': 'socks5://127.0.0.1:7897', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'WT_PROFILE_ID': '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}', 'HOME': '/home/lzy', 'OLDPWD': '/home/lzy', 'NO_PROXY': '172.31.*,172.30.*,172.29.*,172.28.*,172.27.*,172.26.*,172.25.*,172.24.*,172.23.*,172.22.*,172.21.*,172.20.*,172.19.*,172.18.*,172.17.*,172.16.*,10.*,192.168.*,127.*,localhost,<local>', 'ROS_PYTHON_VERSION': '3', 'PAGER': 'cat', 'LC_CTYPE': 'C.UTF-8', 'NO_COLOR': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': '', 'WSL_DISTRO_NAME': 'Ubuntu-24.04', 'WAYLAND_DISPLAY': 'wayland-0', 'https_proxy': 'http://127.0.0.1:7897', 'ROS_DISTRO': 'jazzy', 'LOGNAME': 'lzy', 'ALL_PROXY': 'socks5://127.0.0.1:7897', 'NAME': 'WIN-PLQOOSSF61U', 'WSL_INTEROP': '/run/WSL/9445_interop', 'http_proxy': 'http://127.0.0.1:7897', 'PULSE_SERVER': 'unix:/mnt/wslg/PulseServer', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm-256color', 'PATH': '/usr/local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/home/lzy/.codex/tmp/arg0/codex-arg0QFWPYP:/usr/local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.12.8-hotspot/bin:/mnt/c/Program Files/Eclipse Adoptium/jdk-17.0.19.10-hotspot/bin:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA app/NvDLISR:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/CMake/bin:/mnt/c/Program Files/Microsoft SQL Server/170/Tools/Binn/:/mnt/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/:/mnt/d/Program Files/:/mnt/c/Program Files/WSL/:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/Lenovo/AppData/Local/Programs/OpenAI/Codex/bin:/mnt/c/Users/Lenovo/AppData/Local/Microsoft/WindowsApps:/mnt/d/Microsoft VS Code/bin:/mnt/c/Users/Lenovo/.dotnet/tools:/mnt/c/Users/Lenovo/AppData/Roaming/npm:/mnt/c/Users/Lenovo/AppData/Local/Programs/DockerDesktop/resources/bin:/snap/bin', 'CODEX_SESSION_ID': '01a074ff-c277-7b93-9f8a-4b5617737b6c', 'WT_SESSION': 'cb3e105a-7644-49c6-9783-a2006862129c', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'GH_PAGER': 'cat', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'AMENT_PREFIX_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CODEX_THREAD_ID': '01a074ff-c277-7b93-9f8a-4b5617737b6c', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'GIT_PAGER': 'cat', 'PWD': '/home/lzy/lbot_ws/build/lbot_motion', 'LC_ALL': 'C.UTF-8', 'CODEX_MANAGED_PACKAGE_ROOT': '/usr/local/lib/node_modules/@openai/codex', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'HTTP_PROXY': 'http://127.0.0.1:7897', 'COLCON': '1', 'WSL2_GUI_APPS_ENABLED': '1', 'CODEX_MANAGED_BY_NPM': '1', 'HOSTTYPE': 'x86_64', 'CMAKE_PREFIX_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy', 'WSLENV': 'WT_SESSION:WT_PROFILE_ID:'}), 'shell': False}
+[0.099574] (-) TimerEvent: {}
+[0.141444] (lbot_motion) StdoutLine: {'line': b'-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)\n'}
+[0.199650] (-) TimerEvent: {}
+[0.272426] (lbot_motion) StdoutLine: {'line': b'-- Found rclcpp: 28.1.21 (/opt/ros/jazzy/share/rclcpp/cmake)\n'}
+[0.299784] (-) TimerEvent: {}
+[0.349764] (lbot_motion) StdoutLine: {'line': b'-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n'}
+[0.356138] (lbot_motion) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n'}
+[0.366279] (lbot_motion) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.376230] (lbot_motion) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.399879] (-) TimerEvent: {}
+[0.421569] (lbot_motion) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n'}
+[0.423442] (lbot_motion) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)\n'}
+[0.499972] (-) TimerEvent: {}
+[0.554770] (lbot_motion) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[0.600059] (-) TimerEvent: {}
+[0.663213] (lbot_motion) StdoutLine: {'line': b'-- Found sensor_msgs: 5.3.8 (/opt/ros/jazzy/share/sensor_msgs/cmake)\n'}
+[0.700146] (-) TimerEvent: {}
+[0.702272] (lbot_motion) StdoutLine: {'line': b'-- Found lbot_arm_interfaces: 0.0.0 (/home/lzy/lbot_ws/install/lbot_arm_interfaces/share/lbot_arm_interfaces/cmake)\n'}
+[0.779997] (lbot_motion) StdoutLine: {'line': b'-- Configuring done (0.6s)\n'}
+[0.793025] (lbot_motion) StdoutLine: {'line': b'-- Generating done (0.0s)\n'}
+[0.795664] (lbot_motion) StdoutLine: {'line': b'-- Build files have been written to: /home/lzy/lbot_ws/build/lbot_motion\n'}
+[0.800210] (-) TimerEvent: {}
+[0.839458] (lbot_motion) StdoutLine: {'line': b'[ 16%] Building CXX object CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.o\n'}
+[0.900347] (-) TimerEvent: {}
+[1.000524] (-) TimerEvent: {}
+[1.100695] (-) TimerEvent: {}
+[1.200874] (-) TimerEvent: {}
+[1.301049] (-) TimerEvent: {}
+[1.401221] (-) TimerEvent: {}
+[1.501401] (-) TimerEvent: {}
+[1.601573] (-) TimerEvent: {}
+[1.701743] (-) TimerEvent: {}
+[1.801940] (-) TimerEvent: {}
+[1.902116] (-) TimerEvent: {}
+[2.002298] (-) TimerEvent: {}
+[2.102475] (-) TimerEvent: {}
+[2.202656] (-) TimerEvent: {}
+[2.302834] (-) TimerEvent: {}
+[2.403027] (-) TimerEvent: {}
+[2.503199] (-) TimerEvent: {}
+[2.525218] (lbot_motion) StdoutLine: {'line': b'[ 33%] Linking CXX shared library liblbot_motion.so\n'}
+[2.603307] (-) TimerEvent: {}
+[2.703464] (-) TimerEvent: {}
+[2.767291] (lbot_motion) StdoutLine: {'line': b'[ 66%] Built target lbot_motion\n'}
+[2.781061] (lbot_motion) StdoutLine: {'line': b'[ 83%] Building CXX object CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.o\n'}
+[2.803558] (-) TimerEvent: {}
+[2.903671] (-) TimerEvent: {}
+[3.003830] (-) TimerEvent: {}
+[3.104024] (-) TimerEvent: {}
+[3.204195] (-) TimerEvent: {}
+[3.304362] (-) TimerEvent: {}
+[3.404520] (-) TimerEvent: {}
+[3.504690] (-) TimerEvent: {}
+[3.604933] (-) TimerEvent: {}
+[3.705111] (-) TimerEvent: {}
+[3.805289] (-) TimerEvent: {}
+[3.905447] (-) TimerEvent: {}
+[4.005648] (-) TimerEvent: {}
+[4.105821] (-) TimerEvent: {}
+[4.186869] (lbot_motion) StderrLine: {'line': b'/home/lzy/lbot_ws/src/lbot_motion/src/motion_demo_node.cpp:9:8: warning: \xe2\x80\x98double {anonymous}::deg(double)\xe2\x80\x99 defined but not used [-Wunused-function]\n'}
+[4.187061] (lbot_motion) StderrLine: {'line': b'    9 | double deg(double value) { return value * kPi / 180.0; }\n'}
+[4.187102] (lbot_motion) StderrLine: {'line': b'      |        ^~~\n'}
+[4.205916] (-) TimerEvent: {}
+[4.289712] (lbot_motion) StdoutLine: {'line': b'[100%] Linking CXX executable motion_demo_node\n'}
+[4.305979] (-) TimerEvent: {}
+[4.406169] (-) TimerEvent: {}
+[4.444718] (lbot_motion) StdoutLine: {'line': b'[100%] Built target motion_demo_node\n'}
+[4.449987] (lbot_motion) CommandEnded: {'returncode': 0}
+[4.450389] (lbot_motion) JobProgress: {'identifier': 'lbot_motion', 'progress': 'install'}
+[4.454481] (lbot_motion) Command: {'cmd': ['/usr/bin/cmake', '--install', '/home/lzy/lbot_ws/build/lbot_motion'], 'cwd': '/home/lzy/lbot_ws/build/lbot_motion', 'env': OrderedDict({'LESSOPEN': '| /usr/bin/lesspipe %s', 'HTTPS_PROXY': 'http://127.0.0.1:7897', 'CODEX_CI': '1', 'no_proxy': '172.31.*,172.30.*,172.29.*,172.28.*,172.27.*,172.26.*,172.25.*,172.24.*,172.23.*,172.22.*,172.21.*,172.20.*,172.19.*,172.18.*,172.17.*,172.16.*,10.*,192.168.*,127.*,localhost,<local>', 'USER': 'lzy', 'all_proxy': 'socks5://127.0.0.1:7897', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'WT_PROFILE_ID': '{61c54bbd-c2c6-5271-96e7-009a87ff44bf}', 'HOME': '/home/lzy', 'OLDPWD': '/home/lzy', 'NO_PROXY': '172.31.*,172.30.*,172.29.*,172.28.*,172.27.*,172.26.*,172.25.*,172.24.*,172.23.*,172.22.*,172.21.*,172.20.*,172.19.*,172.18.*,172.17.*,172.16.*,10.*,192.168.*,127.*,localhost,<local>', 'ROS_PYTHON_VERSION': '3', 'PAGER': 'cat', 'LC_CTYPE': 'C.UTF-8', 'NO_COLOR': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': '', 'WSL_DISTRO_NAME': 'Ubuntu-24.04', 'WAYLAND_DISPLAY': 'wayland-0', 'https_proxy': 'http://127.0.0.1:7897', 'ROS_DISTRO': 'jazzy', 'LOGNAME': 'lzy', 'ALL_PROXY': 'socks5://127.0.0.1:7897', 'NAME': 'WIN-PLQOOSSF61U', 'WSL_INTEROP': '/run/WSL/9445_interop', 'http_proxy': 'http://127.0.0.1:7897', 'PULSE_SERVER': 'unix:/mnt/wslg/PulseServer', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm-256color', 'PATH': '/usr/local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/home/lzy/.codex/tmp/arg0/codex-arg0QFWPYP:/usr/local/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.12.8-hotspot/bin:/mnt/c/Program Files/Eclipse Adoptium/jdk-17.0.19.10-hotspot/bin:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA app/NvDLISR:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/CMake/bin:/mnt/c/Program Files/Microsoft SQL Server/170/Tools/Binn/:/mnt/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/:/mnt/d/Program Files/:/mnt/c/Program Files/WSL/:/mnt/c/Program Files/usbipd-win/:/mnt/c/Users/Lenovo/AppData/Local/Programs/OpenAI/Codex/bin:/mnt/c/Users/Lenovo/AppData/Local/Microsoft/WindowsApps:/mnt/d/Microsoft VS Code/bin:/mnt/c/Users/Lenovo/.dotnet/tools:/mnt/c/Users/Lenovo/AppData/Roaming/npm:/mnt/c/Users/Lenovo/AppData/Local/Programs/DockerDesktop/resources/bin:/snap/bin', 'CODEX_SESSION_ID': '01a074ff-c277-7b93-9f8a-4b5617737b6c', 'WT_SESSION': 'cb3e105a-7644-49c6-9783-a2006862129c', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'GH_PAGER': 'cat', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'AMENT_PREFIX_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CODEX_THREAD_ID': '01a074ff-c277-7b93-9f8a-4b5617737b6c', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'GIT_PAGER': 'cat', 'PWD': '/home/lzy/lbot_ws/build/lbot_motion', 'LC_ALL': 'C.UTF-8', 'CODEX_MANAGED_PACKAGE_ROOT': '/usr/local/lib/node_modules/@openai/codex', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages', 'HTTP_PROXY': 'http://127.0.0.1:7897', 'COLCON': '1', 'WSL2_GUI_APPS_ENABLED': '1', 'CODEX_MANAGED_BY_NPM': '1', 'HOSTTYPE': 'x86_64', 'CMAKE_PREFIX_PATH': '/home/lzy/lbot_ws/install/lbot_arm_interfaces:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy', 'WSLENV': 'WT_SESSION:WT_PROFILE_ID:'}), 'shell': False}
+[4.457709] (lbot_motion) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[4.457848] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so\n'}
+[4.460709] (lbot_motion) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so" to ""\n'}
+[4.460813] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node\n'}
+[4.461097] (lbot_motion) StdoutLine: {'line': b'-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_motion/lib/lbot_motion/motion_demo_node" to ""\n'}
+[4.461170] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include\n'}
+[4.461202] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion\n'}
+[4.461233] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_planner.hpp\n'}
+[4.461278] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/motion_device.hpp\n'}
+[4.461305] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/include/lbot_motion/camera_motion_plan.hpp\n'}
+[4.461333] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch\n'}
+[4.461357] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/launch/motion_demo.launch.py\n'}
+[4.461541] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/config\n'}
+[4.461609] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/config/motion_demo.yaml\n'}
+[4.461645] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/README.md\n'}
+[4.461678] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.sh\n'}
+[4.461707] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/library_path.dsv\n'}
+[4.461828] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/package_run_dependencies/lbot_motion\n'}
+[4.461860] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/parent_prefix_path/lbot_motion\n'}
+[4.461887] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.sh\n'}
+[4.461913] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/ament_prefix_path.dsv\n'}
+[4.461938] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.sh\n'}
+[4.461961] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/environment/path.dsv\n'}
+[4.461991] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.bash\n'}
+[4.462016] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.sh\n'}
+[4.462041] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.zsh\n'}
+[4.462063] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/local_setup.dsv\n'}
+[4.462090] (lbot_motion) StdoutLine: {'line': b'-- Installing: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.dsv\n'}
+[4.462113] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/ament_index/resource_index/packages/lbot_motion\n'}
+[4.462204] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_include_directories-extras.cmake\n'}
+[4.462285] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_libraries-extras.cmake\n'}
+[4.462319] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/ament_cmake_export_dependencies-extras.cmake\n'}
+[4.462347] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig.cmake\n'}
+[4.462374] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/lbot_motionConfig-version.cmake\n'}
+[4.462397] (lbot_motion) StdoutLine: {'line': b'-- Up-to-date: /home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/package.xml\n'}
+[4.462808] (lbot_motion) CommandEnded: {'returncode': 0}
+[4.476929] (lbot_motion) JobEnded: {'identifier': 'lbot_motion', 'rc': 0}
+[4.477234] (-) EventReactorShutdown: {}

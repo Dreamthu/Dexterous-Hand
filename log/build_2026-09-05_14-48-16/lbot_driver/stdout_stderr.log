@@ -1,0 +1,43 @@
+[ 50%] [32m[1mLinking CXX executable lbot_driver[0m
+[100%] Built target lbot_driver
+-- Install configuration: ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/lbot_driver/lbot_driver
+-- Set non-toolchain portion of runtime path of "/home/lzy/lbot_ws/install/lbot_driver/lib/lbot_driver/lbot_driver" to ""
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/launch
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/launch/lbot_start_driver.launch.py
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/config
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/config/lbot_config.yaml
+-- Up-to-date: /home/lzy/lbot_ws/install/lbot_driver/lib
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/lib_install.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1.0.5
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1.0.5
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api_cpp.so.1
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_arm64/liblbot_api.so.1
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1.0.5
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so.1.0.5
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api_cpp.so.1
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/linux_x64/liblbot_api.so.1
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so.1.0.0
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/lib/liblbot_api_cpp.so.1
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/package_run_dependencies/lbot_driver
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/parent_prefix_path/lbot_driver
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/ament_prefix_path.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/path.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/environment/path.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.bash
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.sh
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.zsh
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/local_setup.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/package.dsv
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/ament_index/resource_index/packages/lbot_driver
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/cmake/lbot_driverConfig-version.cmake
+-- Installing: /home/lzy/lbot_ws/install/lbot_driver/share/lbot_driver/package.xml

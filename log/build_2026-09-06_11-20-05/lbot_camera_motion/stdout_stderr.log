@@ -1,0 +1,22 @@
+[ 50%] Building CXX object CMakeFiles/camera_motion_node.dir/src/camera_motion_node.cpp.o
+[100%] Linking CXX executable camera_motion_node
+[100%] Built target camera_motion_node
+-- Install configuration: ""
+-- Execute custom install script
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/lib/lbot_camera_motion/camera_motion_node
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/launch/camera_motion.launch.py
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/ament_index/resource_index/package_run_dependencies/lbot_camera_motion
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/ament_index/resource_index/parent_prefix_path/lbot_camera_motion
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/environment/path.sh
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/environment/path.dsv
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/local_setup.bash
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/local_setup.sh
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/local_setup.zsh
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/local_setup.dsv
+-- Symlinking: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/package.dsv
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/ament_index/resource_index/packages/lbot_camera_motion
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/cmake/lbot_camera_motionConfig.cmake
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/cmake/lbot_camera_motionConfig-version.cmake
+-- Up-to-date symlink: /home/lzy/lbot_ws/install/lbot_camera_motion/share/lbot_camera_motion/package.xml

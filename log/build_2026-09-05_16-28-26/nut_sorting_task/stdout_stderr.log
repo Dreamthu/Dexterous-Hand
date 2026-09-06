@@ -1,0 +1,26 @@
+running develop
+running egg_info
+creating nut_sorting_task.egg-info
+writing nut_sorting_task.egg-info/PKG-INFO
+writing dependency_links to nut_sorting_task.egg-info/dependency_links.txt
+writing entry points to nut_sorting_task.egg-info/entry_points.txt
+writing requirements to nut_sorting_task.egg-info/requires.txt
+writing top-level names to nut_sorting_task.egg-info/top_level.txt
+writing manifest file 'nut_sorting_task.egg-info/SOURCES.txt'
+reading manifest file 'nut_sorting_task.egg-info/SOURCES.txt'
+writing manifest file 'nut_sorting_task.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/lzy/lbot_ws/install/nut_sorting_task/lib/python3.12/site-packages/nut-sorting-task.egg-link (link to .)
+Installing nut_sorting_node script to /home/lzy/lbot_ws/install/nut_sorting_task/lib/nut_sorting_task
+
+Installed /home/lzy/lbot_ws/build/nut_sorting_task
+running symlink_data
+creating /home/lzy/lbot_ws/install/nut_sorting_task/share/ament_index
+creating /home/lzy/lbot_ws/install/nut_sorting_task/share/ament_index/resource_index
+creating /home/lzy/lbot_ws/install/nut_sorting_task/share/ament_index/resource_index/packages
+symbolically linking /home/lzy/lbot_ws/build/nut_sorting_task/resource/nut_sorting_task -> /home/lzy/lbot_ws/install/nut_sorting_task/share/ament_index/resource_index/packages
+symbolically linking /home/lzy/lbot_ws/build/nut_sorting_task/package.xml -> /home/lzy/lbot_ws/install/nut_sorting_task/share/nut_sorting_task
+creating /home/lzy/lbot_ws/install/nut_sorting_task/share/nut_sorting_task/config
+symbolically linking /home/lzy/lbot_ws/build/nut_sorting_task/config/params.yaml -> /home/lzy/lbot_ws/install/nut_sorting_task/share/nut_sorting_task/config
+creating /home/lzy/lbot_ws/install/nut_sorting_task/share/nut_sorting_task/launch
+symbolically linking /home/lzy/lbot_ws/build/nut_sorting_task/launch/nut_sorting.launch.py -> /home/lzy/lbot_ws/install/nut_sorting_task/share/nut_sorting_task/launch

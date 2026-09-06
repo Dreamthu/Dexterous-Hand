@@ -1,0 +1,267 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-f9f7112cad1e79fccaa5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				},
+				{
+					"build" : "lbot_arm_interfaces__py",
+					"jsonFile" : "directory-lbot_arm_interfaces__py-c7692c76e83ef4040d03.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/lzy/lbot_ws/build/lbot_arm_interfaces/lbot_arm_interfaces__py",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "lbot_arm_interfaces__rs",
+					"jsonFile" : "directory-lbot_arm_interfaces__rs-1a62273cc3710b24c902.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/lzy/lbot_ws/build/lbot_arm_interfaces/lbot_arm_interfaces__rs",
+					"targetIndexes" : 
+					[
+						14
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2
+					],
+					"name" : "lbot_arm_interfaces",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_build_lbot_arm_interfaces_egg::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_build_lbot_arm_interfaces_egg-576bee319312fab846d3.json",
+					"name" : "ament_cmake_python_build_lbot_arm_interfaces_egg",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_copy_lbot_arm_interfaces::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_copy_lbot_arm_interfaces-c2aa04b745e6e05cb25f.json",
+					"name" : "ament_cmake_python_copy_lbot_arm_interfaces",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces-c00f498085b89200b169.json",
+					"name" : "lbot_arm_interfaces",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__cpp-6c7b780dc28391dcbccc.json",
+					"name" : "lbot_arm_interfaces__cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "lbot_arm_interfaces__py::@526f1de612de12d4ec05",
+					"jsonFile" : "target-lbot_arm_interfaces__py-54541a0789dfdf7720fd.json",
+					"name" : "lbot_arm_interfaces__py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_generator_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_generator_c-1c6408d9924b402e44f5.json",
+					"name" : "lbot_arm_interfaces__rosidl_generator_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_generator_py::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_generator_py-6aadb7b0dd0ffa48579d.json",
+					"name" : "lbot_arm_interfaces__rosidl_generator_py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_generator_type_description::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_generator_type_description-35332e07462854ad1750.json",
+					"name" : "lbot_arm_interfaces__rosidl_generator_type_description",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_c-1fc5ea1892e5e0e67016.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_cpp-de4df17004a6c83be736.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_fastrtps_c-e6f1ed9f432ffb56e36d.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp-aa987060e0d962d66e65.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_fastrtps_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_introspection_c-a60ca88827c6ae5d6306.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces__rosidl_typesupport_introspection_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces__rosidl_typesupport_introspection_cpp-496dd59eee0a3ce49caa.json",
+					"name" : "lbot_arm_interfaces__rosidl_typesupport_introspection_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "lbot_arm_interfaces__rs::@675ae82da081d15edc7b",
+					"jsonFile" : "target-lbot_arm_interfaces__rs-89f9d67c24fd9618d9c2.json",
+					"name" : "lbot_arm_interfaces__rs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces_s__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces_s__rosidl_typesupport_c-fa696e39bf13570710b6.json",
+					"name" : "lbot_arm_interfaces_s__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces_s__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces_s__rosidl_typesupport_fastrtps_c-c0ba4d4bae41a54e1da9.json",
+					"name" : "lbot_arm_interfaces_s__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces_s__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces_s__rosidl_typesupport_introspection_c-d989c73544801b4e9f81.json",
+					"name" : "lbot_arm_interfaces_s__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lbot_arm_interfaces_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lbot_arm_interfaces_uninstall-80ad2aa719acc57038e0.json",
+					"name" : "lbot_arm_interfaces_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-c388812b8d9243a205dc.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/lzy/lbot_ws/build/lbot_arm_interfaces",
+		"source" : "/home/lzy/lbot_ws/src/lbot_arm_interfaces"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
