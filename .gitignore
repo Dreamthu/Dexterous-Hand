@@ -1,0 +1,18 @@
+# ROS2/colcon generated files
+build/
+install/
+log/
+orbbec_ws/build/
+orbbec_ws/install/
+orbbec_ws/install2/
+orbbec_ws/log/
+orbbec_ws/log2/
+orbbec_ws/runtime_logs/
+
+# External OrbbecSDK_ROS2 checkout; clone v2-main separately when building the camera overlay.
+orbbec_ws/src/OrbbecSDK_ROS2/
+
+# Local/editor metadata
+.marscode/
+.agents/
+.codex/

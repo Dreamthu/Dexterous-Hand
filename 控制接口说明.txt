@@ -1,0 +1,164 @@
+# 控制接口说明
+
+## 基本规则
+
+- 默认命名空间是 `/robot1`。
+- 左臂路径里是 `left_arm`，右臂路径里是 `right_arm`。
+- 关节角单位是 `rad`。
+- 末端位置单位是 `m`。
+- 欧拉角单位是 `rad`。
+- 灵巧手控制值是 `0~255`。
+- 新程序第一次运行时，建议先用低速度、低加速度、小位移测试。
+
+## 状态话题
+
+| 话题 | 类型 | 说明 |
+| --- | --- | --- |
+| `/robot1/left_arm/joint_states` | `sensor_msgs/msg/JointState` | 左臂关节状态 |
+| `/robot1/right_arm/joint_states` | `sensor_msgs/msg/JointState` | 右臂关节状态 |
+| `/robot1/left_arm/pose_states` | `geometry_msgs/msg/PoseStamped` | 左臂末端位姿 |
+| `/robot1/right_arm/pose_states` | `geometry_msgs/msg/PoseStamped` | 右臂末端位姿 |
+
+驱动约 50 Hz 发布状态。
+
+```bash
+ros2 topic echo /robot1/left_arm/joint_states
+```
+
+## 运动服务
+
+| 服务 | 类型 | 作用 |
+| --- | --- | --- |
+| `/robot1/left_arm/move_joint` | `MoveJ` | 左臂关节运动 |
+| `/robot1/right_arm/move_joint` | `MoveJ` | 右臂关节运动 |
+| `/robot1/left_arm/move_pose` | `MoveJP` | 左臂末端位姿运动 |
+| `/robot1/right_arm/move_pose` | `MoveJP` | 右臂末端位姿运动 |
+| `/robot1/left_arm/move_linear` | `MoveL` | 左臂直线运动 |
+| `/robot1/right_arm/move_linear` | `MoveL` | 右臂直线运动 |
+
+MoveJ：
+
+```text
+float32[] joints
+float32 speed
+float32 acce
+bool block
+---
+bool success
+```
+
+```bash
+ros2 service call /robot1/left_arm/move_joint lbot_arm_interfaces/srv/MoveJ \
+"{joints: [0, 0, 0, 0, 0, 0, 0], speed: 0.3, acce: 0.3, block: true}"
+```
+
+MoveJP / MoveL：
+
+```text
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 euler
+float32 speed
+float32 acce
+bool block
+---
+bool success
+```
+
+```bash
+ros2 service call /robot1/left_arm/move_linear lbot_arm_interfaces/srv/MoveL \
+"{position: {x: 0.3, y: 0.1, z: -0.2}, euler: {x: 0.0, y: -1.57, z: 0.0}, speed: 0.2, acce: 0.2, block: true}"
+```
+
+## 运动学服务
+
+| 服务 | 类型 | 作用 |
+| --- | --- | --- |
+| `/robot1/left_arm/forward_kinematics` | `ForwardKinematics` | 左臂正解 |
+| `/robot1/right_arm/forward_kinematics` | `ForwardKinematics` | 右臂正解 |
+| `/robot1/left_arm/inverse_kinematics` | `InverseKinematics` | 左臂逆解 |
+| `/robot1/right_arm/inverse_kinematics` | `InverseKinematics` | 右臂逆解 |
+
+正解输入 7 个关节角，输出末端位置和欧拉角。逆解输入目标位置和欧拉角，输出 7 个关节角。
+
+## 工具坐标系服务
+
+| 服务 | 作用 |
+| --- | --- |
+| `/robot1/left_arm/set_tool_frame` | 设置左臂工具坐标系 |
+| `/robot1/left_arm/get_tool_frame` | 查询指定工具坐标系 |
+| `/robot1/left_arm/get_current_tool_frame` | 查询当前工具坐标系 |
+| `/robot1/left_arm/get_all_tool_frames` | 查询全部工具坐标系名称 |
+| `/robot1/left_arm/change_tool_frame` | 切换工具坐标系 |
+| `/robot1/left_arm/delete_tool_frame` | 删除工具坐标系 |
+
+右臂把 `left_arm` 换成 `right_arm`。
+
+工具坐标系数据：
+
+```text
+string name
+geometry_msgs/Vector3 euler
+geometry_msgs/Vector3 position
+```
+
+## 系统服务
+
+| 服务 | 类型 | 作用 |
+| --- | --- | --- |
+| `/robot1/left_arm/set_enable` | `SetEnable` | 左臂使能/掉使能 |
+| `/robot1/right_arm/set_enable` | `SetEnable` | 右臂使能/掉使能 |
+| `/robot1/left_arm/set_emergency_stop` | `SetEmergency` | 左臂急停/恢复 |
+| `/robot1/right_arm/set_emergency_stop` | `SetEmergency` | 右臂急停/恢复 |
+| `/robot1/left_arm/set_zero` | `SetZero` | 左臂当前位置标零 |
+| `/robot1/right_arm/set_zero` | `SetZero` | 右臂当前位置标零 |
+
+```bash
+ros2 service call /robot1/left_arm/set_enable lbot_arm_interfaces/srv/SetEnable "{enable: true}"
+ros2 service call /robot1/left_arm/set_emergency_stop lbot_arm_interfaces/srv/SetEmergency "{emergency: true}"
+```
+
+`set_emergency_stop` 中：
+
+| 参数 | 含义 |
+| --- | --- |
+| `emergency: true` | 进入急停 |
+| `emergency: false` | 解除急停 |
+
+解除左臂急停示例：
+
+```bash
+ros2 service call /robot1/left_arm/set_emergency_stop lbot_arm_interfaces/srv/SetEmergency "{emergency: false}"
+```
+
+`set_zero` 会把当前位置设为新的零点，比赛调试时不要随便调用。
+
+## 关节跟随话题
+
+| 话题 | 类型 | 说明 |
+| --- | --- | --- |
+| `/robot1/left_arm/joint_follow` | `lbot_arm_interfaces/msg/FollowJoint` | 左臂跟随 |
+| `/robot1/right_arm/joint_follow` | `lbot_arm_interfaces/msg/FollowJoint` | 右臂跟随 |
+
+消息：
+
+```text
+float32[] joints
+bool follow
+```
+
+`joint_follow` 适合连续跟随控制。新手调试和比赛动作编排建议优先使用 `move_joint`、`move_pose`、`move_linear` 服务，确认动作安全后再考虑跟随话题。
+
+## 灵巧手话题
+
+| 话题 | 数据长度 | 作用 |
+| --- | --- | --- |
+| `/robot1/left_hand/set_l6_joint` | 6 | 左手位置 |
+| `/robot1/left_hand/set_l6_force` | 6 | 左手力矩 |
+| `/robot1/left_hand/set_l6_speed` | 6 | 左手速度 |
+| `/robot1/right_hand/set_l6_joint` | 6 | 右手位置 |
+| `/robot1/right_hand/set_l6_force` | 6 | 右手力矩 |
+| `/robot1/right_hand/set_l6_speed` | 6 | 右手速度 |
+
+```bash
+ros2 topic pub --once /robot1/left_hand/set_l6_joint std_msgs/msg/UInt8MultiArray "{data: [0, 0, 0, 0, 0, 0]}"
+```

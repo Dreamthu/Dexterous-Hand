@@ -1,0 +1,9 @@
+geometry_msgs/Vector3 position
+geometry_msgs/Vector3 euler
+float32 speed
+float32 acce
+bool block
+
+---
+
+bool success
