@@ -84,7 +84,7 @@ require_both_arms_natural_down: true
 - 相机状态为 `{"status":"ok"}`，连续 `stable_frames` 帧一致。
 - `/nut_detections` 和 `/nut_slots` 的 `header.frame_id` 等于 `base_torso_root`。
 - 三颗螺母排序为大、中、小，完整轮廓在黑框内，互不接触。
-- 黑框、蓝筐和桌面高度均在标定范围内。
+- 黑框、蓝筐和桌面高度均在已验证的工作范围内。
 - 左右臂关节角均在各自 `natural_down_*_joints` 的容差内。
 - 所有预抓点、抓取点、抬升点和放置点通过工作空间/碰撞检查。
 - 急停已清除；控制器不自动清除急停。

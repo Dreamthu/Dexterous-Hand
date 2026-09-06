@@ -29,9 +29,9 @@ linkerbot_ws/
 ├── linkerbot/          # 可复用的运行时适配代码
 ├── scripts/            # 用户直接执行的稳定命令
 ├── src/lbot_vision/    # ROS 感知适配包
-├── tools/              # 独立开发/标定工具
+├── tools/              # 独立工具；当前仅预留外参工具边界
 ├── tests/              # 配置与入口测试
-└── artifacts/          # 标定结果和运行日志（默认不提交 Git）
+└── artifacts/          # 外参产物和运行日志（默认不提交 Git）
 ```
 
 ## 快速开始
@@ -71,12 +71,6 @@ cd linkerbot_ws
 ./scripts/show_camera.sh --topic /nut_detection/debug_image
 ```
 
-一条命令启动相机并执行内参标定；退出标定后相机会自动停止：
-
-```bash
-./scripts/calibrate_camera.sh
-```
-
 运行仓库自检：
 
 ```bash
@@ -89,14 +83,21 @@ cd linkerbot_ws
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
-- `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
+- `config/camera/gemini2.yaml`：相机 profile 和流开关，不覆盖厂内参。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
-- `config/calibration/chessboard.yaml`：棋盘尺寸、采样数和结果目录。
+- `config/calibration/extrinsics/`：只预留相机安装、机器人和现场相关外参。
 - `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
 
-接受新的内参后，在 `config/camera/gemini2.yaml` 中填写相对于仓库根目录的
-`color_info_file`。相机适配层会自动转换为 ROS 所需的 `file://` URL。
+## 相机标定边界
+
+Gemini 2 的彩色/深度内参、畸变参数以及彩色—深度内部外参均使用设备出厂值。本仓库
+不保存或覆盖这些参数：Orbbec 驱动针对当前 profile 发布 `CameraInfo`，视觉节点同时读取
+其中的 `K`、`D` 和 `distortion_model`。对原始彩色图的检测点先去畸变，再结合已经注册
+到彩色视角的深度反投影，因此不会把原始像素直接套入 `K`。
+
+未来仍需按安装和赛场实际情况求解的相机到机器人、末端工具和现场基准外参，只保留在
+`config/calibration/extrinsics/` 所定义的结构中；在方案确定前不提交占位数值。
 
 ## 安全边界
 

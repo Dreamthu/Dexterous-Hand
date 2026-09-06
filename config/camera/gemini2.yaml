@@ -3,13 +3,10 @@ driver:
   launch_file: gemini2.launch.py
   log_directory: artifacts/logs/orbbec
 
-# Set this to a camera_info.yaml path relative to the repository root after
-# accepting an intrinsic calibration, for example:
-# color_info_file: artifacts/calibration/20260906_170000/camera_info.yaml
-color_info_file: null
-
 # Explicit dimensions and frame rates bound USB bandwidth in WSL. Let the
 # Gemini 2 firmware choose its native depth format; the ROS output is 16UC1.
+# Intrinsics, distortion, and color-depth registration always come from the
+# camera firmware through the Orbbec driver; this repository does not override them.
 parameters:
   camera_name: camera
   uvc_backend: libuvc
@@ -33,5 +30,7 @@ parameters:
   enable_frame_sync: false
   enable_point_cloud: false
   enable_colored_point_cloud: false
+  # Keep the raw color stream. lbot_vision uses CameraInfo K and D to correct
+  # detected pixels before 3-D back-projection without breaking depth alignment.
   enable_color_undistortion: false
   publish_tf: true

@@ -17,6 +17,8 @@
 - ROS subscriber/publisher/service client 放入命名明确的 adapter/node 文件。
 - 进程组合放入 `apps/`，再提供对应的 `scripts/*.sh` 稳定入口。
 - 运行结果、图片和日志写入 `artifacts/`，不要写进 `src/` 或 `config/`。
+- 相机像素转三维统一复用 `lbot_vision::CameraGeometry`；不要新增只读取 `K` 的投影实现，
+  也不要用仓库内文件覆盖设备发布的 `CameraInfo`。
 
 ## 提交前检查
 

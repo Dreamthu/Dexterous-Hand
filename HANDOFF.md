@@ -26,7 +26,7 @@
 - `linkerbot/`：可复用的 Python 适配层，负责路径、配置和底层进程命令。
 - `scripts/`：交付给使用者的稳定入口；每个完整功能都必须有对应脚本。
 - `src/`：本仓库维护的 ROS package 和 C++ 代码。
-- `tools/`：标定、数据检查等独立工具，不依赖比赛任务状态机。
+- `tools/`：外参求解、数据检查等独立工具，不依赖比赛任务状态机。
 - `tests/`：配置、纯算法和入口契约测试。
 - `artifacts/`：标定结果、采集数据和运行日志，不作为源码目录。
 - `docs/`：架构决策、接口说明和外部依赖来源。
@@ -61,6 +61,17 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
 - 新配置必须有注释、合理默认值、加载时校验和自动化测试。
 - 本地差异使用被 Git 忽略的 `config/*.local.env`，不得直接改成个人路径后提交。
 - 任何能够触发真实机械臂运动的配置，默认执行开关必须为 `false`。
+
+## 标定边界
+
+- Gemini 2 的彩色/深度内参、畸变参数和两传感器内部外参以固件及 Orbbec 驱动发布值为
+  唯一来源；禁止提交另一份 `camera_info.yaml`、棋盘内参工具或 `color_info_url` 覆盖。
+- 使用原始图像的代码必须同时处理 `CameraInfo.K`、`D` 和 `distortion_model`。公共转换
+  统一复用 `lbot_vision::CameraGeometry`，不得在节点中重新手写只使用 `K` 的反投影。
+- 相机到机器人、相机到末端、TCP 和现场基准属于外参。其配置只放在
+  `config/calibration/extrinsics/`，求解工具只放在 `tools/extrinsic_calibration/`，产物只写入
+  `artifacts/calibration/extrinsics/`。
+- 尚未测量的外参不得用单位矩阵、零向量或经验数值冒充有效标定，也不得发布到正式 TF。
 
 ## 用户入口与 ROS 封装
 

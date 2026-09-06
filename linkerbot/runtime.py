@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Tuple
 
@@ -64,15 +63,6 @@ def camera_command(
     command = ["ros2", "launch", package, launch_file]
     command.extend(f"{name}:={ros_value(value)}" for name, value in parameters.items())
 
-    color_info_file = config.get("color_info_file")
-    if color_info_file:
-        calibration_path = repository_path(str(color_info_file))
-        if not calibration_path.is_file():
-            raise ConfigurationError(
-                f"Configured color_info_file does not exist: {calibration_path}"
-            )
-        command.append(f"color_info_url:={calibration_path.as_uri()}")
-
     environment = os.environ.copy()
     log_directory = repository_path(str(driver.get("log_directory", "artifacts/logs/orbbec")))
     log_directory.mkdir(parents=True, exist_ok=True)
@@ -126,52 +116,3 @@ def viewer_command(
     if selected_topic:
         command.append(selected_topic)
     return command
-
-
-def calibration_command(
-    config_path: str | Path = "config/calibration/chessboard.yaml",
-) -> List[str]:
-    config = load_yaml(config_path)
-    board = required_mapping(config, "board")
-    capture = required_mapping(config, "capture")
-    script = REPOSITORY_ROOT / "tools/camera_calibration/calibrate_camera.py"
-    if not script.is_file():
-        raise ConfigurationError(f"Calibration tool does not exist: {script}")
-
-    required_values = {
-        "topic": config.get("topic"),
-        "camera_name": config.get("camera_name"),
-        "squares_x": board.get("squares_x"),
-        "squares_y": board.get("squares_y"),
-        "square_size_mm": board.get("square_size_mm"),
-        "min_samples": capture.get("min_samples"),
-        "min_board_area_ratio": capture.get("min_board_area_ratio"),
-        "output_directory": capture.get("output_directory"),
-    }
-    missing = [name for name, value in required_values.items() if value is None]
-    if missing:
-        raise ConfigurationError(
-            "Missing calibration configuration values: " + ", ".join(missing)
-        )
-
-    output_directory = repository_path(str(required_values["output_directory"]))
-    return [
-        sys.executable,
-        str(script),
-        "--topic",
-        str(required_values["topic"]),
-        "--camera-name",
-        str(required_values["camera_name"]),
-        "--squares-x",
-        str(required_values["squares_x"]),
-        "--squares-y",
-        str(required_values["squares_y"]),
-        "--square-size-mm",
-        str(required_values["square_size_mm"]),
-        "--min-samples",
-        str(required_values["min_samples"]),
-        "--min-board-area-ratio",
-        str(required_values["min_board_area_ratio"]),
-        "--output-dir",
-        str(output_directory),
-    ]

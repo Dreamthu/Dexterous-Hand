@@ -4,8 +4,10 @@
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <opencv2/imgproc.hpp>
@@ -15,6 +17,7 @@
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "lbot_vision/camera_geometry.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
@@ -31,6 +34,7 @@ namespace {
 struct Detection {
   cv::Point2f pixel;
   float radius_px{0.0F};
+  double radius_m{0.0};
   double depth_m{0.0};
   geometry_msgs::msg::Point point;
   std::string frame_id;
@@ -127,7 +131,8 @@ private:
   double min_nut_clearance_m_{0.003}, depth_min_m_{0.15}, depth_max_m_{5.0};
 
   sensor_msgs::msg::Image::ConstSharedPtr color_msg_, depth_msg_;
-  sensor_msgs::msg::CameraInfo::ConstSharedPtr info_msg_;
+  std::optional<lbot_vision::CameraGeometry> camera_geometry_;
+  bool camera_info_logged_{false};
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr color_sub_, depth_sub_;
   rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_sub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr detections_pub_;
@@ -140,7 +145,30 @@ private:
 
   void color_callback(sensor_msgs::msg::Image::ConstSharedPtr msg) { color_msg_ = msg; }
   void depth_callback(sensor_msgs::msg::Image::ConstSharedPtr msg) { depth_msg_ = msg; }
-  void info_callback(sensor_msgs::msg::CameraInfo::ConstSharedPtr msg) { info_msg_ = msg; }
+  void info_callback(sensor_msgs::msg::CameraInfo::ConstSharedPtr msg)
+  {
+    lbot_vision::CameraCalibration calibration;
+    calibration.width = msg->width;
+    calibration.height = msg->height;
+    std::copy(msg->k.begin(), msg->k.end(), calibration.intrinsic_matrix.begin());
+    calibration.distortion.assign(msg->d.begin(), msg->d.end());
+    calibration.distortion_model = msg->distortion_model;
+    try {
+      camera_geometry_.emplace(std::move(calibration));
+      if (!camera_info_logged_) {
+        RCLCPP_INFO(get_logger(),
+                    "Using driver CameraInfo (%ux%u, distortion=%s, D=%zu)",
+                    camera_geometry_->width(), camera_geometry_->height(),
+                    camera_geometry_->distortion_model().c_str(),
+                    camera_geometry_->distortion_size());
+        camera_info_logged_ = true;
+      }
+    } catch (const std::exception &error) {
+      camera_geometry_.reset();
+      RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 3000,
+                            "Rejected invalid driver CameraInfo: %s", error.what());
+    }
+  }
 
   static bool valid_depth(double z, double min_z, double max_z)
   {
@@ -177,12 +205,11 @@ private:
 
   geometry_msgs::msg::Point project_pixel(const cv::Point2f &pixel, double z) const
   {
+    const cv::Point3d camera_point = camera_geometry_->back_project(pixel, z);
     geometry_msgs::msg::Point p;
-    const double fx = info_msg_->k[0], fy = info_msg_->k[4];
-    const double cx = info_msg_->k[2], cy = info_msg_->k[5];
-    p.z = z;
-    p.x = (static_cast<double>(pixel.x) - cx) * z / fx;
-    p.y = (static_cast<double>(pixel.y) - cy) * z / fy;
+    p.x = camera_point.x;
+    p.y = camera_point.y;
+    p.z = camera_point.z;
     return p;
   }
 
@@ -479,7 +506,7 @@ private:
 
   void process()
   {
-    if (!color_msg_ || !depth_msg_ || !info_msg_) return;
+    if (!color_msg_ || !depth_msg_ || !camera_geometry_) return;
     cv::Mat color, depth;
     try {
       color = cv_bridge::toCvCopy(color_msg_, sensor_msgs::image_encodings::BGR8)->image;
@@ -490,6 +517,15 @@ private:
       }
     } catch (const std::exception &e) {
       RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000, "Image conversion failed: %s", e.what());
+      return;
+    }
+    if (camera_geometry_->width() != static_cast<std::uint32_t>(color.cols) ||
+        camera_geometry_->height() != static_cast<std::uint32_t>(color.rows)) {
+      RCLCPP_ERROR_THROTTLE(
+        get_logger(), *get_clock(), 3000,
+        "CameraInfo size %ux%u does not match raw color image %dx%d; refusing invalid projection",
+        camera_geometry_->width(), camera_geometry_->height(), color.cols, color.rows);
+      publish_status("camera_info_size_mismatch", 0);
       return;
     }
     cv::Mat debug;
@@ -514,9 +550,10 @@ private:
       Detection d;
       d.pixel = px;
       d.radius_px = circle[2];
+      d.radius_m = camera_geometry_->projected_radius_m(px, circle[2], z);
       d.depth_m = z;
       if (!transform_point(camera_point, color_msg_->header.frame_id, d.point, d.frame_id)) {
-        // A missing external calibration is not fatal for recognition; publish camera coordinates.
+        // Missing camera-to-robot extrinsics are not fatal; publish camera coordinates.
         d.frame_id = color_msg_->header.frame_id;
       }
       detections.push_back(d);
@@ -531,9 +568,6 @@ private:
     detections[1].size_class = "medium";
     detections[2].size_class = "small";
     bool separated = true;
-    const double fx = std::max(1.0, static_cast<double>(info_msg_->k[0]));
-    const double fy = std::max(1.0, static_cast<double>(info_msg_->k[4]));
-    const double focal = std::max(1.0, std::min(fx, fy));
     for (size_t i = 0; i < detections.size(); ++i) {
       for (size_t j = i + 1; j < detections.size(); ++j) {
         const double dx = detections[i].point.x - detections[j].point.x;
@@ -541,9 +575,10 @@ private:
         // Convert the detected outer silhouette radius back to a conservative
         // tabletop footprint. This rejects touching nuts even when their
         // centers are several millimetres apart.
-        const double ri = detections[i].radius_px * detections[i].depth_m / focal;
-        const double rj = detections[j].radius_px * detections[j].depth_m / focal;
-        if (std::hypot(dx, dy) < ri + rj + min_nut_clearance_m_) separated = false;
+        if (std::hypot(dx, dy) < detections[i].radius_m + detections[j].radius_m +
+                                  min_nut_clearance_m_) {
+          separated = false;
+        }
       }
     }
     if (!separated) {
