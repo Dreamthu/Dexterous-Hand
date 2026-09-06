@@ -17,7 +17,8 @@ nut_detector_node:
     blue_h_max: 140
     blue_s_min: 70
     blue_v_min: 35
-    min_frame_area_ratio: 0.08
+    min_frame_area_ratio: 0.03
+    max_frame_area_ratio: 0.30
     min_basket_area_ratio: 0.01
     frame_inner_scale: 0.94
     min_nut_radius_px: 5.0
@@ -36,3 +37,6 @@ nut_detector_node:
     depth_min_m: 0.15
     depth_max_m: 5.0
     slot_axis: long
+    # Reference photos include both camera orientations. Use "right" for the
+    # fixed contest layout where the blue box is required to be on the right.
+    basket_side: any

@@ -73,6 +73,7 @@ public:
     blue_s_min_ = declare_parameter("blue_s_min", 70);
     blue_v_min_ = declare_parameter("blue_v_min", 35);
     min_frame_area_ratio_ = declare_parameter("min_frame_area_ratio", 0.08);
+    max_frame_area_ratio_ = declare_parameter("max_frame_area_ratio", 0.30);
     min_basket_area_ratio_ = declare_parameter("min_basket_area_ratio", 0.01);
     frame_inner_scale_ = declare_parameter("frame_inner_scale", 0.94);
     min_nut_radius_px_ = declare_parameter("min_nut_radius_px", 5.0);
@@ -90,6 +91,7 @@ public:
     depth_min_m_ = declare_parameter("depth_min_m", 0.15);
     depth_max_m_ = declare_parameter("depth_max_m", 5.0);
     slot_axis_ = declare_parameter("slot_axis", "long");
+    basket_side_ = declare_parameter("basket_side", "any");
 
     color_sub_ = create_subscription<sensor_msgs::msg::Image>(
       color_topic_, rclcpp::SensorDataQoS(),
@@ -114,12 +116,12 @@ public:
 
 private:
   std::string color_topic_, depth_topic_, camera_info_topic_;
-  std::string target_frame_, detection_topic_, slot_topic_, debug_topic_, slot_axis_;
+  std::string target_frame_, detection_topic_, slot_topic_, debug_topic_, slot_axis_, basket_side_;
   bool use_tf_{true};
   double publish_rate_hz_{5.0};
   int black_v_max_{90}, blue_h_min_{90}, blue_h_max_{140};
   int blue_s_min_{70}, blue_v_min_{35};
-  double min_frame_area_ratio_{0.08}, min_basket_area_ratio_{0.01};
+  double min_frame_area_ratio_{0.08}, max_frame_area_ratio_{0.30}, min_basket_area_ratio_{0.01};
   double frame_inner_scale_{0.94};
   double min_nut_radius_px_{5.0}, max_nut_radius_px_{180.0}, hough_param2_{13.0};
   double min_nut_area_px_{350.0}, max_nut_area_px_{100000.0};
@@ -217,7 +219,8 @@ private:
     }
   }
 
-  static std::vector<cv::Point> largest_quadrilateral(const cv::Mat &mask, double min_area)
+  static std::vector<cv::Point> largest_quadrilateral(const cv::Mat &mask, const cv::Mat &gray,
+                                                      double min_area, double max_area)
   {
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -225,11 +228,27 @@ private:
     std::vector<cv::Point> result;
     for (const auto &contour : contours) {
       const double area = cv::contourArea(contour);
-      if (area < min_area || area <= best) continue;
+      if (area < min_area || area > max_area) continue;
       std::vector<cv::Point> approx;
       cv::approxPolyDP(contour, approx, 0.03 * cv::arcLength(contour, true), true);
-      if (approx.size() >= 4 && approx.size() <= 8 && cv::isContourConvex(approx)) {
-        best = area;
+      if (approx.size() < 4 || approx.size() > 8 || !cv::isContourConvex(approx)) continue;
+      const cv::RotatedRect rr = cv::minAreaRect(approx);
+      const double rect_area = static_cast<double>(rr.size.area());
+      if (rect_area <= 1e-6) continue;
+      const double rectangularity = area / rect_area;
+      const double short_side = std::min(rr.size.width, rr.size.height);
+      const double long_side = std::max(rr.size.width, rr.size.height);
+      if (short_side <= 1.0 || long_side / short_side > 2.5 || rectangularity < 0.55) continue;
+      cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
+      cv::fillConvexPoly(interior, approx, 255);
+      cv::erode(interior, interior, cv::getStructuringElement(cv::MORPH_ELLIPSE, {11, 11}));
+      const double mean_intensity = cv::mean(gray, interior)[0];
+      // The line frame surrounds a bright sheet. This rejects black equipment,
+      // floor areas and labels that happen to form large quadrilaterals.
+      if (mean_intensity < 120.0) continue;
+      const double score = area * rectangularity;
+      if (score > best) {
+        best = score;
         result = approx;
       }
     }
@@ -250,23 +269,31 @@ private:
     cv::morphologyEx(blue_mask, blue_mask, cv::MORPH_CLOSE,
                      cv::getStructuringElement(cv::MORPH_RECT, {7, 7}));
 
+    cv::Mat gray;
+    cv::cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
+
     const double image_area = static_cast<double>(bgr.cols * bgr.rows);
-    geometry.frame = largest_quadrilateral(black_mask, image_area * min_frame_area_ratio_);
+    geometry.frame = largest_quadrilateral(
+      black_mask, gray, image_area * min_frame_area_ratio_, image_area * max_frame_area_ratio_);
     if (geometry.frame.empty()) {
       std::vector<std::vector<cv::Point>> contours;
       cv::findContours(black_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      if (!contours.empty()) {
-        auto it = std::max_element(contours.begin(), contours.end(),
-          [](const auto &a, const auto &b) { return cv::contourArea(a) < cv::contourArea(b); });
-        if (cv::contourArea(*it) >= image_area * min_frame_area_ratio_) {
-          geometry.frame = {cv::Point(cv::boundingRect(*it).x, cv::boundingRect(*it).y),
-                            cv::Point(cv::boundingRect(*it).x + cv::boundingRect(*it).width,
-                                      cv::boundingRect(*it).y),
-                            cv::Point(cv::boundingRect(*it).x + cv::boundingRect(*it).width,
-                                      cv::boundingRect(*it).y + cv::boundingRect(*it).height),
-                            cv::Point(cv::boundingRect(*it).x,
-                                      cv::boundingRect(*it).y + cv::boundingRect(*it).height)};
-        }
+      double best_fallback = 0.0;
+      for (const auto &contour : contours) {
+        const double area = cv::contourArea(contour);
+        if (area < image_area * min_frame_area_ratio_ ||
+            area > image_area * max_frame_area_ratio_) continue;
+        const cv::Rect rect = cv::boundingRect(contour);
+        if (rect.width < 2 || rect.height < 2) continue;
+        cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
+        cv::rectangle(interior, rect, 255, cv::FILLED);
+        const double mean_intensity = cv::mean(gray, interior)[0];
+        if (mean_intensity < 120.0 || area <= best_fallback) continue;
+        best_fallback = area;
+        geometry.frame = {cv::Point(rect.x, rect.y),
+                          cv::Point(rect.x + rect.width, rect.y),
+                          cv::Point(rect.x + rect.width, rect.y + rect.height),
+                          cv::Point(rect.x, rect.y + rect.height)};
       }
     }
 
@@ -284,7 +311,8 @@ private:
       cv::Moments m = cv::moments(contour);
       if (area < best_area || std::abs(m.m00) < 1e-6) continue;
       cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
-      if (c.x <= frame_center.x) continue;
+      if (basket_side_ == "right" && c.x <= frame_center.x) continue;
+      if (basket_side_ == "left" && c.x >= frame_center.x) continue;
       best_area = area;
       std::vector<cv::Point> approx;
       cv::approxPolyDP(contour, approx, 0.03 * cv::arcLength(contour, true), true);
@@ -376,33 +404,33 @@ private:
       std::vector<std::vector<cv::Point>> contours;
       cv::findContours(candidate_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
       for (const auto &contour : contours) {
-      const double area = cv::contourArea(contour);
-      if (area < min_nut_area_px_ || area > max_nut_area_px_) continue;
-      const double perimeter = cv::arcLength(contour, true);
-      if (perimeter <= 1e-6) continue;
-      const double circularity = 4.0 * CV_PI * area / (perimeter * perimeter);
-      if (circularity < min_nut_circularity_) continue;
-      std::vector<cv::Point> hull;
-      cv::convexHull(contour, hull);
-      const double hull_area = cv::contourArea(hull);
-      if (hull_area <= 1e-6 || area / hull_area < min_nut_solidity_) continue;
-      const cv::RotatedRect rr = cv::minAreaRect(contour);
-      const float width = std::max(rr.size.width, rr.size.height);
-      const float height = std::min(rr.size.width, rr.size.height);
-      if (width <= 1.0F || height / width < 0.50F) continue;
-      cv::Moments moments = cv::moments(contour);
-      if (std::abs(moments.m00) <= 1e-6) continue;
-      const cv::Point2f center(static_cast<float>(moments.m10 / moments.m00),
-                               static_cast<float>(moments.m01 / moments.m00));
-      // Check every outer contour point, not just its center, against the frame.
-      double frame_clearance = std::numeric_limits<double>::infinity();
-      for (const auto &point : contour) {
-        frame_clearance = std::min(frame_clearance,
-                                   cv::pointPolygonTest(geometry.frame, point, true));
-      }
-      if (frame_clearance < 3.0) continue;
-      const float radius = 0.5F * width;
-      candidates.emplace_back(center.x, center.y, radius);
+        const double area = cv::contourArea(contour);
+        if (area < min_nut_area_px_ || area > max_nut_area_px_) continue;
+        const double perimeter = cv::arcLength(contour, true);
+        if (perimeter <= 1e-6) continue;
+        const double circularity = 4.0 * CV_PI * area / (perimeter * perimeter);
+        if (circularity < min_nut_circularity_) continue;
+        std::vector<cv::Point> hull;
+        cv::convexHull(contour, hull);
+        const double hull_area = cv::contourArea(hull);
+        if (hull_area <= 1e-6 || area / hull_area < min_nut_solidity_) continue;
+        const cv::RotatedRect rr = cv::minAreaRect(contour);
+        const float width = std::max(rr.size.width, rr.size.height);
+        const float height = std::min(rr.size.width, rr.size.height);
+        if (width <= 1.0F || height / width < 0.50F) continue;
+        cv::Moments moments = cv::moments(contour);
+        if (std::abs(moments.m00) <= 1e-6) continue;
+        const cv::Point2f center(static_cast<float>(moments.m10 / moments.m00),
+                                 static_cast<float>(moments.m01 / moments.m00));
+        // Check every outer contour point, not just its center, against the frame.
+        double frame_clearance = std::numeric_limits<double>::infinity();
+        for (const auto &point : contour) {
+          frame_clearance = std::min(frame_clearance,
+                                     cv::pointPolygonTest(geometry.frame, point, true));
+        }
+        if (frame_clearance < 3.0) continue;
+        const float radius = 0.5F * width;
+        candidates.emplace_back(center.x, center.y, radius);
         cv::polylines(debug, contour, true, cv::Scalar(0, 200, 0), 2);
       }
     }
