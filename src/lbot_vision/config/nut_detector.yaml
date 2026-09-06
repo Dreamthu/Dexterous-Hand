@@ -1,0 +1,42 @@
+nut_detector_node:
+  ros__parameters:
+    # OrbbecSDK_ROS2 v2-main publishes these names under camera_name:=camera.
+    color_topic: /camera/color/image_raw
+    depth_topic: /camera/depth/image_raw
+    camera_info_topic: /camera/color/camera_info
+    target_frame: base_torso_root
+    use_tf: true
+    detection_topic: /nut_detections
+    slot_topic: /nut_slots
+    debug_image_topic: /nut_detection/debug_image
+    publish_rate_hz: 5.0
+
+    # HSV/geometry values; tune only if the lighting or materials change.
+    black_v_max: 90
+    blue_h_min: 90
+    blue_h_max: 140
+    blue_s_min: 70
+    blue_v_min: 35
+    min_frame_area_ratio: 0.03
+    max_frame_area_ratio: 0.30
+    min_basket_area_ratio: 0.01
+    frame_inner_scale: 0.94
+    min_nut_radius_px: 5.0
+    max_nut_radius_px: 180.0
+    # Outer silhouette filters for the hexagonal nuts in reference diagram/*.jpg.
+    min_nut_area_px: 350.0
+    max_nut_area_px: 100000.0
+    adaptive_block_size: 51
+    adaptive_c: 8.0
+    blackhat_kernel_size: 51
+    blackhat_threshold: 25.0
+    min_nut_solidity: 0.72
+    min_nut_circularity: 0.45
+    hough_param2: 13.0
+    min_nut_clearance_m: 0.003
+    depth_min_m: 0.15
+    depth_max_m: 5.0
+    slot_axis: long
+    # Reference photos include both camera orientations. Use "right" for the
+    # fixed contest layout where the blue box is required to be on the right.
+    basket_side: any
