@@ -77,6 +77,14 @@ public:
     frame_inner_scale_ = declare_parameter("frame_inner_scale", 0.94);
     min_nut_radius_px_ = declare_parameter("min_nut_radius_px", 5.0);
     max_nut_radius_px_ = declare_parameter("max_nut_radius_px", 180.0);
+    min_nut_area_px_ = declare_parameter("min_nut_area_px", 350.0);
+    max_nut_area_px_ = declare_parameter("max_nut_area_px", 100000.0);
+    adaptive_block_size_ = declare_parameter("adaptive_block_size", 51);
+    adaptive_c_ = declare_parameter("adaptive_c", 8.0);
+    blackhat_kernel_size_ = declare_parameter("blackhat_kernel_size", 51);
+    blackhat_threshold_ = declare_parameter("blackhat_threshold", 25.0);
+    min_nut_solidity_ = declare_parameter("min_nut_solidity", 0.72);
+    min_nut_circularity_ = declare_parameter("min_nut_circularity", 0.45);
     hough_param2_ = declare_parameter("hough_param2", 13.0);
     min_nut_clearance_m_ = declare_parameter("min_nut_clearance_m", 0.003);
     depth_min_m_ = declare_parameter("depth_min_m", 0.15);
@@ -114,6 +122,12 @@ private:
   double min_frame_area_ratio_{0.08}, min_basket_area_ratio_{0.01};
   double frame_inner_scale_{0.94};
   double min_nut_radius_px_{5.0}, max_nut_radius_px_{180.0}, hough_param2_{13.0};
+  double min_nut_area_px_{350.0}, max_nut_area_px_{100000.0};
+  int adaptive_block_size_{51};
+  double adaptive_c_{8.0};
+  int blackhat_kernel_size_{51};
+  double blackhat_threshold_{25.0};
+  double min_nut_solidity_{0.72}, min_nut_circularity_{0.45};
   double min_nut_clearance_m_{0.003}, depth_min_m_{0.15}, depth_max_m_{5.0};
 
   sensor_msgs::msg::Image::ConstSharedPtr color_msg_, depth_msg_;
@@ -325,19 +339,83 @@ private:
     cv::fillConvexPoly(roi, inner, 255);
     // The frame is the only dark large object; suppress its residual border.
     cv::erode(roi, roi, cv::getStructuringElement(cv::MORPH_ELLIPSE, {9, 9}));
-    std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1.2,
-                     std::max(10.0, min_nut_radius_px_ * 1.4), 90.0, hough_param2_,
-                     cvRound(min_nut_radius_px_), cvRound(max_nut_radius_px_));
-    std::vector<cv::Vec3f> accepted;
-    std::sort(circles.begin(), circles.end(), [](const auto &a, const auto &b) {
+
+    // Reference images show hexagonal nuts with circular holes. Detect the outer
+    // silhouette first, so size classification is not driven by the inner hole.
+    cv::Mat adaptive_mask;
+    int block_size = std::max(3, adaptive_block_size_);
+    if ((block_size % 2) == 0) ++block_size;
+    // The table and paper have a strong illumination gradient in the reference
+    // images. Adaptive thresholding keeps the silver nut visible without
+    // turning the whole shaded paper into one connected component.
+    cv::adaptiveThreshold(gray, adaptive_mask, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                          cv::THRESH_BINARY_INV, block_size, adaptive_c_);
+    cv::bitwise_and(adaptive_mask, roi, adaptive_mask);
+    cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_OPEN,
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
+    cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_CLOSE,
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
+
+    int blackhat_size = std::max(3, blackhat_kernel_size_);
+    if ((blackhat_size % 2) == 0) ++blackhat_size;
+    cv::Mat blackhat, blackhat_mask;
+    cv::morphologyEx(gray, blackhat, cv::MORPH_BLACKHAT,
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                {blackhat_size, blackhat_size}));
+    cv::threshold(blackhat, blackhat_mask, blackhat_threshold_, 255, cv::THRESH_BINARY);
+    cv::bitwise_and(blackhat_mask, roi, blackhat_mask);
+    cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_OPEN,
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
+    cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_CLOSE,
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
+
+    std::vector<cv::Vec3f> candidates;
+    // Black-hat handles the large illumination gradient in the sample photos;
+    // adaptive thresholding is retained for cases where the nut has weak edges.
+    for (const cv::Mat &candidate_mask : {blackhat_mask, adaptive_mask}) {
+      std::vector<std::vector<cv::Point>> contours;
+      cv::findContours(candidate_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+      for (const auto &contour : contours) {
+      const double area = cv::contourArea(contour);
+      if (area < min_nut_area_px_ || area > max_nut_area_px_) continue;
+      const double perimeter = cv::arcLength(contour, true);
+      if (perimeter <= 1e-6) continue;
+      const double circularity = 4.0 * CV_PI * area / (perimeter * perimeter);
+      if (circularity < min_nut_circularity_) continue;
+      std::vector<cv::Point> hull;
+      cv::convexHull(contour, hull);
+      const double hull_area = cv::contourArea(hull);
+      if (hull_area <= 1e-6 || area / hull_area < min_nut_solidity_) continue;
+      const cv::RotatedRect rr = cv::minAreaRect(contour);
+      const float width = std::max(rr.size.width, rr.size.height);
+      const float height = std::min(rr.size.width, rr.size.height);
+      if (width <= 1.0F || height / width < 0.50F) continue;
+      cv::Moments moments = cv::moments(contour);
+      if (std::abs(moments.m00) <= 1e-6) continue;
+      const cv::Point2f center(static_cast<float>(moments.m10 / moments.m00),
+                               static_cast<float>(moments.m01 / moments.m00));
+      // Check every outer contour point, not just its center, against the frame.
+      double frame_clearance = std::numeric_limits<double>::infinity();
+      for (const auto &point : contour) {
+        frame_clearance = std::min(frame_clearance,
+                                   cv::pointPolygonTest(geometry.frame, point, true));
+      }
+      if (frame_clearance < 3.0) continue;
+      const float radius = 0.5F * width;
+      candidates.emplace_back(center.x, center.y, radius);
+        cv::polylines(debug, contour, true, cv::Scalar(0, 200, 0), 2);
+      }
+    }
+
+    std::sort(candidates.begin(), candidates.end(), [](const auto &a, const auto &b) {
       return a[2] > b[2];
     });
-    for (const auto &c : circles) {
+    std::vector<cv::Vec3f> accepted;
+    auto append_if_new = [&](const cv::Vec3f &c) {
       cv::Point2f p(c[0], c[1]);
-      if (p.x < 0 || p.y < 0 || p.x >= roi.cols || p.y >= roi.rows || !roi.at<uint8_t>(cvRound(p.y), cvRound(p.x))) continue;
-      // The complete visible nut outline must stay inside the black frame, not merely its center.
-      if (cv::pointPolygonTest(geometry.frame, p, true) < c[2] + 3.0) continue;
+      if (p.x < 0 || p.y < 0 || p.x >= roi.cols || p.y >= roi.rows ||
+          !roi.at<uint8_t>(cvRound(p.y), cvRound(p.x))) return;
+      if (cv::pointPolygonTest(geometry.frame, p, true) < c[2] + 3.0) return;
       bool duplicate = false;
       for (const auto &a : accepted) {
         if (cv::norm(p - cv::Point2f(a[0], a[1])) < 0.55 * (c[2] + a[2])) {
@@ -345,8 +423,22 @@ private:
           break;
         }
       }
-      if (!duplicate) accepted.push_back(c);
-      if (accepted.size() == 3) break;
+      if (!duplicate && accepted.size() < 3) accepted.push_back(c);
+    };
+
+    for (const auto &candidate : candidates) append_if_new(candidate);
+
+    // Metallic glare or dark shadows can break the silhouette mask. Keep the
+    // original circle detector as a fallback for any missing targets.
+    if (accepted.size() < 3) {
+      std::vector<cv::Vec3f> circles;
+      cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1.2,
+                       std::max(10.0, min_nut_radius_px_ * 1.4), 90.0, hough_param2_,
+                       cvRound(min_nut_radius_px_), cvRound(max_nut_radius_px_));
+      std::sort(circles.begin(), circles.end(), [](const auto &a, const auto &b) {
+        return a[2] > b[2];
+      });
+      for (const auto &circle : circles) append_if_new(circle);
     }
     for (const auto &c : accepted) {
       cv::circle(debug, {cvRound(c[0]), cvRound(c[1])}, cvRound(c[2]), cv::Scalar(0, 255, 0), 2);
@@ -417,11 +509,19 @@ private:
     detections[1].size_class = "medium";
     detections[2].size_class = "small";
     bool separated = true;
+    const double fx = std::max(1.0, static_cast<double>(info_msg_->k[0]));
+    const double fy = std::max(1.0, static_cast<double>(info_msg_->k[4]));
+    const double focal = std::max(1.0, std::min(fx, fy));
     for (size_t i = 0; i < detections.size(); ++i) {
       for (size_t j = i + 1; j < detections.size(); ++j) {
         const double dx = detections[i].point.x - detections[j].point.x;
         const double dy = detections[i].point.y - detections[j].point.y;
-        if (std::hypot(dx, dy) < min_nut_clearance_m_) separated = false;
+        // Convert the detected outer silhouette radius back to a conservative
+        // tabletop footprint. This rejects touching nuts even when their
+        // centers are several millimetres apart.
+        const double ri = detections[i].radius_px * detections[i].depth_m / focal;
+        const double rj = detections[j].radius_px * detections[j].depth_m / focal;
+        if (std::hypot(dx, dy) < ri + rj + min_nut_clearance_m_) separated = false;
       }
     }
     if (!separated) {
