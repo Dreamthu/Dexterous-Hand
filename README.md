@@ -22,6 +22,7 @@ linkerbot_ws/
 │   ├── calibration/
 │   ├── camera/
 │   ├── experimental/
+│   ├── viewer/
 │   ├── vision/
 │   └── workspace.env
 ├── docs/               # 架构、开发约定和任务设计
@@ -48,6 +49,9 @@ cd linkerbot_ws
 ./scripts/run_perception.sh
 ```
 
+该脚本运行无界面的感知服务，不会自动弹出图像窗口。保持它运行，再用另一个终端启动
+查看器。
+
 只启动其中一个组件：
 
 ```bash
@@ -59,6 +63,12 @@ cd linkerbot_ws
 
 ```bash
 ./scripts/show_camera.sh
+```
+
+默认打开 `/camera/color/image_raw`。查看识别标注画面时可以运行：
+
+```bash
+./scripts/show_camera.sh --topic /nut_detection/debug_image
 ```
 
 一条命令启动相机并执行内参标定；退出标定后相机会自动停止：
@@ -73,11 +83,15 @@ cd linkerbot_ws
 ./scripts/test.sh
 ```
 
+遇到灰色窗口、深度流未启动或 rqt 卸载警告时，参见
+[运行与故障排查](docs/troubleshooting.md)。
+
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
 - `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
+- `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
 - `config/calibration/chessboard.yaml`：棋盘尺寸、采样数和结果目录。
 - `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
 
@@ -92,5 +106,5 @@ cd linkerbot_ws
 独立机器人适配层接入，并默认保持执行开关关闭。
 
 继续开发前请阅读 [开发交接规范](HANDOFF.md)。更多信息见
-[架构说明](docs/architecture.md)、[开发约定](docs/development.md) 和
-[迁移来源](docs/provenance.md)。
+[架构说明](docs/architecture.md)、[开发约定](docs/development.md)、
+[运行与故障排查](docs/troubleshooting.md) 和 [迁移来源](docs/provenance.md)。

@@ -27,3 +27,5 @@ git status --short
 ```
 
 真实相机/机械臂测试结果应在提交说明中注明设备、固件、分辨率和测试时长。
+相机 profile 或图像 topic 发生变化时，还必须同步更新
+[`troubleshooting.md`](troubleshooting.md) 中的已验证运行状态和排查步骤。

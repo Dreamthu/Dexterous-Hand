@@ -94,6 +94,40 @@ def detector_command(
     return [str(executable), "--ros-args", "--params-file", str(parameters)]
 
 
+def viewer_command(
+    config_path: str | Path = "config/viewer/image.yaml",
+    *,
+    topic: str | None = None,
+) -> List[str]:
+    config = load_yaml(config_path)
+    viewer = required_mapping(config, "viewer")
+    package = viewer.get("package")
+    executable_name = viewer.get("executable")
+    configured_topic = viewer.get("topic")
+    if not isinstance(package, str) or not isinstance(executable_name, str):
+        raise ConfigurationError("viewer package and executable must be strings")
+    selected_topic = topic if topic is not None else configured_topic
+    if selected_topic is not None and not isinstance(selected_topic, str):
+        raise ConfigurationError("viewer topic must be a string or null")
+
+    try:
+        from ament_index_python.packages import get_package_prefix
+
+        package_prefix = Path(get_package_prefix(package))
+    except (ImportError, LookupError) as error:
+        raise ConfigurationError(
+            f"ROS package '{package}' is unavailable. Install ros-jazzy-rqt-image-view."
+        ) from error
+
+    executable = package_prefix / "lib" / package / executable_name
+    if not executable.is_file() or not os.access(executable, os.X_OK):
+        raise ConfigurationError(f"Viewer executable does not exist: {executable}")
+    command = [str(executable)]
+    if selected_topic:
+        command.append(selected_topic)
+    return command
+
+
 def calibration_command(
     config_path: str | Path = "config/calibration/chessboard.yaml",
 ) -> List[str]:
