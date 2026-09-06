@@ -1,0 +1,14 @@
+topic: /camera/color/image_raw
+camera_name: gemini2_color
+
+board:
+  # Printed black/white square count, not inner-corner count.
+  squares_x: 11
+  squares_y: 8
+  square_size_mm: 15.0
+
+capture:
+  min_samples: 20
+  # Inner-corner convex hull must cover at least 5% of the image.
+  min_board_area_ratio: 0.05
+  output_directory: artifacts/calibration

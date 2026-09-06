@@ -1,0 +1,26 @@
+# Reference-only parameters for src/lbot_vision/experimental/nut_task_node.cpp.
+# This node is not built. The placeholder poses below must never be used on a
+# real robot without calibration, workspace checks, and an execution interlock.
+nut_task_node:
+  ros__parameters:
+    color_topic: /camera/color/image_raw
+    depth_topic: /camera/depth/image_rect_raw
+    camera_info_topic: /camera/color/camera_info
+    left_joint_topic: /robot1/left_arm/joint_states
+    right_joint_topic: /robot1/right_arm/joint_states
+    base_frame: base_torso_root
+    camera_frame: camera_color_optical_frame
+    required_gap_m: 0.50
+    gap_tolerance_m: 0.01
+    table_z_m: 0.0
+    pregrasp_height_m: 0.08
+    lift_height_m: 0.15
+    place_clearance_m: 0.04
+    max_xy_error_m: 0.006
+    min_nut_clearance_m: 0.003
+    stable_frames: 8
+    action_speed: 0.15
+    action_accel: 0.15
+    # All poses are in base_torso_root; replace with measured poses.
+    camera_observe_xyzrpy: [0.35, -0.35, 0.45, 0.0, -1.57, 0.0]
+    left_safe_xyzrpy: [0.25, 0.25, 0.20, 0.0, -1.57, 0.0]

@@ -1,0 +1,23 @@
+# colcon/CMake output
+/build/
+/install/
+/log/
+
+# Runtime artifacts and local calibration captures
+/artifacts/logs/
+/artifacts/calibration/*
+!/artifacts/calibration/.gitkeep
+
+# Python/editor caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
+
+# Local overrides and crash output
+config/*.local.env
+*.core
+core.*

@@ -1,0 +1,31 @@
+driver:
+  package: orbbec_camera
+  launch_file: gemini2.launch.py
+  log_directory: artifacts/logs/orbbec
+
+# Set this to a camera_info.yaml path relative to the repository root after
+# accepting an intrinsic calibration, for example:
+# color_info_file: artifacts/calibration/20260906_170000/camera_info.yaml
+color_info_file: null
+
+# Explicit profiles avoid the unstable high-bandwidth ANY defaults in WSL.
+parameters:
+  camera_name: camera
+  uvc_backend: libuvc
+  enable_color: true
+  color_width: 640
+  color_height: 360
+  color_fps: 15
+  color_format: MJPG
+  enable_depth: true
+  depth_width: 640
+  depth_height: 400
+  depth_fps: 15
+  depth_format: Y14
+  enable_ir: false
+  depth_registration: true
+  align_mode: HW
+  enable_point_cloud: false
+  enable_colored_point_cloud: false
+  enable_color_undistortion: false
+  publish_tf: true

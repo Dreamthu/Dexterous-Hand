@@ -1,0 +1,143 @@
+"""Hide ROS process details behind stable application-level commands."""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Mapping, Tuple
+
+import yaml
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+class ConfigurationError(RuntimeError):
+    """Raised when repository configuration cannot produce a safe command."""
+
+
+def repository_path(value: str | Path) -> Path:
+    path = Path(value).expanduser()
+    return path.resolve() if path.is_absolute() else (REPOSITORY_ROOT / path).resolve()
+
+
+def load_yaml(path: str | Path) -> Dict[str, Any]:
+    resolved = repository_path(path)
+    if not resolved.is_file():
+        raise ConfigurationError(f"Configuration file does not exist: {resolved}")
+    with resolved.open(encoding="utf-8") as stream:
+        document = yaml.safe_load(stream)
+    if not isinstance(document, dict):
+        raise ConfigurationError(f"Configuration root must be a mapping: {resolved}")
+    return document
+
+
+def required_mapping(document: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    value = document.get(key)
+    if not isinstance(value, dict):
+        raise ConfigurationError(f"'{key}' must be a mapping")
+    return value
+
+
+def ros_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (str, int, float)):
+        return str(value)
+    raise ConfigurationError(
+        f"Unsupported ROS launch value {value!r}; use a string, number, or boolean"
+    )
+
+
+def camera_command(
+    config_path: str | Path = "config/camera/gemini2.yaml",
+) -> Tuple[List[str], Dict[str, str]]:
+    config = load_yaml(config_path)
+    driver = required_mapping(config, "driver")
+    parameters = required_mapping(config, "parameters")
+    package = driver.get("package")
+    launch_file = driver.get("launch_file")
+    if not isinstance(package, str) or not isinstance(launch_file, str):
+        raise ConfigurationError("camera driver package and launch_file must be strings")
+
+    command = ["ros2", "launch", package, launch_file]
+    command.extend(f"{name}:={ros_value(value)}" for name, value in parameters.items())
+
+    color_info_file = config.get("color_info_file")
+    if color_info_file:
+        calibration_path = repository_path(str(color_info_file))
+        if not calibration_path.is_file():
+            raise ConfigurationError(
+                f"Configured color_info_file does not exist: {calibration_path}"
+            )
+        command.append(f"color_info_url:={calibration_path.as_uri()}")
+
+    environment = os.environ.copy()
+    log_directory = repository_path(str(driver.get("log_directory", "artifacts/logs/orbbec")))
+    log_directory.mkdir(parents=True, exist_ok=True)
+    environment["ROS_LOG_DIR"] = str(log_directory)
+    return command, environment
+
+
+def detector_command(
+    config_path: str | Path = "config/vision/nut_detector.yaml",
+    *,
+    require_built: bool = True,
+) -> List[str]:
+    executable = REPOSITORY_ROOT / "install/lbot_vision/lib/lbot_vision/nut_detector_node"
+    parameters = repository_path(config_path)
+    if not parameters.is_file():
+        raise ConfigurationError(f"Detector parameter file does not exist: {parameters}")
+    if require_built and not executable.is_file():
+        raise ConfigurationError("Detector is not built. Run ./scripts/build.sh first.")
+    return [str(executable), "--ros-args", "--params-file", str(parameters)]
+
+
+def calibration_command(
+    config_path: str | Path = "config/calibration/chessboard.yaml",
+) -> List[str]:
+    config = load_yaml(config_path)
+    board = required_mapping(config, "board")
+    capture = required_mapping(config, "capture")
+    script = REPOSITORY_ROOT / "tools/camera_calibration/calibrate_camera.py"
+    if not script.is_file():
+        raise ConfigurationError(f"Calibration tool does not exist: {script}")
+
+    required_values = {
+        "topic": config.get("topic"),
+        "camera_name": config.get("camera_name"),
+        "squares_x": board.get("squares_x"),
+        "squares_y": board.get("squares_y"),
+        "square_size_mm": board.get("square_size_mm"),
+        "min_samples": capture.get("min_samples"),
+        "min_board_area_ratio": capture.get("min_board_area_ratio"),
+        "output_directory": capture.get("output_directory"),
+    }
+    missing = [name for name, value in required_values.items() if value is None]
+    if missing:
+        raise ConfigurationError(
+            "Missing calibration configuration values: " + ", ".join(missing)
+        )
+
+    output_directory = repository_path(str(required_values["output_directory"]))
+    return [
+        sys.executable,
+        str(script),
+        "--topic",
+        str(required_values["topic"]),
+        "--camera-name",
+        str(required_values["camera_name"]),
+        "--squares-x",
+        str(required_values["squares_x"]),
+        "--squares-y",
+        str(required_values["squares_y"]),
+        "--square-size-mm",
+        str(required_values["square_size_mm"]),
+        "--min-samples",
+        str(required_values["min_samples"]),
+        "--min-board-area-ratio",
+        str(required_values["min_board_area_ratio"]),
+        "--output-dir",
+        str(output_directory),
+    ]
