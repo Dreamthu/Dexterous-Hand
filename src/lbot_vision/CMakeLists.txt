@@ -19,6 +19,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
+include(detector_core.cmake)
 
 add_library(lbot_vision_geometry src/core/camera_geometry.cpp)
 target_include_directories(lbot_vision_geometry
@@ -33,7 +34,7 @@ target_include_directories(nut_detector_node PRIVATE ${OpenCV_INCLUDE_DIRS})
 ament_target_dependencies(nut_detector_node
   rclcpp sensor_msgs geometry_msgs std_msgs cv_bridge tf2 tf2_ros
   tf2_geometry_msgs)
-target_link_libraries(nut_detector_node lbot_vision_geometry ${OpenCV_LIBRARIES})
+target_link_libraries(nut_detector_node lbot_vision_detector lbot_vision_geometry ${OpenCV_LIBRARIES})
 
 if(BUILD_TESTING)
   enable_testing()
@@ -43,7 +44,7 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  TARGETS lbot_vision_geometry
+  TARGETS lbot_vision_geometry lbot_vision_detector
   EXPORT export_lbot_vision_geometry
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

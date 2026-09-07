@@ -23,3 +23,7 @@ __pycache__/
 config/*.local.env
 *.core
 core.*
+
+# Offline datasets and replay output (may contain private camera images).
+/artifacts/offline_detection/
+/artifacts/datasets/

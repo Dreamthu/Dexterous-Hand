@@ -80,11 +80,30 @@ cd linkerbot_ws
 遇到灰色窗口、深度流未启动或 rqt 卸载警告时，参见
 [运行与故障排查](docs/troubleshooting.md)。
 
+## 无硬件二维识别调试
+
+无需 ROS、相机或机器人，可在安装 C++17 / CMake / OpenCV 4 开发库 / PyYAML 后使用：
+
+```bash
+bash scripts/build_offline.sh
+bash scripts/test_offline.sh
+bash scripts/run_detector_offline.sh artifacts/datasets/scene_001.png
+```
+
+Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测核心，阈值仍只从
+`config/vision/nut_detector.yaml` 读取。原图、配置快照、掩膜、候选拒绝原因和结果写入
+被 Git 忽略的 `artifacts/offline_detection/`。
+
+本次是任务一解耦：**不是目标跟踪，也未解决连续取走后的身份关联**；不输出可执行抓取坐标。
+具体环境、图片/序列用法、现场数据交接和限制见 [离线识别说明](docs/offline_detection.md)，
+文件清单和提交步骤见 [本次修改与提交说明](docs/offline_detection_changes.md)。
+
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
 - `config/camera/gemini2.yaml`：相机 profile 和流开关，不覆盖厂内参。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
+- `config/vision/offline.yaml`：离线构建目录、输出目录和低并发构建设置。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
 - `config/calibration/extrinsics/`：只预留相机安装、机器人和现场相关外参。
 - `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。

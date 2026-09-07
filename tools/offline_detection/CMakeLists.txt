@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.16)
+project(lbot_offline_detection LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Hash long out-of-tree object paths. This also keeps MinGW assembler output
+# paths ASCII when the checkout itself has non-ASCII directory names.
+if(WIN32)
+  set(CMAKE_OBJECT_PATH_MAX 200)
+endif()
+# Avoid cmd.exe recoding UTF-8 library paths on MinGW/Ninja link commands.
+if(MINGW AND CMAKE_GENERATOR MATCHES "Ninja")
+  set(CMAKE_NINJA_FORCE_RESPONSE_FILE ON)
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+find_package(OpenCV 4 REQUIRED COMPONENTS core imgproc imgcodecs calib3d)
+include("../../src/lbot_vision/detector_core.cmake")
+add_library(lbot_offline_io offline_io.cpp)
+target_link_libraries(lbot_offline_io PUBLIC lbot_vision_detector)
+target_include_directories(lbot_offline_io PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+add_executable(nut_detector_offline main.cpp)
+target_link_libraries(nut_detector_offline PRIVATE lbot_offline_io)
+# Keep the executable path stable also with Visual Studio multi-config generators.
+set_target_properties(nut_detector_offline PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+foreach(configuration DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+  set_target_properties(nut_detector_offline PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_${configuration} "${CMAKE_BINARY_DIR}/bin")
+endforeach()
+include(CTest)
+if(BUILD_TESTING)
+  if(NOT DEFINED DETECTOR_TEST_CONFIG)
+    message(FATAL_ERROR "Use scripts/build_offline.sh to prepare the test config")
+  endif()
+  add_executable(nut_detector_core_test "../../src/lbot_vision/tests/nut_detector_core_test.cpp")
+  target_link_libraries(nut_detector_core_test PRIVATE lbot_offline_io)
+  add_test(NAME nut_detector_core_test COMMAND nut_detector_core_test "${DETECTOR_TEST_CONFIG}")
+  add_executable(camera_geometry_offline_test
+    "../../src/lbot_vision/tests/camera_geometry_test.cpp"
+    "../../src/lbot_vision/src/core/camera_geometry.cpp")
+  target_link_libraries(camera_geometry_offline_test PRIVATE lbot_vision_detector)
+  add_test(NAME camera_geometry_offline_test COMMAND camera_geometry_offline_test)
+endif()

@@ -1,0 +1,7 @@
+# Paths are relative to repository root, not the caller's current directory.
+# The detector YAML is shared with ROS; do not duplicate its threshold values here.
+detector_config: config/vision/nut_detector.yaml
+build_directory: build/offline_detection
+output_directory: artifacts/offline_detection
+# Conservative build concurrency; no ROS or external SDK is required.
+build_jobs: 2

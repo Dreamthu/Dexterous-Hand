@@ -1,9 +1,9 @@
 #include <algorithm>
+#include <chrono>
+#include <functional>
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <memory>
-#include <numeric>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -11,13 +11,13 @@
 #include <vector>
 
 #include <opencv2/imgproc.hpp>
-#include <opencv2/objdetect.hpp>
 
 #include "cv_bridge/cv_bridge.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "lbot_vision/camera_geometry.hpp"
+#include "lbot_vision/nut_detector.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
@@ -41,12 +41,6 @@ struct Detection {
   std::string size_class;
 };
 
-struct SceneGeometry {
-  std::vector<cv::Point> frame;
-  std::vector<cv::Point> basket;
-  std::vector<cv::Point2f> slots;
-};
-
 }  // namespace
 
 class NutDetectorNode final : public rclcpp::Node {
@@ -64,32 +58,14 @@ public:
     debug_topic_ = declare_parameter("debug_image_topic", "/nut_detection/debug_image");
     publish_rate_hz_ = declare_parameter("publish_rate_hz", 5.0);
 
-    // HSV thresholds are deliberately parameters: lighting and black/blue materials vary.
-    black_v_max_ = declare_parameter("black_v_max", 90);
-    blue_h_min_ = declare_parameter("blue_h_min", 90);
-    blue_h_max_ = declare_parameter("blue_h_max", 140);
-    blue_s_min_ = declare_parameter("blue_s_min", 70);
-    blue_v_min_ = declare_parameter("blue_v_min", 35);
-    min_frame_area_ratio_ = declare_parameter("min_frame_area_ratio", 0.08);
-    max_frame_area_ratio_ = declare_parameter("max_frame_area_ratio", 0.30);
-    min_basket_area_ratio_ = declare_parameter("min_basket_area_ratio", 0.01);
-    frame_inner_scale_ = declare_parameter("frame_inner_scale", 0.94);
-    min_nut_radius_px_ = declare_parameter("min_nut_radius_px", 5.0);
-    max_nut_radius_px_ = declare_parameter("max_nut_radius_px", 180.0);
-    min_nut_area_px_ = declare_parameter("min_nut_area_px", 350.0);
-    max_nut_area_px_ = declare_parameter("max_nut_area_px", 100000.0);
-    adaptive_block_size_ = declare_parameter("adaptive_block_size", 51);
-    adaptive_c_ = declare_parameter("adaptive_c", 8.0);
-    blackhat_kernel_size_ = declare_parameter("blackhat_kernel_size", 51);
-    blackhat_threshold_ = declare_parameter("blackhat_threshold", 25.0);
-    min_nut_solidity_ = declare_parameter("min_nut_solidity", 0.72);
-    min_nut_circularity_ = declare_parameter("min_nut_circularity", 0.45);
-    hough_param2_ = declare_parameter("hough_param2", 13.0);
+    // Mandatory values come from the same central YAML as the offline adapter.
+#define LBOT_DETECTOR_FIELD(type, name) detector_config_.name = declare_parameter<type>(#name);
+#include "lbot_vision/detector_fields.inc"
+#undef LBOT_DETECTOR_FIELD
+    detector_config_.validate();
     min_nut_clearance_m_ = declare_parameter("min_nut_clearance_m", 0.003);
     depth_min_m_ = declare_parameter("depth_min_m", 0.15);
     depth_max_m_ = declare_parameter("depth_max_m", 5.0);
-    slot_axis_ = declare_parameter("slot_axis", "long");
-    basket_side_ = declare_parameter("basket_side", "any");
 
     color_sub_ = create_subscription<sensor_msgs::msg::Image>(
       color_topic_, rclcpp::SensorDataQoS(),
@@ -114,20 +90,10 @@ public:
 
 private:
   std::string color_topic_, depth_topic_, camera_info_topic_;
-  std::string target_frame_, detection_topic_, slot_topic_, debug_topic_, slot_axis_, basket_side_;
+  std::string target_frame_, detection_topic_, slot_topic_, debug_topic_;
   bool use_tf_{true};
   double publish_rate_hz_{5.0};
-  int black_v_max_{90}, blue_h_min_{90}, blue_h_max_{140};
-  int blue_s_min_{70}, blue_v_min_{35};
-  double min_frame_area_ratio_{0.08}, max_frame_area_ratio_{0.30}, min_basket_area_ratio_{0.01};
-  double frame_inner_scale_{0.94};
-  double min_nut_radius_px_{5.0}, max_nut_radius_px_{180.0}, hough_param2_{13.0};
-  double min_nut_area_px_{350.0}, max_nut_area_px_{100000.0};
-  int adaptive_block_size_{51};
-  double adaptive_c_{8.0};
-  int blackhat_kernel_size_{51};
-  double blackhat_threshold_{25.0};
-  double min_nut_solidity_{0.72}, min_nut_circularity_{0.45};
+  lbot_vision::DetectorConfig detector_config_;
   double min_nut_clearance_m_{0.003}, depth_min_m_{0.15}, depth_max_m_{5.0};
 
   sensor_msgs::msg::Image::ConstSharedPtr color_msg_, depth_msg_;
@@ -240,261 +206,6 @@ private:
     }
   }
 
-  static std::vector<cv::Point> largest_quadrilateral(const cv::Mat &mask, const cv::Mat &gray,
-                                                      double min_area, double max_area)
-  {
-    std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    double best = 0.0;
-    std::vector<cv::Point> result;
-    for (const auto &contour : contours) {
-      const double area = cv::contourArea(contour);
-      if (area < min_area || area > max_area) continue;
-      std::vector<cv::Point> approx;
-      cv::approxPolyDP(contour, approx, 0.03 * cv::arcLength(contour, true), true);
-      if (approx.size() < 4 || approx.size() > 8 || !cv::isContourConvex(approx)) continue;
-      const cv::RotatedRect rr = cv::minAreaRect(approx);
-      const double rect_area = static_cast<double>(rr.size.area());
-      if (rect_area <= 1e-6) continue;
-      const double rectangularity = area / rect_area;
-      const double short_side = std::min(rr.size.width, rr.size.height);
-      const double long_side = std::max(rr.size.width, rr.size.height);
-      if (short_side <= 1.0 || long_side / short_side > 2.5 || rectangularity < 0.55) continue;
-      cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
-      cv::fillConvexPoly(interior, approx, 255);
-      cv::erode(interior, interior, cv::getStructuringElement(cv::MORPH_ELLIPSE, {11, 11}));
-      const double mean_intensity = cv::mean(gray, interior)[0];
-      // The line frame surrounds a bright sheet. This rejects black equipment,
-      // floor areas and labels that happen to form large quadrilaterals.
-      if (mean_intensity < 120.0) continue;
-      const double score = area * rectangularity;
-      if (score > best) {
-        best = score;
-        result = approx;
-      }
-    }
-    return result;
-  }
-
-  SceneGeometry find_geometry(const cv::Mat &bgr, cv::Mat &debug)
-  {
-    SceneGeometry geometry;
-    cv::Mat hsv;
-    cv::cvtColor(bgr, hsv, cv::COLOR_BGR2HSV);
-    cv::Mat black_mask, blue_mask;
-    cv::inRange(hsv, cv::Scalar(0, 0, 0), cv::Scalar(180, 255, black_v_max_), black_mask);
-    cv::inRange(hsv, cv::Scalar(blue_h_min_, blue_s_min_, blue_v_min_),
-                cv::Scalar(blue_h_max_, 255, 255), blue_mask);
-    cv::morphologyEx(black_mask, black_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_RECT, {9, 9}));
-    cv::morphologyEx(blue_mask, blue_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_RECT, {7, 7}));
-
-    cv::Mat gray;
-    cv::cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
-
-    const double image_area = static_cast<double>(bgr.cols * bgr.rows);
-    geometry.frame = largest_quadrilateral(
-      black_mask, gray, image_area * min_frame_area_ratio_, image_area * max_frame_area_ratio_);
-    if (geometry.frame.empty()) {
-      std::vector<std::vector<cv::Point>> contours;
-      cv::findContours(black_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      double best_fallback = 0.0;
-      for (const auto &contour : contours) {
-        const double area = cv::contourArea(contour);
-        if (area < image_area * min_frame_area_ratio_ ||
-            area > image_area * max_frame_area_ratio_) continue;
-        const cv::Rect rect = cv::boundingRect(contour);
-        if (rect.width < 2 || rect.height < 2) continue;
-        cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
-        cv::rectangle(interior, rect, 255, cv::FILLED);
-        const double mean_intensity = cv::mean(gray, interior)[0];
-        if (mean_intensity < 120.0 || area <= best_fallback) continue;
-        best_fallback = area;
-        geometry.frame = {cv::Point(rect.x, rect.y),
-                          cv::Point(rect.x + rect.width, rect.y),
-                          cv::Point(rect.x + rect.width, rect.y + rect.height),
-                          cv::Point(rect.x, rect.y + rect.height)};
-      }
-    }
-
-    std::vector<std::vector<cv::Point>> blue_contours;
-    cv::findContours(blue_mask, blue_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    cv::Point2f frame_center(bgr.cols * 0.5F, bgr.rows * 0.5F);
-    if (!geometry.frame.empty()) {
-      cv::Moments m = cv::moments(geometry.frame);
-      if (std::abs(m.m00) > 1e-6) frame_center = {static_cast<float>(m.m10 / m.m00),
-                                                   static_cast<float>(m.m01 / m.m00)};
-    }
-    double best_area = image_area * min_basket_area_ratio_;
-    for (const auto &contour : blue_contours) {
-      double area = cv::contourArea(contour);
-      cv::Moments m = cv::moments(contour);
-      if (area < best_area || std::abs(m.m00) < 1e-6) continue;
-      cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
-      if (basket_side_ == "right" && c.x <= frame_center.x) continue;
-      if (basket_side_ == "left" && c.x >= frame_center.x) continue;
-      best_area = area;
-      std::vector<cv::Point> approx;
-      cv::approxPolyDP(contour, approx, 0.03 * cv::arcLength(contour, true), true);
-      geometry.basket = approx.size() >= 4 ? approx : contour;
-    }
-
-    if (!geometry.basket.empty()) {
-      cv::RotatedRect rr = cv::minAreaRect(geometry.basket);
-      float angle = rr.angle * static_cast<float>(CV_PI / 180.0);
-      float long_size = rr.size.width;
-      cv::Point2f axis(std::cos(angle), std::sin(angle));
-      if (rr.size.height > rr.size.width) {
-        long_size = rr.size.height;
-        axis = cv::Point2f(-std::sin(angle), std::cos(angle));
-      }
-      axis *= (long_size / 3.0F);
-      for (int i = 0; i < 3; ++i) {
-        geometry.slots.push_back(rr.center + axis * (static_cast<float>(i) - 1.0F));
-      }
-      if (slot_axis_ == "right_to_left") std::reverse(geometry.slots.begin(), geometry.slots.end());
-    }
-
-    debug = bgr.clone();
-    if (geometry.frame.size() >= 4)
-      cv::polylines(debug, geometry.frame, true, cv::Scalar(0, 0, 255), 3);
-    if (geometry.basket.size() >= 4)
-      cv::polylines(debug, geometry.basket, true, cv::Scalar(255, 0, 0), 3);
-    for (size_t i = 0; i < geometry.slots.size(); ++i) {
-      cv::drawMarker(debug, geometry.slots[i], cv::Scalar(255, 0, 255), cv::MARKER_CROSS, 20, 2);
-      cv::putText(debug, "slot_" + std::to_string(i + 1), geometry.slots[i] + cv::Point2f(5, -5),
-                  cv::FONT_HERSHEY_SIMPLEX, 0.55, cv::Scalar(255, 0, 255), 2);
-    }
-    return geometry;
-  }
-
-  std::vector<cv::Vec3f> find_nut_circles(const cv::Mat &bgr, const SceneGeometry &geometry,
-                                          cv::Mat &debug)
-  {
-    if (geometry.frame.size() < 4) return {};
-    cv::Mat gray;
-    cv::cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
-    cv::GaussianBlur(gray, gray, {5, 5}, 1.2);
-    cv::Mat roi = cv::Mat::zeros(gray.size(), CV_8UC1);
-    std::vector<cv::Point> inner;
-    cv::Point2f center(0, 0);
-    for (const auto &p : geometry.frame) center += cv::Point2f(p);
-    center *= 1.0F / static_cast<float>(geometry.frame.size());
-    for (const auto &p : geometry.frame) {
-      cv::Point2f q = center + static_cast<float>(frame_inner_scale_) * (cv::Point2f(p) - center);
-      inner.emplace_back(cv::Point(cvRound(q.x), cvRound(q.y)));
-    }
-    cv::fillConvexPoly(roi, inner, 255);
-    // The frame is the only dark large object; suppress its residual border.
-    cv::erode(roi, roi, cv::getStructuringElement(cv::MORPH_ELLIPSE, {9, 9}));
-
-    // Reference images show hexagonal nuts with circular holes. Detect the outer
-    // silhouette first, so size classification is not driven by the inner hole.
-    cv::Mat adaptive_mask;
-    int block_size = std::max(3, adaptive_block_size_);
-    if ((block_size % 2) == 0) ++block_size;
-    // The table and paper have a strong illumination gradient in the reference
-    // images. Adaptive thresholding keeps the silver nut visible without
-    // turning the whole shaded paper into one connected component.
-    cv::adaptiveThreshold(gray, adaptive_mask, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-                          cv::THRESH_BINARY_INV, block_size, adaptive_c_);
-    cv::bitwise_and(adaptive_mask, roi, adaptive_mask);
-    cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_OPEN,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
-    cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
-
-    int blackhat_size = std::max(3, blackhat_kernel_size_);
-    if ((blackhat_size % 2) == 0) ++blackhat_size;
-    cv::Mat blackhat, blackhat_mask;
-    cv::morphologyEx(gray, blackhat, cv::MORPH_BLACKHAT,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                {blackhat_size, blackhat_size}));
-    cv::threshold(blackhat, blackhat_mask, blackhat_threshold_, 255, cv::THRESH_BINARY);
-    cv::bitwise_and(blackhat_mask, roi, blackhat_mask);
-    cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_OPEN,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
-    cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
-
-    std::vector<cv::Vec3f> candidates;
-    // Black-hat handles the large illumination gradient in the sample photos;
-    // adaptive thresholding is retained for cases where the nut has weak edges.
-    for (const cv::Mat &candidate_mask : {blackhat_mask, adaptive_mask}) {
-      std::vector<std::vector<cv::Point>> contours;
-      cv::findContours(candidate_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      for (const auto &contour : contours) {
-        const double area = cv::contourArea(contour);
-        if (area < min_nut_area_px_ || area > max_nut_area_px_) continue;
-        const double perimeter = cv::arcLength(contour, true);
-        if (perimeter <= 1e-6) continue;
-        const double circularity = 4.0 * CV_PI * area / (perimeter * perimeter);
-        if (circularity < min_nut_circularity_) continue;
-        std::vector<cv::Point> hull;
-        cv::convexHull(contour, hull);
-        const double hull_area = cv::contourArea(hull);
-        if (hull_area <= 1e-6 || area / hull_area < min_nut_solidity_) continue;
-        const cv::RotatedRect rr = cv::minAreaRect(contour);
-        const float width = std::max(rr.size.width, rr.size.height);
-        const float height = std::min(rr.size.width, rr.size.height);
-        if (width <= 1.0F || height / width < 0.50F) continue;
-        cv::Moments moments = cv::moments(contour);
-        if (std::abs(moments.m00) <= 1e-6) continue;
-        const cv::Point2f center(static_cast<float>(moments.m10 / moments.m00),
-                                 static_cast<float>(moments.m01 / moments.m00));
-        // Check every outer contour point, not just its center, against the frame.
-        double frame_clearance = std::numeric_limits<double>::infinity();
-        for (const auto &point : contour) {
-          frame_clearance = std::min(frame_clearance,
-                                     cv::pointPolygonTest(geometry.frame, point, true));
-        }
-        if (frame_clearance < 3.0) continue;
-        const float radius = 0.5F * width;
-        candidates.emplace_back(center.x, center.y, radius);
-        cv::polylines(debug, contour, true, cv::Scalar(0, 200, 0), 2);
-      }
-    }
-
-    std::sort(candidates.begin(), candidates.end(), [](const auto &a, const auto &b) {
-      return a[2] > b[2];
-    });
-    std::vector<cv::Vec3f> accepted;
-    auto append_if_new = [&](const cv::Vec3f &c) {
-      cv::Point2f p(c[0], c[1]);
-      if (p.x < 0 || p.y < 0 || p.x >= roi.cols || p.y >= roi.rows ||
-          !roi.at<uint8_t>(cvRound(p.y), cvRound(p.x))) return;
-      if (cv::pointPolygonTest(geometry.frame, p, true) < c[2] + 3.0) return;
-      bool duplicate = false;
-      for (const auto &a : accepted) {
-        if (cv::norm(p - cv::Point2f(a[0], a[1])) < 0.55 * (c[2] + a[2])) {
-          duplicate = true;
-          break;
-        }
-      }
-      if (!duplicate && accepted.size() < 3) accepted.push_back(c);
-    };
-
-    for (const auto &candidate : candidates) append_if_new(candidate);
-
-    // Metallic glare or dark shadows can break the silhouette mask. Keep the
-    // original circle detector as a fallback for any missing targets.
-    if (accepted.size() < 3) {
-      std::vector<cv::Vec3f> circles;
-      cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1.2,
-                       std::max(10.0, min_nut_radius_px_ * 1.4), 90.0, hough_param2_,
-                       cvRound(min_nut_radius_px_), cvRound(max_nut_radius_px_));
-      std::sort(circles.begin(), circles.end(), [](const auto &a, const auto &b) {
-        return a[2] > b[2];
-      });
-      for (const auto &circle : circles) append_if_new(circle);
-    }
-    for (const auto &c : accepted) {
-      cv::circle(debug, {cvRound(c[0]), cvRound(c[1])}, cvRound(c[2]), cv::Scalar(0, 255, 0), 2);
-    }
-    return accepted;
-  }
-
   void publish_status(const std::string &status, size_t count)
   {
     std_msgs::msg::String msg;
@@ -506,43 +217,62 @@ private:
 
   void process()
   {
-    if (!color_msg_ || !depth_msg_ || !camera_geometry_) return;
-    cv::Mat color, depth;
+    if (!color_msg_) return;
+    cv::Mat color;
     try {
       color = cv_bridge::toCvCopy(color_msg_, sensor_msgs::image_encodings::BGR8)->image;
-      if (depth_msg_->encoding == sensor_msgs::image_encodings::TYPE_16UC1) {
-        depth = cv_bridge::toCvCopy(depth_msg_, sensor_msgs::image_encodings::TYPE_16UC1)->image;
-      } else {
-        depth = cv_bridge::toCvCopy(depth_msg_, sensor_msgs::image_encodings::TYPE_32FC1)->image;
-      }
-    } catch (const std::exception &e) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000, "Image conversion failed: %s", e.what());
+    } catch (const std::exception &error) {
+      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000, "Color conversion failed: %s", error.what());
+      publish_status("invalid_color_image", 0);
       return;
     }
-    if (camera_geometry_->width() != static_cast<std::uint32_t>(color.cols) ||
-        camera_geometry_->height() != static_cast<std::uint32_t>(color.rows)) {
-      RCLCPP_ERROR_THROTTLE(
-        get_logger(), *get_clock(), 3000,
-        "CameraInfo size %ux%u does not match raw color image %dx%d; refusing invalid projection",
-        camera_geometry_->width(), camera_geometry_->height(), color.cols, color.rows);
-      publish_status("camera_info_size_mismatch", 0);
+    lbot_vision::Detection2D observation;
+    try {
+      observation = lbot_vision::detect_2d(color, detector_config_);
+    } catch (const std::exception &error) {
+      RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 3000, "2D detection failed: %s", error.what());
+      publish_status("detection_2d_failed", 0);
       return;
     }
-    cv::Mat debug;
-    SceneGeometry geometry = find_geometry(color, debug);
-    if (geometry.frame.size() < 4) {
+    cv::Mat debug = observation.annotated;
+    const auto &geometry = observation.geometry;
+    if (!observation.frame_found) {
       publish_status("frame_not_found", 0);
       return publish_debug(debug, color_msg_->header);
     }
-    if (geometry.basket.size() < 4 || geometry.slots.size() != 3) {
-      publish_status("basket_not_found", 0);
+    if (!observation.basket_found) {
+      publish_status("basket_not_found", observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
+    if (!depth_msg_ || !camera_geometry_) {
+      publish_status("localization_inputs_missing", observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
+    if (camera_geometry_->width() != static_cast<std::uint32_t>(color.cols) ||
+        camera_geometry_->height() != static_cast<std::uint32_t>(color.rows)) {
+      publish_status("camera_info_size_mismatch", observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
+    cv::Mat depth;
+    try {
+      if (depth_msg_->encoding == sensor_msgs::image_encodings::TYPE_16UC1)
+        depth = cv_bridge::toCvCopy(depth_msg_, sensor_msgs::image_encodings::TYPE_16UC1)->image;
+      else if (depth_msg_->encoding == sensor_msgs::image_encodings::TYPE_32FC1)
+        depth = cv_bridge::toCvCopy(depth_msg_, sensor_msgs::image_encodings::TYPE_32FC1)->image;
+      else {
+        publish_status("unsupported_depth_encoding", observation.circles.size());
+        return publish_debug(debug, color_msg_->header);
+      }
+    } catch (const std::exception &error) {
+      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000, "Depth conversion failed: %s", error.what());
+      publish_status("invalid_depth_image", observation.circles.size());
       return publish_debug(debug, color_msg_->header);
     }
 
     const double sx = static_cast<double>(depth.cols) / color.cols;
     const double sy = static_cast<double>(depth.rows) / color.rows;
     std::vector<Detection> detections;
-    for (const auto &circle : find_nut_circles(color, geometry, debug)) {
+    for (const auto &circle : observation.circles) {
       cv::Point2f px(circle[0], circle[1]);
       double z = sample_depth(depth, {px.x * static_cast<float>(sx), px.y * static_cast<float>(sy)});
       if (!valid_depth(z, depth_min_m_, depth_max_m_)) continue;

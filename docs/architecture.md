@@ -62,3 +62,16 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 - 急停、关节状态、工作空间和 TF 检查；
 - 明确的超时与失败状态；
 - 仿真/录包验证后才能连接真实机械臂。
+
+## 二维核心与离线适配（任务一）
+
+`src/lbot_vision/detector_core.cmake` 定义共享 `lbot_vision_detector` 目标，由 ROS package
+和 `tools/offline_detection` 的独立 CMake 工程复用。`detect_2d` 只处理 BGR8 与普通配置结构。
+场景几何、轮廓过滤、Hough fallback、掩膜和候选诊断均在此库中，ROS 节点不再保留第二份算法。
+
+离线入口遵循 `scripts -> apps -> linkerbot/offline.py -> C++ 文件适配 -> 检测核心`。
+Python 只负责配置、路径、构建/子进程和复现记录，不实现识别算法。
+算法参数类型来自同一个字段声明表，数值只维护在中央 YAML；生成 JSON 仅作为运行快照。
+
+二维结果不依赖篮筐存在、深度或 CameraInfo；三维与 TF 留在 ROS adapter，已有 CameraGeometry
+不变。跨帧身份和任务执行状态不属于此次二维解耦。详细边界见 [离线识别说明](offline_detection.md)。
