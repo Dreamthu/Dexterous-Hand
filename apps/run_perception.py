@@ -15,7 +15,12 @@ from typing import List
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from linkerbot.runtime import ConfigurationError, camera_command, detector_command  # noqa: E402
+from linkerbot.runtime import (  # noqa: E402
+    ConfigurationError,
+    acquire_camera_lock,
+    camera_command,
+    detector_command,
+)
 
 
 def stop_process(process: subprocess.Popen[bytes], timeout_seconds: float = 8.0) -> None:
@@ -41,6 +46,7 @@ def main() -> int:
     try:
         camera, camera_environment = camera_command(arguments.camera_config)
         detector = detector_command(arguments.vision_config)
+        camera_lock = acquire_camera_lock()
     except ConfigurationError as error:
         parser.error(str(error))
 

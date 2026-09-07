@@ -506,10 +506,41 @@ private:
 
   void process()
   {
-    if (!color_msg_ || !depth_msg_ || !camera_geometry_) return;
-    cv::Mat color, depth;
+    // Keep the debug stream useful even while the depth stream or CameraInfo is
+    // recovering.  Requiring all three inputs before decoding the color frame
+    // leaves rqt with a permanently blank window and hides which input is
+    // missing.
+    if (!color_msg_) return;
+    cv::Mat color;
     try {
       color = cv_bridge::toCvCopy(color_msg_, sensor_msgs::image_encodings::BGR8)->image;
+    } catch (const std::exception &e) {
+      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
+                           "Color image conversion failed: %s", e.what());
+      return;
+    }
+
+    cv::Mat debug;
+    SceneGeometry geometry = find_geometry(color, debug);
+    if (!depth_msg_ || !camera_geometry_) {
+      std::string status;
+      if (!depth_msg_ && !camera_geometry_) {
+        status = "waiting_for_depth_and_camera_info";
+      } else if (!depth_msg_) {
+        status = "waiting_for_depth";
+      } else {
+        status = "waiting_for_camera_info";
+      }
+      publish_status(status, 0);
+      cv::putText(debug, status, {16, 32}, cv::FONT_HERSHEY_SIMPLEX,
+                  0.55, cv::Scalar(0, 0, 0), 4);
+      cv::putText(debug, status, {16, 32}, cv::FONT_HERSHEY_SIMPLEX,
+                  0.55, cv::Scalar(0, 255, 255), 2);
+      return publish_debug(debug, color_msg_->header);
+    }
+
+    cv::Mat depth;
+    try {
       if (depth_msg_->encoding == sensor_msgs::image_encodings::TYPE_16UC1) {
         depth = cv_bridge::toCvCopy(depth_msg_, sensor_msgs::image_encodings::TYPE_16UC1)->image;
       } else {
@@ -526,10 +557,8 @@ private:
         "CameraInfo size %ux%u does not match raw color image %dx%d; refusing invalid projection",
         camera_geometry_->width(), camera_geometry_->height(), color.cols, color.rows);
       publish_status("camera_info_size_mismatch", 0);
-      return;
+      return publish_debug(debug, color_msg_->header);
     }
-    cv::Mat debug;
-    SceneGeometry geometry = find_geometry(color, debug);
     if (geometry.frame.size() < 4) {
       publish_status("frame_not_found", 0);
       return publish_debug(debug, color_msg_->header);

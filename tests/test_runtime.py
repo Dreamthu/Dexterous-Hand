@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
 from linkerbot.runtime import (
+    ConfigurationError,
     REPOSITORY_ROOT,
+    acquire_camera_lock,
     camera_command,
     detector_command,
     load_yaml,
@@ -12,6 +17,19 @@ from linkerbot.runtime import (
 
 
 class RuntimeConfigurationTests(unittest.TestCase):
+    def test_camera_lock_rejects_a_second_entry_point(self) -> None:
+        with tempfile.TemporaryDirectory() as runtime_directory:
+            with patch.dict(os.environ, {"XDG_RUNTIME_DIR": runtime_directory}):
+                first_lock = acquire_camera_lock()
+                self.addCleanup(first_lock.close)
+                with self.assertRaisesRegex(
+                    ConfigurationError, "camera application is already running"
+                ):
+                    acquire_camera_lock()
+                first_lock.close()
+                replacement_lock = acquire_camera_lock()
+                replacement_lock.close()
+
     def test_camera_uses_stable_explicit_profiles(self) -> None:
         command, environment = camera_command()
         self.assertEqual(command[:4], ["ros2", "launch", "orbbec_camera", "gemini2.launch.py"])

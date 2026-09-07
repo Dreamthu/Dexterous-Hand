@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import fcntl
 import os
+import tempfile
 from pathlib import Path
 import sys
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any, Dict, List, Mapping, TextIO, Tuple
 
 import yaml
 
@@ -15,6 +17,29 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 class ConfigurationError(RuntimeError):
     """Raised when repository configuration cannot produce a safe command."""
+
+
+def acquire_camera_lock() -> TextIO:
+    """Prevent multiple application entry points from owning one USB camera."""
+    runtime_directory = Path(os.environ.get("XDG_RUNTIME_DIR", tempfile.gettempdir()))
+    lock_path = runtime_directory / f"linkerbot-camera-{os.getuid()}.lock"
+    lock_file = lock_path.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as error:
+        lock_file.seek(0)
+        owner = lock_file.read().strip()
+        lock_file.close()
+        owner_hint = f" (PID {owner})" if owner else ""
+        raise ConfigurationError(
+            "A camera application is already running"
+            f"{owner_hint}. Stop it before starting another one."
+        ) from error
+    lock_file.seek(0)
+    lock_file.truncate()
+    lock_file.write(str(os.getpid()))
+    lock_file.flush()
+    return lock_file
 
 
 def repository_path(value: str | Path) -> Path:
