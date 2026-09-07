@@ -1,0 +1,12 @@
+# Read the seven actual joint angles while the exposed R8 face is aligned
+# with the printed fixture. Values are URDF joint angles in RADIANS.
+# Null entries deliberately prevent using a made-up robot pose for calibration.
+# For SDK degrees: radians = degrees * pi / 180; also verify SDK zero/sign mapping.
+joint_positions_rad:
+  arm_right_R1_Joint: null
+  arm_right_R2_Joint: null
+  arm_right_R3_Joint: null
+  arm_right_R4_Joint: null
+  arm_right_R5_Joint: null
+  arm_right_R6_Joint: null
+  arm_right_R7_Joint: null

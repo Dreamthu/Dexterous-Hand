@@ -1,3 +1,6 @@
+# Reference-only parameters for src/lbot_vision/experimental/nut_task_node.cpp.
+# This node is not built. The placeholder poses below must never be used on a
+# real robot without calibration, workspace checks, and an execution interlock.
 nut_task_node:
   ros__parameters:
     color_topic: /camera/color/image_raw

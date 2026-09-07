@@ -1,0 +1,5 @@
+viewer:
+  package: rqt_image_view
+  executable: rqt_image_view
+  # Open the live color stream immediately. Override with --topic when needed.
+  topic: /camera/color/image_raw

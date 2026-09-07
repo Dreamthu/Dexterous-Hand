@@ -1,0 +1,55 @@
+driver:
+  package: orbbec_camera
+  launch_file: gemini2.launch.py
+  log_directory: artifacts/logs/orbbec
+
+# Explicit dimensions and frame rates bound USB bandwidth in WSL. Let the
+# Gemini 2 firmware choose its native depth format; the ROS output is 16UC1.
+# Intrinsics, distortion, and color-depth registration always come from the
+# camera firmware through the Orbbec driver; this repository does not override them.
+parameters:
+  camera_name: camera
+  uvc_backend: libuvc
+  enable_color: true
+  color_width: 640
+  color_height: 360
+  color_fps: 15
+  color_format: MJPG
+  enable_depth: true
+  depth_width: 640
+  depth_height: 400
+  depth_fps: 15
+  depth_format: ANY
+  enable_ir: false
+  # OrbbecSDK_ROS2 v2-main publishes /camera/gyro_accel/sample when the
+  # synchronized output is enabled. Orientation is intentionally unavailable.
+  enable_accel: true
+  accel_rate: 100hz
+  accel_range: 4g
+  enable_gyro: true
+  gyro_rate: 100hz
+  gyro_range: 1000dps
+  enable_sync_output_accel_gyro: true
+  linear_accel_cov: 0.01
+  angular_vel_cov: 0.01
+  depth_registration: true
+  align_mode: HW
+  # Frame sync intermittently leaves the depth stream in STARTING under WSL USBIP.
+  enable_frame_sync: false
+  # Keep RGB-D and synchronized IMU stamps in ROS's realtime/global clock.
+  # The SDK's separate accel/gyro mode uses device timestamps and is not a
+  # timestamp-compatible fallback for image-conditioned calibration.
+  time_domain: global
+  timestamp_clock_type: realtime
+  enable_point_cloud: false
+  enable_colored_point_cloud: false
+  # Keep the raw color stream. lbot_vision uses CameraInfo K and D to correct
+  # detected pixels before 3-D back-projection without breaking depth alignment.
+  enable_color_undistortion: false
+  publish_tf: true
+
+imu:
+  topic: /camera/gyro_accel/sample
+  frame_id: camera_accel_gyro_optical_frame
+  message_type: sensor_msgs/msg/Imu
+  orientation_available: false

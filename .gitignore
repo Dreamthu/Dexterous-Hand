@@ -1,7 +1,7 @@
-# ROS2/colcon generated files
-build/
-install/
-log/
+# ROS 2 / colcon output
+/build/
+/install/
+/log/
 orbbec_ws/build/
 orbbec_ws/install/
 orbbec_ws/install2/
@@ -9,10 +9,29 @@ orbbec_ws/log/
 orbbec_ws/log2/
 orbbec_ws/runtime_logs/
 
-# External OrbbecSDK_ROS2 checkout; clone v2-main separately when building the camera overlay.
+# External OrbbecSDK_ROS2 checkout; clone it separately when building the camera overlay.
 orbbec_ws/src/OrbbecSDK_ROS2/
 
-# Local/editor metadata
+# Runtime artifacts and external-calibration captures
+/artifacts/logs/
+/artifacts/calibration/*
+!/artifacts/calibration/extrinsics/
+/artifacts/calibration/extrinsics/*
+!/artifacts/calibration/extrinsics/.gitkeep
+
+# Python and editor caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
 .marscode/
 .agents/
 .codex/
+
+# Local overrides and crash output
+config/*.local.env
+*.core
+core.*
