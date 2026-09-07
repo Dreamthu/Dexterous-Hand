@@ -14,7 +14,7 @@ apps/*.py                 应用生命周期、进程编排
     ▼
 linkerbot/runtime.py      ROS 命令与配置适配边界
     │
-    ├── orbbec_ws         外部相机驱动
+    ├── OrbbecSDK_ROS2    外部相机驱动
     └── lbot_vision       仓库内 ROS 感知适配包
             │
             ▼
@@ -35,7 +35,7 @@ CameraInfo URL 转换等细节集中在内部适配层。
 
 ## 外部库
 
-`../orbbec_ws` 和 `../Dexterous-Hand` 不属于本仓库，也不会由运行脚本更新、拉取或修改。
+`../OrbbecSDK_ROS2` 和外部机器人 SDK 不属于本仓库，也不会由运行脚本更新、拉取或修改。
 构建脚本只读取 `Dexterous-Hand/src/lbot_arm_interfaces` 并把生成物写入本仓库自己的
 `build/install/log`。
 

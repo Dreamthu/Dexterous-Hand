@@ -1,0 +1,75 @@
+# Fixed Gemini2 on the torso. All lengths are metres; angles are degrees.
+frames:
+  base: base_torso_root
+  optical: camera_color_optical_frame
+  camera_root: camera_link
+  flange: arm_right_R8_Link
+
+topics:
+  color: /camera/color/image_raw
+  camera_info: /camera/color/camera_info
+
+board:
+  dictionary: DICT_6X6_250
+  columns: 3
+  rows: 3
+  marker_length_m: 0.040
+  marker_separation_m: 0.010
+  first_id: 0
+
+# R8's hand-facing plane is z=0, outward normal -Z. Lay that face directly
+# on the printed face, +X8 to page right, +Y8 up the page. The side tab and
+# flange outline distinguish the 180-degree ambiguity of four collinear holes.
+# Grid origin: outer bottom-left, at page (35, 185) mm for this layout.
+fixture:
+  source_mesh_path: assets/components/arms/lkls73_arm/variants/right/meshes/R8_Link.STL
+  source_mesh_sha256: ab9a24b4a90dcdaf88688e63ca9dfd9baf55b3170ef19a2547feb0d7f39eed97
+  contact_z_in_flange_m: 0.0
+  # Shifted toward the right/bottom paper edge so the docking holes are easy
+  # to reach while the ArUco grid remains in its quiet upper area.
+  flange_origin_in_board_m: [0.065, -0.065, 0.0]
+  flange_yaw_in_board_deg: 0.0
+  hole_diameter_m: 0.0035
+  holes_in_flange_m:
+    - [0.079970359, -0.022605121, 0.0]
+    - [0.079986787, -0.010105133, 0.0]
+    - [0.080013073, 0.009894850, 0.0]
+    - [0.080029502, 0.022394839, 0.0]
+  # Conservative outline of the side tab used to disambiguate its direction.
+  outline_in_flange_m:
+    - [0.050, -0.030, 0.0]
+    - [0.090, -0.030, 0.0]
+    - [0.090, 0.030, 0.0]
+    - [0.050, 0.030, 0.0]
+
+robot:
+  urdf: assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf
+
+quality:
+  min_markers: 6
+  min_marker_side_px: 25.0
+  max_reprojection_rms_px: 0.8
+  # Reject near-tied planar pose solutions with materially different rotations.
+  ambiguity_error_margin_px: 0.10
+  ambiguity_angle_deg: 3.0
+  stable_samples: 25
+  max_translation_spread_m: 0.003
+  max_rotation_spread_deg: 1.0
+  max_image_age_s: 1.0
+  capture_timeout_s: 120.0
+
+# Opt-in via capture --with-imu or solve --imu-file. These conservative
+# thresholds require validation with the actual device before being tuned.
+# Reads topic/frame from the camera config; never consumes its orientation.
+imu:
+  camera_config: config/camera/gemini2.yaml
+  window_s: 1.0
+  min_samples: 50
+  max_gap_s: 0.10
+  gravity_m_s2: 9.80665
+  max_accel_norm_error_m_s2: 0.6
+  max_accel_std_m_s2: 0.15
+  max_gyro_norm_rad_s: 0.035
+  max_samples: 10000
+
+output_directory: artifacts/calibration/extrinsics

@@ -175,3 +175,10 @@ def calibration_command(
         "--output-dir",
         str(output_directory),
     ]
+
+
+def extrinsic_calibration_command(arguments: List[str]) -> List[str]:
+    script = REPOSITORY_ROOT / "tools/camera_calibration/calibrate_extrinsics.py"
+    if not script.is_file():
+        raise ConfigurationError(f"Extrinsic calibration tool does not exist: {script}")
+    return [sys.executable, str(script), *arguments]

@@ -9,7 +9,7 @@
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库：比赛代码、配置、工具和入口
-├── orbbec_ws/          # 静态外部相机 SDK/已编译工作区
+├── OrbbecSDK_ROS2/     # 静态外部相机 SDK/已编译工作区
 └── Dexterous-Hand/     # 静态外部机器人 SDK，不再包含 lbot_vision（主办方提供的SDK）
 ```
 
@@ -76,6 +76,10 @@ cd linkerbot_ws
 ```bash
 ./scripts/calibrate_camera.sh
 ```
+
+躯干固定 Gemini2 的 R8 定位板外参标定、A4 打印和离线求解见
+[`docs/camera_extrinsic_calibration.md`](docs/camera_extrinsic_calibration.md)。入口为
+`./scripts/calibrate_extrinsics.sh`，默认不发送机械臂运动命令。
 
 运行仓库自检：
 

@@ -20,7 +20,11 @@ class RuntimeConfigurationTests(unittest.TestCase):
         self.assertIn("depth_height:=400", command)
         self.assertIn("depth_format:=ANY", command)
         self.assertIn("enable_frame_sync:=false", command)
-        self.assertIn("enable_sync_output_accel_gyro:=false", command)
+        self.assertIn("enable_accel:=true", command)
+        self.assertIn("enable_gyro:=true", command)
+        self.assertIn("enable_sync_output_accel_gyro:=true", command)
+        self.assertEqual(load_yaml("config/camera/gemini2.yaml")["imu"]["topic"],
+                         "/camera/gyro_accel/sample")
         self.assertIn("ROS_LOG_DIR", environment)
 
     def test_detector_is_direct_executable_with_central_config(self) -> None:

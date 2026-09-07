@@ -9,12 +9,12 @@
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库
-├── orbbec_ws/          # 静态外部相机依赖
+├── OrbbecSDK_ROS2/     # 静态外部相机依赖
 └── Dexterous-Hand/     # 静态外部机器人依赖
 ```
 
 - 日常功能开发只修改 `linkerbot_ws`。
-- `orbbec_ws` 和 `Dexterous-Hand` 视为只读依赖；运行、构建和测试脚本不得自动拉取、
+- `OrbbecSDK_ROS2` 和外部机器人 SDK 视为只读依赖；运行、构建和测试脚本不得自动拉取、
   更新或修改它们。
 - 外部依赖版本变化必须单独验证，并更新 `docs/provenance.md`。
 - 不得把外部仓库复制进 `linkerbot_ws/src`，也不得提交它们的构建产物。
