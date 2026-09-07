@@ -3,10 +3,12 @@
 /install/
 /log/
 
-# Runtime artifacts and local calibration captures
+# Runtime artifacts and external-calibration captures
 /artifacts/logs/
 /artifacts/calibration/*
-!/artifacts/calibration/.gitkeep
+!/artifacts/calibration/extrinsics/
+/artifacts/calibration/extrinsics/*
+!/artifacts/calibration/extrinsics/.gitkeep
 
 # Python/editor caches
 __pycache__/

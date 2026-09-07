@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
+import sys
 from typing import Any, Dict, List, Mapping, Tuple
 
 import yaml
@@ -126,55 +126,6 @@ def viewer_command(
     if selected_topic:
         command.append(selected_topic)
     return command
-
-
-def calibration_command(
-    config_path: str | Path = "config/calibration/chessboard.yaml",
-) -> List[str]:
-    config = load_yaml(config_path)
-    board = required_mapping(config, "board")
-    capture = required_mapping(config, "capture")
-    script = REPOSITORY_ROOT / "tools/camera_calibration/calibrate_camera.py"
-    if not script.is_file():
-        raise ConfigurationError(f"Calibration tool does not exist: {script}")
-
-    required_values = {
-        "topic": config.get("topic"),
-        "camera_name": config.get("camera_name"),
-        "squares_x": board.get("squares_x"),
-        "squares_y": board.get("squares_y"),
-        "square_size_mm": board.get("square_size_mm"),
-        "min_samples": capture.get("min_samples"),
-        "min_board_area_ratio": capture.get("min_board_area_ratio"),
-        "output_directory": capture.get("output_directory"),
-    }
-    missing = [name for name, value in required_values.items() if value is None]
-    if missing:
-        raise ConfigurationError(
-            "Missing calibration configuration values: " + ", ".join(missing)
-        )
-
-    output_directory = repository_path(str(required_values["output_directory"]))
-    return [
-        sys.executable,
-        str(script),
-        "--topic",
-        str(required_values["topic"]),
-        "--camera-name",
-        str(required_values["camera_name"]),
-        "--squares-x",
-        str(required_values["squares_x"]),
-        "--squares-y",
-        str(required_values["squares_y"]),
-        "--square-size-mm",
-        str(required_values["square_size_mm"]),
-        "--min-samples",
-        str(required_values["min_samples"]),
-        "--min-board-area-ratio",
-        str(required_values["min_board_area_ratio"]),
-        "--output-dir",
-        str(output_directory),
-    ]
 
 
 def extrinsic_calibration_command(arguments: List[str]) -> List[str]:

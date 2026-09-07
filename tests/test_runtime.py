@@ -4,7 +4,6 @@ import unittest
 
 from linkerbot.runtime import (
     REPOSITORY_ROOT,
-    calibration_command,
     camera_command,
     detector_command,
     load_yaml,
@@ -27,6 +26,18 @@ class RuntimeConfigurationTests(unittest.TestCase):
                          "/camera/gyro_accel/sample")
         self.assertIn("ROS_LOG_DIR", environment)
 
+    def test_factory_intrinsics_have_no_local_override_path(self) -> None:
+        obsolete_paths = (
+            "apps/run_calibration.py",
+            "apps/run_calibration_session.py",
+            "config/calibration/chessboard.yaml",
+            "scripts/calibrate_camera.sh",
+            "tools/camera_calibration/calibrate_camera.py",
+        )
+        for relative_path in obsolete_paths:
+            with self.subTest(relative_path=relative_path):
+                self.assertFalse((REPOSITORY_ROOT / relative_path).exists())
+
     def test_detector_is_direct_executable_with_central_config(self) -> None:
         command = detector_command(require_built=False)
         self.assertTrue(command[0].endswith("/lbot_vision/nut_detector_node"))
@@ -37,14 +48,6 @@ class RuntimeConfigurationTests(unittest.TestCase):
         command = viewer_command()
         self.assertTrue(command[0].endswith("/lib/rqt_image_view/rqt_image_view"))
         self.assertEqual(command[1], "/camera/color/image_raw")
-
-    def test_calibration_uses_board_configuration(self) -> None:
-        command = calibration_command()
-        self.assertIn("--squares-x", command)
-        self.assertEqual(command[command.index("--squares-x") + 1], "11")
-        self.assertEqual(command[command.index("--squares-y") + 1], "8")
-        self.assertEqual(command[command.index("--square-size-mm") + 1], "15.0")
-        self.assertEqual(command[command.index("--min-board-area-ratio") + 1], "0.05")
 
     def test_configuration_has_one_central_source(self) -> None:
         config_files = sorted((REPOSITORY_ROOT / "config").rglob("*.yaml"))

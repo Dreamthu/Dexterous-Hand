@@ -71,12 +71,6 @@ cd linkerbot_ws
 ./scripts/show_camera.sh --topic /nut_detection/debug_image
 ```
 
-一条命令启动相机并执行内参标定；退出标定后相机会自动停止：
-
-```bash
-./scripts/calibrate_camera.sh
-```
-
 躯干固定 Gemini2 的 R8 定位板外参标定、A4 打印和离线求解见
 [`docs/camera_extrinsic_calibration.md`](docs/camera_extrinsic_calibration.md)。入口为
 `./scripts/calibrate_extrinsics.sh`，默认不发送机械臂运动命令。
@@ -96,11 +90,8 @@ cd linkerbot_ws
 - `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
-- `config/calibration/chessboard.yaml`：棋盘尺寸、采样数和结果目录。
-- `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
+- `- `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
 
-接受新的内参后，在 `config/camera/gemini2.yaml` 中填写相对于仓库根目录的
-`color_info_file`。相机适配层会自动转换为 ROS 所需的 `file://` URL。
 
 ## 安全边界
 

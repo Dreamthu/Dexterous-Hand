@@ -55,8 +55,14 @@ joint_positions_rad:
   --imu-file /path/to/imu_samples.yaml --image-stamp-ns <rgb_stamp>
 ```
 
-`<rgb_stamp>` 必须是图像原始时间戳；程序默认检查其之前配置的 1 秒窗口。录包裁剪场景
-可以改用 `--imu-start-stamp-ns` 和 `--imu-end-stamp-ns`。
+`<rgb_stamp>` 必须是图像原始时间戳；程序会检查以该时间为结束点、按配置回看的 1 秒窗口。
+如需单独检查任意 IMU 时间段，可使用 `check-imu` 子命令：
+
+```bash
+./scripts/calibrate_extrinsics.sh check-imu \
+  --imu-file /path/to/imu_samples.yaml \
+  --start-stamp-ns <start> --end-stamp-ns <end>
+```
 
 程序会检查标签尺寸、PnP 重投影误差、正深度、URDF 关节限位和 R8 网格 SHA-256，结果写入
 `extrinsics.yaml`。核心变换为：

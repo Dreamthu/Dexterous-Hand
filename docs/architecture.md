@@ -18,11 +18,11 @@ linkerbot/runtime.py      ROS 命令与配置适配边界
     └── lbot_vision       仓库内 ROS 感知适配包
             │
             ▼
-       图像/深度识别逻辑
+       CameraInfo 适配 -> 纯相机几何 -> 图像/深度识别逻辑
 ```
 
-用户只依赖 `scripts/` 的稳定入口。ROS package 名、节点可执行文件路径、参数文件路径、
-CameraInfo URL 转换等细节集中在内部适配层。
+用户只依赖 `scripts/` 的稳定入口。ROS package 名、节点可执行文件路径和参数文件路径等
+细节集中在内部适配层。
 
 ## 依赖方向
 
@@ -32,6 +32,16 @@ CameraInfo URL 转换等细节集中在内部适配层。
 4. `linkerbot_control` 只能通过一个机器人适配类访问 `lbot_arm_interfaces`，任务状态机
    不直接创建 ROS service client。
 5. `apps/` 只负责组合组件和清理进程，不实现识别或运动算法。
+
+## 相机几何数据流
+
+Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变，并发布彩色
+`CameraInfo`。`nut_detector_node` 是 ROS adapter：它把 `K`、`D`、畸变模型和图像尺寸
+转换为不依赖 ROS 的 `lbot_vision::CameraGeometry`。所有原始像素的三维反投影和米制
+半径估算都经过该模块去畸变。
+
+深度注册由驱动使用设备内部的彩色—深度外参完成。相机到机器人或现场的外参不属于
+设备出厂参数，未来由独立工具求解并通过 TF 接入。两者不得放入同一配置文件或相互覆盖。
 
 ## 外部库
 
