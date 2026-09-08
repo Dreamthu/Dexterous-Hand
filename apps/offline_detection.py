@@ -45,7 +45,7 @@ def main() -> int:
         if args.action == "build":
             build(config)
         elif args.action == "test":
-            run_command([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_offline.py", "-v"], cwd=ROOT)
+            run_command([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_offline*.py", "-v"], cwd=ROOT)
             if not (config["build_directory"] / "CTestTestfile.cmake").is_file():
                 raise ConfigurationError("C++ tests not built; run scripts/build_offline.sh (or .ps1) first")
             run_command(["ctest", "--test-dir", str(config["build_directory"]), "-C", "Release", "--output-on-failure", "--no-tests=error"])

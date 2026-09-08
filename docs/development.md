@@ -49,3 +49,12 @@ bash scripts/test_offline.sh
 `NutSequence` 必须保持 ROS-free，并通过 `nut_sequence_test` 验证。任何阶段推进都只能来自
 带 session/round/event_sequence 的显式事件；禁止使用检测数量、目标消失或超时自动写入
 `completed`。修改接口后，现场还必须完成 ROS Jazzy 的 rosidl 构建和话题/service 联调。
+
+## 主分支整合检查
+
+相机锁只属于实际 ROS 相机入口，不得再通过公共 runtime 导入污染 Windows 离线工具。
+离线测试入口现在包含 `test_offline*.py`，其中源码接线测试和模拟后端测试不能代替真实 ROS
+构建或 Linux 锁互斥验证。环境覆盖只写入被忽略的 `config/workspace.local.env`。
+
+本次整合的实际结果、已知环境阻塞和启用 C++ 测试的 ROS 验收步骤见
+[2026-09-08 整合记录](integration_20260908.md)。

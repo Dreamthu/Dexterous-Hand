@@ -9,6 +9,11 @@ export LINKERBOT_ROOT
 set -a
 # shellcheck source=/dev/null
 source "${LINKERBOT_ROOT}/config/workspace.env"
+# Machine-specific paths belong in the ignored override, never shared defaults.
+if [[ -f "${LINKERBOT_ROOT}/config/workspace.local.env" ]]; then
+  # shellcheck source=/dev/null
+  source "${LINKERBOT_ROOT}/config/workspace.local.env"
+fi
 set +a
 
 linkerbot_resolve_path() {

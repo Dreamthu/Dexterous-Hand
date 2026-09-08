@@ -5,12 +5,12 @@
 
 ## 目录关系
 
-无论三个目录位于哪一个父目录，都必须保持如下同级关系：
+默认配置使用以下同级目录；实际目录名可通过本地配置覆盖：
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库：比赛代码、配置、工具和入口
-├── orbbec_ws/          # 静态外部相机 SDK/已编译工作区
-└── Dexterous-Hand/     # 静态外部机器人 SDK，不再包含 lbot_vision（主办方提供的SDK）
+├── OrbbecSDK_ROS2/     # 静态外部相机 SDK/已编译工作区
+└── lbot_ws/            # 静态外部机器人 SDK/工作区，包含 src/lbot_arm_interfaces
 ```
 
 仓库内部：
@@ -29,12 +29,24 @@ linkerbot_ws/
 ├── linkerbot/          # 可复用的运行时适配代码
 ├── scripts/            # 用户直接执行的稳定命令
 ├── src/lbot_vision/    # ROS 感知适配包
-├── tools/              # 独立工具；当前仅预留外参工具边界
+├── tools/              # 独立开发/标定工具
 ├── tests/              # 配置与入口测试
-└── artifacts/          # 外参产物和运行日志（默认不提交 Git）
+└── artifacts/          # 标定结果和运行日志（默认不提交 Git）
 ```
 
 ## 快速开始
+
+外部路径以 `config/workspace.env` 为默认值。本机目录不同时，新建被 Git 忽略的
+`config/workspace.local.env`，只填写需要覆盖的变量，例如：
+
+```bash
+LINKERBOT_CAMERA_WORKSPACE=../OrbbecSDK_ROS2
+LINKERBOT_ROBOT_WORKSPACE=../Dexterous-Hand
+```
+
+相对路径始终相对本仓库根目录；不要将个人绝对路径提交到共享配置。外部机器人工作区
+必须包含 `src/lbot_arm_interfaces/package.xml`。本仓库自身即使也叫 `Dexterous-Hand`，
+仍不能代替外部机器人 SDK。
 
 首次构建：
 
@@ -71,6 +83,10 @@ cd linkerbot_ws
 ./scripts/show_camera.sh --topic /nut_detection/debug_image
 ```
 
+躯干固定 Gemini2 的 R8 定位板外参标定、A4 打印和离线求解见
+[`docs/camera_extrinsic_calibration.md`](docs/camera_extrinsic_calibration.md)。入口为
+`./scripts/calibrate_extrinsics.sh`，默认不发送机械臂运动命令。
+
 运行仓库自检：
 
 ```bash
@@ -90,7 +106,8 @@ bash scripts/test_offline.sh
 bash scripts/run_detector_offline.sh artifacts/datasets/scene_001.png
 ```
 
-Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测核心，阈值仍只从
+Windows 提供同名 `.ps1` 入口。配置加载、离线检测和 `--help` 不依赖 POSIX 相机锁；
+真实相机入口仍要求 Linux/POSIX 与 ROS，Windows 上会明确拒绝启动。离线和现场 ROS 节点共用 C++ 检测核心，阈值仍只从
 `config/vision/nut_detector.yaml` 读取。原图、配置快照、掩膜、候选拒绝原因和结果写入
 被 Git 忽略的 `artifacts/offline_detection/`。
 
@@ -99,27 +116,17 @@ Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测
 `start/complete/retry/reset` 反馈才推进 3→2→1 阶段，目标消失不会自动判定完成。它不是
 通用空间跟踪器，剩余目标仍按当前像素尺寸重新排序。详见
 [离线识别说明](docs/offline_detection.md)、[螺母顺序身份与状态](docs/nut_sequence.md) 和
-[2026-09-07 交接/提交说明](docs/nut_sequence_changes.md)。
+[2026-09-08 交接/提交说明](docs/nut_sequence_changes.md)。
 
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
-- `config/camera/gemini2.yaml`：相机 profile 和流开关，不覆盖厂内参。
+- `config/camera/gemini2.yaml`：相机 profile、流开关及 IMU 接口；内参来自驱动 CameraInfo。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
 - `config/vision/offline.yaml`：离线构建目录、输出目录和低并发构建设置。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
-- `config/calibration/extrinsics/`：只预留相机安装、机器人和现场相关外参。
 - `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
 
-## 相机标定边界
-
-Gemini 2 的彩色/深度内参、畸变参数以及彩色—深度内部外参均使用设备出厂值。本仓库
-不保存或覆盖这些参数：Orbbec 驱动针对当前 profile 发布 `CameraInfo`，视觉节点同时读取
-其中的 `K`、`D` 和 `distortion_model`。对原始彩色图的检测点先去畸变，再结合已经注册
-到彩色视角的深度反投影，因此不会把原始像素直接套入 `K`。
-
-未来仍需按安装和赛场实际情况求解的相机到机器人、末端工具和现场基准外参，只保留在
-`config/calibration/extrinsics/` 所定义的结构中；在方案确定前不提交占位数值。
 
 ## 安全边界
 
@@ -131,3 +138,6 @@ Gemini 2 的彩色/深度内参、畸变参数以及彩色—深度内部外参�
 继续开发前请阅读 [开发交接规范](HANDOFF.md)。更多信息见
 [架构说明](docs/architecture.md)、[开发约定](docs/development.md)、
 [运行与故障排查](docs/troubleshooting.md) 和 [迁移来源](docs/provenance.md)。
+
+本次 main/branch 整合结果、验证边界和 PR 验收清单见
+[2026-09-08 整合记录](docs/integration_20260908.md)。

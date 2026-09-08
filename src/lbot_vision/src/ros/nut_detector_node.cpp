@@ -343,6 +343,20 @@ private:
     const auto &sequence_snapshot = sequence_->observe(
       stamp_ns / 1000000, observation.frame_found, color.size(), observation.circles);
     publish_sequence_state();  // 2D identity/state remains available without basket/depth/TF.
+    // Keep color-only diagnostics without bypassing fresh-frame checks or 2D
+    // sequence observation. Missing localization inputs must not suppress the
+    // debug image, even before initialization or without a basket.
+    if (!depth_msg_ || !camera_geometry_) {
+      const std::string status = !depth_msg_ && !camera_geometry_ ?
+        "waiting_for_depth_and_camera_info" :
+        (!depth_msg_ ? "waiting_for_depth" : "waiting_for_camera_info");
+      publish_status(status, observation.circles.size());
+      cv::putText(debug, status, {16, 32}, cv::FONT_HERSHEY_SIMPLEX,
+                  0.55, cv::Scalar(0, 0, 0), 4);
+      cv::putText(debug, status, {16, 32}, cv::FONT_HERSHEY_SIMPLEX,
+                  0.55, cv::Scalar(0, 255, 255), 2);
+      return publish_debug(debug, color_msg_->header);
+    }
     if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
       publish_status(sequence_snapshot.status, observation.circles.size());
       return publish_debug(debug, color_msg_->header);
@@ -353,10 +367,6 @@ private:
     }
     if (!observation.basket_found) {
       publish_status("basket_not_found", observation.circles.size());
-      return publish_debug(debug, color_msg_->header);
-    }
-    if (!depth_msg_ || !camera_geometry_) {
-      publish_status("localization_inputs_missing", observation.circles.size());
       return publish_debug(debug, color_msg_->header);
     }
     if (camera_geometry_->width() != static_cast<std::uint32_t>(color.cols) ||

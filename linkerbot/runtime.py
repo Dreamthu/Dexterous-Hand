@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Tuple
+import sys
+from typing import Any, Dict, List, Mapping, TextIO, Tuple
 
 import yaml
 
@@ -14,6 +16,52 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 class ConfigurationError(RuntimeError):
     """Raised when repository configuration cannot produce a safe command."""
+
+
+def acquire_camera_lock() -> TextIO:
+    """Hold the POSIX camera lock; importing offline/config tools stays portable."""
+    if os.name != "posix":
+        raise ConfigurationError(
+            "Live camera applications require Linux/POSIX with ROS. "
+            "Windows supports scripts/build_offline.ps1 and scripts/test_offline.ps1."
+        )
+    # Do not import fcntl at module scope: the ROS-free adapter shares this module.
+    try:
+        import fcntl
+    except ImportError as error:
+        raise ConfigurationError(
+            "Live camera locking requires Python fcntl on Linux/POSIX."
+        ) from error
+
+    runtime_directory = Path(os.environ.get("XDG_RUNTIME_DIR", tempfile.gettempdir()))
+    lock_path = runtime_directory / f"linkerbot-camera-{os.getuid()}.lock"
+    lock_file = None
+    try:
+        lock_file = lock_path.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            lock_file.seek(0)
+            owner = lock_file.read().strip()
+            owner_hint = f" (PID {owner})" if owner else ""
+            raise ConfigurationError(
+                "A camera application is already running"
+                f"{owner_hint}. Stop it before starting another one."
+            ) from error
+        lock_file.seek(0)
+        lock_file.truncate()
+        lock_file.write(str(os.getpid()))
+        lock_file.flush()
+        return lock_file
+    except (OSError, ConfigurationError) as error:
+        if lock_file is not None:
+            lock_file.close()
+        if isinstance(error, ConfigurationError):
+            raise
+        raise ConfigurationError(
+            f"Cannot acquire camera lock at {lock_path}: {error}. "
+            "Check XDG_RUNTIME_DIR and directory permissions."
+        ) from error
 
 
 def repository_path(value: str | Path) -> Path:
@@ -62,6 +110,15 @@ def camera_command(
 
     command = ["ros2", "launch", package, launch_file]
     command.extend(f"{name}:={ros_value(value)}" for name, value in parameters.items())
+
+    color_info_file = config.get("color_info_file")
+    if color_info_file:
+        calibration_path = repository_path(str(color_info_file))
+        if not calibration_path.is_file():
+            raise ConfigurationError(
+                f"Configured color_info_file does not exist: {calibration_path}"
+            )
+        command.append(f"color_info_url:={calibration_path.as_uri()}")
 
     environment = os.environ.copy()
     log_directory = repository_path(str(driver.get("log_directory", "artifacts/logs/orbbec")))
@@ -116,3 +173,10 @@ def viewer_command(
     if selected_topic:
         command.append(selected_topic)
     return command
+
+
+def extrinsic_calibration_command(arguments: List[str]) -> List[str]:
+    script = REPOSITORY_ROOT / "tools/camera_calibration/calibrate_extrinsics.py"
+    if not script.is_file():
+        raise ConfigurationError(f"Extrinsic calibration tool does not exist: {script}")
+    return [sys.executable, str(script), *arguments]

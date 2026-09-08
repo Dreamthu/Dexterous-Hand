@@ -14,7 +14,7 @@ apps/*.py                 应用生命周期、进程编排
     ▼
 linkerbot/runtime.py      ROS 命令与配置适配边界
     │
-    ├── orbbec_ws         外部相机驱动
+    ├── OrbbecSDK_ROS2    外部相机驱动
     └── lbot_vision       仓库内 ROS 感知适配包
             │
             ▼
@@ -41,13 +41,14 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 半径估算都经过该模块去畸变。
 
 深度注册由驱动使用设备内部的彩色—深度外参完成。相机到机器人或现场的外参不属于
-设备出厂参数，未来由独立工具求解并通过 TF 接入。两者不得放入同一配置文件或相互覆盖。
+设备出厂参数，由独立 R8/ArUco 外参工具求解并通过 TF 接入。两者不得放入同一配置文件或相互覆盖。
 
 ## 外部库
 
-`../orbbec_ws` 和 `../Dexterous-Hand` 不属于本仓库，也不会由运行脚本更新、拉取或修改。
-构建脚本只读取 `Dexterous-Hand/src/lbot_arm_interfaces` 并把生成物写入本仓库自己的
-`build/install/log`。
+`../OrbbecSDK_ROS2` 和外部机器人 SDK 不属于本仓库，也不会由运行脚本更新、拉取或修改。
+机器人工作区默认是 `../lbot_ws`，由 `config/workspace.env` 配置；本机差异只写入被忽略的
+`config/workspace.local.env`。构建脚本只读取该工作区的 `src/lbot_arm_interfaces`，并把
+生成物写入本仓库自己的 `build/install/log`。
 
 ## 参数
 
@@ -82,3 +83,13 @@ Python 只负责配置、路径、构建/子进程和复现记录，不实现识
 关联，而是针对固定“大→中→小”任务维护三个固定 ID，并在显式完成反馈后分别验证 3、2、1
 颗剩余目标。检测数量只用于 fail-closed 验证，不能改变任务阶段。ROS adapter 通过结构化消息和
 service 暴露状态；感知节点仍不发送机械臂动作。详细接口见 [螺母顺序身份与状态](nut_sequence.md)。
+
+## 平台边界与缺输入诊断
+
+`runtime.py` 中路径和 YAML 配置工具可在 Windows 使用；POSIX `fcntl` 仅在实际申请
+相机锁时导入。Windows 不会因此失去离线入口，也不会假装支持真实 ROS 相机启动。
+感知进程退出时显式释放相机锁；启动相机的 exec 入口继续保留锁文件描述符。
+
+ROS 节点先检查 RGB 时效、复用二维核心并更新 sequence，再检查深度和 CameraInfo。
+缺少定位输入时发布带 `waiting_for_*` 原因的调试图和无三维位置的二维状态；不能绕过
+稳定帧、阶段反馈或图像时效检查，也不能把缺少定位数据当成抓取成功。

@@ -5,16 +5,18 @@
 
 ## 不可破坏的目录边界
 
-三个目录必须位于同一父目录下：
+默认布局中三个目录位于同一父目录下（目录名可通过本地配置覆盖）：
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库
-├── orbbec_ws/          # 静态外部相机依赖
-└── Dexterous-Hand/     # 静态外部机器人依赖
+├── OrbbecSDK_ROS2/     # 静态外部相机依赖
+└── lbot_ws/            # 静态外部机器人依赖，包含 src/lbot_arm_interfaces
 ```
 
-- 日常功能开发只修改 `linkerbot_ws`。
-- `orbbec_ws` 和 `Dexterous-Hand` 视为只读依赖；运行、构建和测试脚本不得自动拉取、
+- 日常功能开发只修改本比赛仓库（上图以 `linkerbot_ws` 为例）。
+- 实际外部路径以 `config/workspace.env` 和被忽略的 `config/workspace.local.env` 为准；
+  本地覆盖在默认值之后加载，相对路径从本仓库根目录解析。
+- `OrbbecSDK_ROS2` 和外部机器人 SDK 视为只读依赖；运行、构建和测试脚本不得自动拉取、
   更新或修改它们。
 - 外部依赖版本变化必须单独验证，并更新 `docs/provenance.md`。
 - 不得把外部仓库复制进 `linkerbot_ws/src`，也不得提交它们的构建产物。

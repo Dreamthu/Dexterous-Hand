@@ -12,7 +12,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from linkerbot.runtime import ConfigurationError, camera_command  # noqa: E402
+from linkerbot.runtime import (  # noqa: E402
+    ConfigurationError,
+    acquire_camera_lock,
+    camera_command,
+)
 
 
 def main() -> int:
@@ -27,6 +31,13 @@ def main() -> int:
     if arguments.dry_run:
         print(shlex.join(command))
         return 0
+    try:
+        camera_lock = acquire_camera_lock()
+    except ConfigurationError as error:
+        parser.error(str(error))
+    # run_camera replaces this process with ros2; keep the lock descriptor open
+    # across exec so it remains held for the complete launch lifetime.
+    os.set_inheritable(camera_lock.fileno(), True)
     os.execvpe(command[0], command, environment)
     return 127
 
