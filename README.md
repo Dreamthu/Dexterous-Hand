@@ -1,6 +1,6 @@
 # LinkerBot Competition Workspace
 
-这是比赛开发主仓库。相机 SDK 与机器人 SDK 保持在仓库外部，业务代码只依赖它们的稳定接口；日常运行统一通过 `scripts/`，无需手工拼接 ROS 参数。
+这是比赛开发主仓库。相机 SDK 与机器人 SDK 保持在仓库外部，业务代码只依赖它们的稳定接口；相机/感知可使用 `scripts/`，机械臂运动和完整任务统一通过 ROS 2 `launch` 启动。
 
 ## 目录关系
 
@@ -114,16 +114,18 @@ ros2 launch lbot_driver lbot_start_driver.launch.py
 
 默认机器人 IP 为 `192.168.10.21`，默认命名空间为 `/robot1`。关节单位为弧度（`rad`），位置单位为米（`m`）。
 
-配置检查和机械臂路线运行统一使用 launch；默认只检查、不运动：
+配置检查、机械臂路线和完整任务运行统一使用 ROS 2 launch；默认只检查、不运动：
 
 ```bash
 ros2 launch lbot_control lbot_start_control.launch.py
 ros2 launch lbot_control lbot_start_control.launch.py mode:=enter execute_motion:=true
+# 视觉已接入的完整任务入口（execute_task 默认 false）
+ros2 launch lbot_control lbot_task.launch.py start_driver:=true execute_task:=true
 ```
 
 ## 安全边界
 
-当前默认运行路径只启动相机和视觉识别，不发送机械臂运动命令。旧的 `nut_task_node.cpp` 位于 `src/lbot_vision/experimental/`，其中包含占位姿态和坐标，不会被构建或作为比赛运行入口。正式运动控制器应通过独立机器人适配层接入，并默认保持执行开关关闭。
+旧的 `nut_task_node.cpp` 位于 `src/lbot_vision/experimental/`，其中包含占位姿态和坐标，不会被构建或作为比赛运行入口。正式运动控制器为 `lbot_control/nut_task_controller`，通过 `RosVisionSystem` 消费视觉结果，并默认保持 `execute_task` 关闭。
 
 运动前确认急停未触发、机械臂已使能、工作区无人；首次运行应使用低速和小幅度动作。
 

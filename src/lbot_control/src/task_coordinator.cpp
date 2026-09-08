@@ -62,6 +62,8 @@ MotionResult TaskCoordinator::step()
       // Keep placement, the camera check, and the return to above-table in one
       // coordinator action.  The camera observes while the arm is still at
       // the slot retreat pose, before that final joint motion can occlude it.
+      const auto started = vision_->start_target(state_machine_.active_size());
+      if (!started.success) return fail("vision start failed: " + started.message, true);
       const auto placed = motion_->execute(MotionStage::PickAndPlace, target);
       if (!placed.success) {
         return fail(

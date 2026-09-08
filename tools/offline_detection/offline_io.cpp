@@ -64,6 +64,23 @@ void write_result(const Detection2D &result, const cv::Size &size, const std::st
   file << "hough_fallback_enabled" << int(result.hough_fallback_enabled);
   file << "localization_valid" << 0 << "localization_reason" << "offline_2d_only";
   file << "frame_contour"; points(file, result.geometry.frame);
+  file << "frame_candidates" << "[";
+  for (const auto &candidate : result.frame_candidates) {
+    file << "{" << "area" << candidate.area
+         << "bounding_rect" << "[" << candidate.bounding_rect.x << candidate.bounding_rect.y
+         << candidate.bounding_rect.width << candidate.bounding_rect.height << "]"
+         << "vertex_count" << candidate.vertex_count
+         << "aspect_ratio" << candidate.aspect_ratio
+         << "fill_ratio" << candidate.fill_ratio
+         << "mean_gray" << candidate.mean_gray
+         << "score" << candidate.score
+         << "hull_stabilized" << int(candidate.hull_stabilized)
+         << "accepted" << int(candidate.accepted)
+         << "reason" << candidate.reason << "contour";
+    points(file, candidate.contour);
+    file << "}";
+  }
+  file << "]";
   file << "basket_contour"; points(file, result.geometry.basket);
   file << "slot_estimates_px" << "[";
   for (const auto &p : result.geometry.slots) file << "[" << p.x << p.y << "]";

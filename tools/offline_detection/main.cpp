@@ -26,7 +26,10 @@ int main(int argc, char **argv)
         throw std::runtime_error("Cannot write debug image: " + name);
     };
     save("annotated", result.annotated);
+    save("value_channel", result.value_channel);
+    save("black_mask_before_close", result.black_mask_before_close);
     save("black_mask", result.black_mask);
+    save("frame_candidates", result.frame_candidate_debug);
     save("blue_mask", result.blue_mask);
     save("roi_mask", result.roi_mask);
     save("adaptive_mask", result.adaptive_mask);
@@ -40,6 +43,19 @@ int main(int argc, char **argv)
                   cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0, 165, 255), 1);
     }
     save("rejected", rejected);
+    if (result.black_frame_debug_enabled) {
+      for (const auto &candidate : result.frame_candidates) {
+        if (!candidate.accepted) continue;
+        std::cout << "frame area=" << candidate.area
+                  << " bounding_rect=[" << candidate.bounding_rect.x << ','
+                  << candidate.bounding_rect.y << ',' << candidate.bounding_rect.width << ','
+                  << candidate.bounding_rect.height << "] vertices=" << candidate.vertex_count
+                  << " aspect_ratio=" << candidate.aspect_ratio
+                  << " fill_ratio=" << candidate.fill_ratio
+                  << " mean_gray=" << candidate.mean_gray
+                  << " score=" << candidate.score << '\n';
+      }
+    }
     std::cout << "OpenCV " << CV_VERSION << "; selected=" << result.circles.size() << '\n';
     return 0;
   } catch (const std::exception &error) {

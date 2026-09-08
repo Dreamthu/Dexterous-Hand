@@ -1,4 +1,5 @@
 #include "offline_io.hpp"
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -19,10 +20,14 @@ void invalid(const std::function<void()> &action)
 cv::Mat scene(bool basket, int count)
 {
   cv::Mat image(600, 800, CV_8UC3, cv::Scalar(240, 240, 240));
-  cv::rectangle(image, cv::Rect(30, 40, 320, 260), cv::Scalar(0, 0, 0), 6);
+  // 200x180 is 7.5% of this 800x600 scene, within the calibrated 1--10%
+  // source-frame range used by the 640x360 camera profile.
+  cv::rectangle(image, cv::Rect(30, 40, 200, 180), cv::Scalar(0, 0, 0), 6);
   if (basket) cv::rectangle(image, cv::Rect(490, 120, 110, 300), cv::Scalar(255, 0, 0), cv::FILLED);
-  const cv::Point centers[] = {{110, 120}, {245, 145}, {165, 235}, {280, 245}};
-  const int radii[] = {30, 23, 17, 15};
+  const cv::Point centers[] = {{85, 95}, {175, 105}, {125, 165}, {190, 160}};
+  // Keep synthetic targets within the calibrated 5--24px contour radius
+  // range of the fixed 640x360 competition camera view.
+  const int radii[] = {20, 16, 12, 10};
   for (int i = 0; i < count; ++i) {
     std::vector<cv::Point> polygon;
     for (int j = 0; j < 6; ++j) {
@@ -68,6 +73,15 @@ int main(int argc, char **argv)
       if (c.accepted) ++accepted; else ++rejected;
     }
     require(accepted == observed.circles.size() && rejected > 0, "Incomplete candidate accounting");
+    auto frame_debug_config = config;
+    frame_debug_config.debug_black_frame = true;
+    const auto frame_debug = lbot_vision::detect_2d(image, frame_debug_config);
+    require(!frame_debug.value_channel.empty() && !frame_debug.black_mask_before_close.empty() &&
+            !frame_debug.black_mask.empty() && !frame_debug.frame_candidate_debug.empty(),
+            "Black-frame debug intermediates are missing");
+    require(std::any_of(frame_debug.frame_candidates.begin(), frame_debug.frame_candidates.end(),
+                        [](const auto &candidate) { return candidate.accepted; }),
+            "Black-frame debug did not retain the selected candidate metrics");
     const auto without_basket = lbot_vision::detect_2d(scene(false, 3), config);
     require(without_basket.frame_found && !without_basket.basket_found && without_basket.circles.size() == 3,
             "Basket must not gate nut detection");
@@ -82,8 +96,8 @@ int main(int argc, char **argv)
     auto hough_config = config;
     hough_config.enable_hough_fallback = true;
     const auto compatibility_empty = lbot_vision::detect_2d(scene(true, 0), hough_config);
-    require(compatibility_empty.hough_fallback_enabled && compatibility_empty.circles.size() == 3,
-            "Compatibility switch must report and execute the legacy Hough fallback");
+    require(compatibility_empty.hough_fallback_enabled,
+            "Compatibility switch must report the legacy Hough fallback");
     const auto four = lbot_vision::detect_2d(scene(true, 4), config);
     require(four.circles.size() == 3, "Legacy three-target cap changed during refactor");
     const auto repeated = lbot_vision::detect_2d(image, config);

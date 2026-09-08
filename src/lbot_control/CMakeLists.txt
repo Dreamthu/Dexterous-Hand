@@ -11,7 +11,9 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(lbot_motion REQUIRED)
+find_package(lbot_vision REQUIRED)
 
 # The task library is deliberately ROS-free. It owns task order and plan
 # construction, but cannot send a robot command.
@@ -37,10 +39,24 @@ target_include_directories(lbot_control_ros_motion_system
 target_link_libraries(lbot_control_ros_motion_system lbot_control_core)
 ament_target_dependencies(lbot_control_ros_motion_system rclcpp lbot_motion)
 
+add_library(lbot_control_ros_vision_system SHARED
+  src/ros_vision_system.cpp)
+target_include_directories(lbot_control_ros_vision_system
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(lbot_control_ros_vision_system rclcpp geometry_msgs lbot_vision)
+
 add_executable(motion_bringup_node src/motion_bringup_node.cpp)
 target_link_libraries(
   motion_bringup_node lbot_control_core lbot_control_ros_motion_system)
 ament_target_dependencies(motion_bringup_node rclcpp lbot_motion)
+
+add_executable(nut_task_controller src/nut_task_controller.cpp)
+target_link_libraries(
+  nut_task_controller lbot_control_core lbot_control_ros_motion_system
+  lbot_control_ros_vision_system)
+ament_target_dependencies(nut_task_controller rclcpp lbot_motion lbot_vision)
 
 if(BUILD_TESTING)
   enable_testing()
@@ -62,13 +78,14 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  TARGETS lbot_control_core lbot_control_ros_motion_system
+  TARGETS lbot_control_core lbot_control_ros_motion_system lbot_control_ros_vision_system
   EXPORT export_lbot_control
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 install(TARGETS motion_bringup_node DESTINATION lib/${PROJECT_NAME})
+install(TARGETS nut_task_controller DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 install(
   DIRECTORY launch
@@ -81,5 +98,5 @@ install(FILES README.md DESTINATION share/${PROJECT_NAME})
 
 ament_export_targets(export_lbot_control HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
-ament_export_dependencies(rclcpp lbot_motion)
+ament_export_dependencies(rclcpp lbot_motion lbot_vision)
 ament_package()

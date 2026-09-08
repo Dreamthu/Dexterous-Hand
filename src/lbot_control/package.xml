@@ -9,7 +9,9 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
   <depend>lbot_motion</depend>
+  <depend>lbot_vision</depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>lbot_driver</exec_depend>

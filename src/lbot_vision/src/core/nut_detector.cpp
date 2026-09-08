@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include <opencv2/imgproc.hpp>
 
 namespace lbot_vision {
@@ -44,9 +45,16 @@ void DetectorConfig::validate() const
           "adaptive_block_size must be odd, 3..4095");
   require(blackhat_kernel_size >= 3 && blackhat_kernel_size <= 4095 && blackhat_kernel_size % 2 == 1,
           "blackhat_kernel_size must be odd, 3..4095");
+  require(nut_mask_close_kernel_size >= 1 && nut_mask_close_kernel_size <= 255 &&
+          nut_mask_close_kernel_size % 2 == 1,
+          "nut_mask_close_kernel_size must be odd, 1..255");
+  require(nut_mask_open_kernel_size >= 1 && nut_mask_open_kernel_size <= 255 &&
+          nut_mask_open_kernel_size % 2 == 1,
+          "nut_mask_open_kernel_size must be odd, 1..255");
   require(blackhat_threshold >= 0 && blackhat_threshold <= 255, "blackhat_threshold");
   require(min_nut_solidity > 0 && min_nut_solidity <= 1, "min_nut_solidity");
   require(min_nut_circularity > 0 && min_nut_circularity <= 1, "min_nut_circularity");
+  require(min_nut_aspect_ratio > 0 && min_nut_aspect_ratio <= 1, "min_nut_aspect_ratio");
   require(hough_param2 > 0, "hough_param2");
   require(slot_axis == "long" || slot_axis == "right_to_left", "slot_axis");
   require(basket_side == "any" || basket_side == "left" || basket_side == "right", "basket_side");
@@ -56,38 +64,115 @@ namespace {
 class Detector {
 public:
   Detector(const DetectorConfig &config, Detection2D &result) : config_(config), result_(result) {}
-  static std::vector<cv::Point> largest_quadrilateral(const cv::Mat &mask, const cv::Mat &gray,
-                                                      double min_area, double max_area)
+  std::vector<cv::Point> best_frame_quadrilateral(const cv::Mat &mask, const cv::Mat &gray,
+                                                   double min_area, double max_area)
   {
     std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    double best = 0.0;
+    // A line frame has nested inner/outer contours.  RETR_EXTERNAL can discard
+    // the useful one when a shadow or neighbouring dark object surrounds it.
+    cv::findContours(mask, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+    double best_score = -std::numeric_limits<double>::infinity();
+    std::size_t best_index = std::numeric_limits<std::size_t>::max();
     std::vector<cv::Point> result;
     for (const auto &contour : contours) {
       const double area = cv::contourArea(contour);
       if (area < min_area || area > max_area) continue;
+
+      FrameCandidateDiagnostic diagnostic;
+      diagnostic.contour = contour;
+      diagnostic.area = area;
+      diagnostic.bounding_rect = cv::boundingRect(contour);
       std::vector<cv::Point> approx;
-      cv::approxPolyDP(contour, approx, 0.03 * cv::arcLength(contour, true), true);
-      if (approx.size() < 4 || approx.size() > 8 || !cv::isContourConvex(approx)) continue;
+      cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, true), true);
+      diagnostic.vertex_count = static_cast<int>(approx.size());
+      if (approx.size() < 4 || approx.size() > 8 || !cv::isContourConvex(approx)) {
+        // With V<=170, a genuine thin source-frame edge can acquire small
+        // inward dents where an internal dark nut or a local shadow touches
+        // the binary component.  Stabilize only such minor dents: a large
+        // convex-hull expansion remains rejected as an unrelated dark object.
+        std::vector<cv::Point> hull;
+        cv::convexHull(contour, hull);
+        const double hull_area = cv::contourArea(hull);
+        constexpr double kMaxHullAreaInflation = 1.15;
+        if (hull_area <= area * kMaxHullAreaInflation) {
+          std::vector<cv::Point> hull_approx;
+          cv::approxPolyDP(hull, hull_approx, 0.02 * cv::arcLength(hull, true), true);
+          if (hull_approx.size() >= 4 && hull_approx.size() <= 8 &&
+              cv::isContourConvex(hull_approx)) {
+            approx = std::move(hull_approx);
+            diagnostic.vertex_count = static_cast<int>(approx.size());
+            diagnostic.hull_stabilized = true;
+          }
+        }
+      }
+      if (approx.size() < 4 || approx.size() > 8) {
+        diagnostic.reason = "vertex_count";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
+      if (!cv::isContourConvex(approx)) {
+        diagnostic.reason = "not_convex";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
       const cv::RotatedRect rr = cv::minAreaRect(approx);
       const double rect_area = static_cast<double>(rr.size.area());
-      if (rect_area <= 1e-6) continue;
+      if (rect_area <= 1e-6) {
+        diagnostic.reason = "zero_rect_area";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
       const double rectangularity = area / rect_area;
+      diagnostic.fill_ratio = rectangularity;
       const double short_side = std::min(rr.size.width, rr.size.height);
       const double long_side = std::max(rr.size.width, rr.size.height);
-      if (short_side <= 1.0 || long_side / short_side > 2.5 || rectangularity < 0.55) continue;
+      diagnostic.aspect_ratio = short_side > 1.0 ? long_side / short_side : 0.0;
+      if (short_side <= 1.0 || diagnostic.aspect_ratio > 2.5) {
+        diagnostic.reason = "aspect_ratio";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
+      if (rectangularity < 0.55) {
+        diagnostic.reason = "low_fill_ratio";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
       cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
       cv::fillConvexPoly(interior, approx, 255);
       cv::erode(interior, interior, cv::getStructuringElement(cv::MORPH_ELLIPSE, {11, 11}));
       const double mean_intensity = cv::mean(gray, interior)[0];
+      diagnostic.mean_gray = mean_intensity;
       // The line frame surrounds a bright sheet. This rejects black equipment,
       // floor areas and labels that happen to form large quadrilaterals.
-      if (mean_intensity < 120.0) continue;
-      const double score = area * rectangularity;
-      if (score > best) {
-        best = score;
+      if (mean_intensity < 120.0) {
+        diagnostic.reason = "low_mean_gray";
+        result_.frame_candidates.push_back(std::move(diagnostic));
+        continue;
+      }
+
+      // Score only candidates which met every required geometry condition.
+      // This deliberately favors a clear four-sided bright-inside frame over
+      // a merely large dark contour such as a table shadow.
+      const double normalized_area = (area - min_area) / (max_area - min_area);
+      const double area_score = std::clamp(1.0 - std::abs(normalized_area - 0.5) * 2.0, 0.0, 1.0);
+      const double shape_score = 1.0 - 0.12 * std::abs(diagnostic.vertex_count - 4);
+      const double aspect_score = std::clamp((2.5 - diagnostic.aspect_ratio) / 1.5, 0.0, 1.0);
+      const double fill_score = std::clamp((rectangularity - 0.55) / 0.45, 0.0, 1.0);
+      const double brightness_score = std::clamp((mean_intensity - 120.0) / 135.0, 0.0, 1.0);
+      diagnostic.score = shape_score + aspect_score + fill_score + brightness_score + area_score;
+      diagnostic.reason = diagnostic.hull_stabilized ? "eligible_hull_stabilized" : "eligible";
+      result_.frame_candidates.push_back(std::move(diagnostic));
+      const std::size_t index = result_.frame_candidates.size() - 1;
+      if (result_.frame_candidates[index].score > best_score) {
+        best_score = result_.frame_candidates[index].score;
+        best_index = index;
         result = approx;
       }
+    }
+    if (best_index != std::numeric_limits<std::size_t>::max()) {
+      result_.frame_candidates[best_index].accepted = true;
+      result_.frame_candidates[best_index].reason = result_.frame_candidates[best_index].hull_stabilized
+          ? "accepted_hull_stabilized" : "accepted";
     }
     return result;
   }
@@ -101,8 +186,10 @@ public:
     cv::inRange(hsv, cv::Scalar(0, 0, 0), cv::Scalar(180, 255, config_.black_v_max), black_mask);
     cv::inRange(hsv, cv::Scalar(config_.blue_h_min, config_.blue_s_min, config_.blue_v_min),
                 cv::Scalar(config_.blue_h_max, 255, 255), blue_mask);
+    cv::extractChannel(hsv, result_.value_channel, 2);
+    result_.black_mask_before_close = black_mask.clone();
     cv::morphologyEx(black_mask, black_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_RECT, {9, 9}));
+                     cv::getStructuringElement(cv::MORPH_RECT, {5, 5}), cv::Point(-1, -1), 1);
     cv::morphologyEx(blue_mask, blue_mask, cv::MORPH_CLOSE,
                      cv::getStructuringElement(cv::MORPH_RECT, {7, 7}));
 
@@ -112,30 +199,8 @@ public:
     cv::cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
 
     const double image_area = static_cast<double>(bgr.cols * bgr.rows);
-    geometry.frame = largest_quadrilateral(
+    geometry.frame = best_frame_quadrilateral(
       black_mask, gray, image_area * config_.min_frame_area_ratio, image_area * config_.max_frame_area_ratio);
-    if (geometry.frame.empty()) {
-      std::vector<std::vector<cv::Point>> contours;
-      cv::findContours(black_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      double best_fallback = 0.0;
-      for (const auto &contour : contours) {
-        const double area = cv::contourArea(contour);
-        if (area < image_area * config_.min_frame_area_ratio ||
-            area > image_area * config_.max_frame_area_ratio) continue;
-        const cv::Rect rect = cv::boundingRect(contour);
-        if (rect.width < 2 || rect.height < 2) continue;
-        cv::Mat interior = cv::Mat::zeros(gray.size(), CV_8UC1);
-        cv::rectangle(interior, rect, 255, cv::FILLED);
-        const double mean_intensity = cv::mean(gray, interior)[0];
-        if (mean_intensity < 120.0 || area <= best_fallback) continue;
-        best_fallback = area;
-        geometry.frame = {cv::Point(rect.x, rect.y),
-                          cv::Point(rect.x + rect.width, rect.y),
-                          cv::Point(rect.x + rect.width, rect.y + rect.height),
-                          cv::Point(rect.x, rect.y + rect.height)};
-      }
-    }
-
     std::vector<std::vector<cv::Point>> blue_contours;
     cv::findContours(blue_mask, blue_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     cv::Point2f frame_center(bgr.cols * 0.5F, bgr.rows * 0.5F);
@@ -175,6 +240,15 @@ public:
     }
 
     debug = bgr.clone();
+    if (config_.debug_black_frame) {
+      for (const auto &candidate : result_.frame_candidates) {
+        cv::polylines(debug, candidate.contour, true, cv::Scalar(0, 165, 255), 1);
+        cv::putText(debug, candidate.reason + ":" + std::to_string(candidate.score),
+                    candidate.bounding_rect.tl(), cv::FONT_HERSHEY_SIMPLEX, 0.35,
+                    cv::Scalar(0, 165, 255), 1);
+      }
+      result_.frame_candidate_debug = debug.clone();
+    }
     if (geometry.frame.size() >= 4)
       cv::polylines(debug, geometry.frame, true, cv::Scalar(0, 0, 255), 3);
     if (geometry.basket.size() >= 4)
@@ -219,9 +293,13 @@ public:
                           cv::THRESH_BINARY_INV, block_size, config_.adaptive_c);
     cv::bitwise_and(adaptive_mask, roi, adaptive_mask);
     cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_OPEN,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                {config_.nut_mask_open_kernel_size,
+                                                 config_.nut_mask_open_kernel_size}));
     cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                {config_.nut_mask_close_kernel_size,
+                                                 config_.nut_mask_close_kernel_size}));
 
     int blackhat_size = std::max(3, config_.blackhat_kernel_size);
     if ((blackhat_size % 2) == 0) ++blackhat_size;
@@ -232,9 +310,13 @@ public:
     cv::threshold(blackhat, blackhat_mask, config_.blackhat_threshold, 255, cv::THRESH_BINARY);
     cv::bitwise_and(blackhat_mask, roi, blackhat_mask);
     cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_OPEN,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {3, 3}));
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                {config_.nut_mask_open_kernel_size,
+                                                 config_.nut_mask_open_kernel_size}));
     cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_CLOSE,
-                     cv::getStructuringElement(cv::MORPH_ELLIPSE, {7, 7}));
+                     cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                {config_.nut_mask_close_kernel_size,
+                                                 config_.nut_mask_close_kernel_size}));
 
     result_.roi_mask = roi.clone();
     result_.adaptive_mask = adaptive_mask.clone();
@@ -269,7 +351,9 @@ public:
         const cv::RotatedRect rr = cv::minAreaRect(contour);
         const float width = std::max(rr.size.width, rr.size.height);
         const float height = std::min(rr.size.width, rr.size.height);
-        if (width <= 1.0F || height / width < 0.50F) { diagnostic.reason = "aspect_ratio"; continue; }
+        if (width <= 1.0F || height / width < config_.min_nut_aspect_ratio) {
+          diagnostic.reason = "aspect_ratio"; continue;
+        }
         cv::Moments moments = cv::moments(contour);
         if (std::abs(moments.m00) <= 1e-6) { diagnostic.reason = "zero_moment"; continue; }
         const cv::Point2f center(static_cast<float>(moments.m10 / moments.m00),
@@ -282,10 +366,12 @@ public:
         }
         if (frame_clearance < 3.0) { diagnostic.reason = "contour_near_frame"; continue; }
         const float radius = 0.5F * width;
+        if (radius < config_.min_nut_radius_px || radius > config_.max_nut_radius_px) {
+          diagnostic.reason = "radius_out_of_range"; continue;
+        }
         diagnostic.center = center;
         diagnostic.radius_px = radius;
         candidates.push_back(result_.candidates.size() - 1);
-        cv::polylines(debug, contour, true, cv::Scalar(0, 200, 0), 2);
       }
     }
 
@@ -335,7 +421,8 @@ public:
       }
     }
     for (const auto &c : accepted) {
-      cv::circle(debug, {cvRound(c[0]), cvRound(c[1])}, cvRound(c[2]), cv::Scalar(0, 255, 0), 2);
+      cv::drawMarker(debug, {cvRound(c[0]), cvRound(c[1])}, cv::Scalar(0, 255, 0),
+                     cv::MARKER_CROSS, 16, 2);
     }
     return accepted;
   }
@@ -354,6 +441,7 @@ Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config)
     throw std::invalid_argument("detect_2d requires a non-empty BGR8 image");
   Detection2D result;
   result.hough_fallback_enabled = config.enable_hough_fallback;
+  result.black_frame_debug_enabled = config.debug_black_frame;
   Detector detector(config, result);
   result.geometry = detector.find_geometry(bgr, result.annotated);
   result.frame_found = result.geometry.frame.size() >= 4;

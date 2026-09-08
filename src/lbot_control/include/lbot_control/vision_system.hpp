@@ -37,6 +37,15 @@ struct PickCheckResult
   }
 };
 
+struct VisionCommandResult
+{
+  bool success{false};
+  std::string message;
+
+  static VisionCommandResult ok(const std::string &message = "") { return {true, message}; }
+  static VisionCommandResult fail(const std::string &message) { return {false, message}; }
+};
+
 // The future camera adapter only needs to provide the initial target poses and
 // report whether the requested nut remains inside the black source frame.
 // The check is made after placement retreat, before the arm returns above the
@@ -46,6 +55,9 @@ class VisionSystem
 public:
   virtual ~VisionSystem() = default;
   virtual SceneResult initial_scene() = 0;
+  // Called immediately before the mechanical pick-and-place action.  The
+  // default keeps non-ROS/fake vision implementations source-compatible.
+  virtual VisionCommandResult start_target(NutSize) { return VisionCommandResult::ok(); }
   virtual PickCheckResult check_nut_in_source(NutSize size) = 0;
 };
 

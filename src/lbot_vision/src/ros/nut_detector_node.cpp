@@ -339,6 +339,22 @@ private:
       return;
     }
     cv::Mat debug = observation.annotated;
+    if (observation.black_frame_debug_enabled) {
+      std::ostringstream frame_debug_log;
+      for (const auto &candidate : observation.frame_candidates) {
+        frame_debug_log << " [" << candidate.reason << ": area=" << candidate.area
+                        << " rect=[" << candidate.bounding_rect.x << ',' << candidate.bounding_rect.y
+                        << ',' << candidate.bounding_rect.width << ',' << candidate.bounding_rect.height
+                        << "] vertices=" << candidate.vertex_count
+                        << " aspect=" << candidate.aspect_ratio
+                        << " fill=" << candidate.fill_ratio
+                        << " gray=" << candidate.mean_gray
+                        << " score=" << candidate.score
+                        << " hull_stabilized=" << candidate.hull_stabilized << ']';
+      }
+      RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
+                           "Black-frame candidates:%s", frame_debug_log.str().c_str());
+    }
     const auto &geometry = observation.geometry;
     const auto &sequence_snapshot = sequence_->observe(
       stamp_ns / 1000000, observation.frame_found, color.size(), observation.circles);
