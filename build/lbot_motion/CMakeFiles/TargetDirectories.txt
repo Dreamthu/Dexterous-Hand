@@ -1,7 +1,6 @@
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/uninstall.dir
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/lbot_motion_uninstall.dir
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/lbot_motion.dir
-/home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/motion_demo_node.dir
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/test.dir
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/edit_cache.dir
 /home/lzy/lbot_ws/build/lbot_motion/CMakeFiles/rebuild_cache.dir

@@ -8,9 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/lzy/lbot_ws/src/lbot_motion/src/camera_motion_plan.cpp" "CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.o" "gcc" "CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.o.d"
-  "/home/lzy/lbot_ws/src/lbot_motion/src/motion_device.cpp" "CMakeFiles/lbot_motion.dir/src/motion_device.cpp.o" "gcc" "CMakeFiles/lbot_motion.dir/src/motion_device.cpp.o.d"
-  "/home/lzy/lbot_ws/src/lbot_motion/src/motion_planner.cpp" "CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.o" "gcc" "CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.o.d"
+  "/home/lzy/lbot_ws/src/lbot_motion/src/left_arm_motion_device.cpp" "CMakeFiles/lbot_motion.dir/src/left_arm_motion_device.cpp.o" "gcc" "CMakeFiles/lbot_motion.dir/src/left_arm_motion_device.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

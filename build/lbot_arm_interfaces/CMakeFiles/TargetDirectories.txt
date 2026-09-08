@@ -10,7 +10,7 @@
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_c.dir
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_introspection_cpp.dir
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces__rosidl_typesupport_cpp.dir
-/home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/ament_cmake_python_copy_lbot_arm_interfaces.dir
+/home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/ament_cmake_python_symlink_lbot_arm_interfaces.dir
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/ament_cmake_python_build_lbot_arm_interfaces_egg.dir
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces__rosidl_generator_py.dir
 /home/lzy/lbot_ws/build/lbot_arm_interfaces/CMakeFiles/lbot_arm_interfaces_s__rosidl_typesupport_fastrtps_c.dir

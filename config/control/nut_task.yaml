@@ -1,0 +1,20 @@
+# Minimal arm-motion configuration.
+# Replace every joint array with a taught value before enabling execution.
+/**:
+  ros__parameters:
+    execute_motion: false
+    mode: check  # check | enter | leave | round_trip
+    robot_namespace: /robot1
+
+    # The left arm follows route.names from first to last. The first point is
+    # natural-down and the last point is the working pose above the table.
+    # Add/remove intermediate names and matching 7-value arrays as needed.
+    table_route_calibrated: false
+    route:
+      names: [natural_down, outside_table, above_table]
+      natural_down:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      outside_table: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      above_table:   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    joint_speed: 0.08
+    joint_acceleration: 0.08

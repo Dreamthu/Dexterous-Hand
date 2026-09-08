@@ -1,6 +1,6 @@
 # generated from ament_cmake_export_dependencies/cmake/ament_cmake_export_dependencies-extras.cmake.in
 
-set(_exported_dependencies "rclcpp;sensor_msgs;std_msgs;lbot_arm_interfaces")
+set(_exported_dependencies "rclcpp;sensor_msgs;std_msgs;geometry_msgs;lbot_arm_interfaces")
 
 find_package(ament_cmake_libraries QUIET REQUIRED)
 

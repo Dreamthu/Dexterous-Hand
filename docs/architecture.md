@@ -28,9 +28,9 @@ linkerbot/runtime.py      ROS 命令与配置适配边界
 
 1. `tools/` 可以依赖 ROS 图像消息，但不能依赖比赛任务控制器。
 2. `lbot_vision` 负责输入图像/深度并输出结构化检测，不发送机器人动作。
-3. 后续运动控制应新增独立 package，例如 `src/linkerbot_control`。
-4. `linkerbot_control` 只能通过一个机器人适配类访问 `lbot_arm_interfaces`，任务状态机
-   不直接创建 ROS service client。
+3. `lbot_motion` 是底层机器人适配包，只提供左臂/左手命令和左臂状态读取，不包含任务逻辑。
+4. `lbot_control` 保留任务状态机和执行器，通过 `lbot_motion::LeftArmMotionDevice` 访问机器人；
+   `MOVE_ABOVE_TABLE` 状态内部按配置执行任意数量的关节节点。
 5. `apps/` 只负责组合组件和清理进程，不实现识别或运动算法。
 
 ## 相机几何数据流
@@ -58,7 +58,7 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 
 感知调试和运动控制保持独立。任何未来运动入口都必须具备：
 
-- 默认 `execute_task: false`；
-- 急停、关节状态、工作空间和 TF 检查；
+- 默认 `execute_motion: false`；
+- 急停、左臂关节状态和 TF 检查；
 - 明确的超时与失败状态；
 - 仿真/录包验证后才能连接真实机械臂。

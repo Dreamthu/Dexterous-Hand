@@ -16,7 +16,7 @@ set(_lbot_motion_CONFIG_INCLUDED TRUE)
 
 # output package information
 if(NOT lbot_motion_FIND_QUIETLY)
-  message(STATUS "Found lbot_motion: 0.1.0 (${lbot_motion_DIR})")
+  message(STATUS "Found lbot_motion: 0.2.0 (${lbot_motion_DIR})")
 endif()
 
 # warn when using a deprecated package
@@ -36,7 +36,7 @@ endif()
 set(lbot_motion_FOUND_AMENT_PACKAGE TRUE)
 
 # include all config extra files
-set(_extras "ament_cmake_export_include_directories-extras.cmake;ament_cmake_export_libraries-extras.cmake;ament_cmake_export_dependencies-extras.cmake")
+set(_extras "ament_cmake_export_targets-extras.cmake;ament_cmake_export_include_directories-extras.cmake;ament_cmake_export_libraries-extras.cmake;ament_cmake_export_dependencies-extras.cmake")
 foreach(_extra ${_extras})
   include("${lbot_motion_DIR}/${_extra}")
 endforeach()

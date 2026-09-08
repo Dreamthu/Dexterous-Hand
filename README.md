@@ -71,6 +71,7 @@
 - `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
+- `config/control/nut_task.yaml`：桌面上方关节路线和机械臂速度。
 - `config/experimental/nut_task.yaml`：旧运动原型参数，仅供参考。
 
 ## 机器人 SDK
@@ -87,6 +88,13 @@ ros2 launch lbot_driver lbot_start_driver.launch.py
 ```
 
 默认机器人 IP 为 `192.168.10.21`，默认命名空间为 `/robot1`。关节单位为弧度（`rad`），位置单位为米（`m`）。
+
+配置检查和机械臂路线运行统一使用 launch；默认只检查、不运动：
+
+```bash
+ros2 launch lbot_control lbot_start_control.launch.py
+ros2 launch lbot_control lbot_start_control.launch.py mode:=enter execute_motion:=true
+```
 
 ## 安全边界
 

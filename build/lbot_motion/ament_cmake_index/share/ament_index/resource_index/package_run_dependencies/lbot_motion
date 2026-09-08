@@ -1,1 +1,1 @@
-rclcpp;sensor_msgs;std_msgs;lbot_arm_interfaces;launch;launch_ros
+rclcpp;sensor_msgs;std_msgs;geometry_msgs;lbot_arm_interfaces

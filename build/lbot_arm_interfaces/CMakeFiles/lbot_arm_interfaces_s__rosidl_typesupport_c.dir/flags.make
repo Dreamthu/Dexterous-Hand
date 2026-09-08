@@ -6,5 +6,5 @@ C_DEFINES = -DROS_PACKAGE_NAME=\"lbot_arm_interfaces\" -Dlbot_arm_interfaces_s__
 
 C_INCLUDES = -I/home/lzy/lbot_ws/build/lbot_arm_interfaces/rosidl_generator_c -I/home/lzy/lbot_ws/build/lbot_arm_interfaces/rosidl_generator_py -I/opt/ros/jazzy/include/rmw -isystem /usr/include/python3.12 -isystem /opt/ros/jazzy/include/std_msgs -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/geometry_msgs -isystem /opt/ros/jazzy/include/sensor_msgs -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport
 
-C_FLAGS = -std=gnu99 -fPIC -Wall -Wextra
+C_FLAGS = -O3 -DNDEBUG -std=gnu99 -fPIC -Wall -Wextra
 

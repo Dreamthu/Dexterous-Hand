@@ -25,7 +25,7 @@ AMENT_CMAKE_ENVIRONMENT_PARENT_PREFIX_PATH_GENERATION:BOOL=ON
 
 //Replace the CMake install command with a custom implementation
 // using symlinks instead of copying resources
-AMENT_CMAKE_SYMLINK_INSTALL:BOOL=OFF
+AMENT_CMAKE_SYMLINK_INSTALL:BOOL=1
 
 //Generate an uninstall target to revert the effects of the install
 // step
@@ -40,7 +40,7 @@ AMENT_TEST_RESULTS_DIR:PATH=/home/lzy/lbot_ws/build/lbot_arm_interfaces/test_res
 BUILD_SHARED_LIBS:BOOL=ON
 
 //Build the testing tree.
-BUILD_TESTING:BOOL=ON
+BUILD_TESTING:BOOL=OFF
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
@@ -50,7 +50,7 @@ CMAKE_AR:FILEPATH=/usr/bin/ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+CMAKE_BUILD_TYPE:STRING=Release
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -648,4 +648,6 @@ _Python3_NUMPY_SIGNATURE:INTERNAL=d5ddeb909deee809c18fdfbea68bafbe
 _Python3_NumPy_INCLUDE_DIR:INTERNAL=/usr/lib/python3/dist-packages/numpy/core/include
 //NumPy reason failure
 _Python3_NumPy_REASON_FAILURE:INTERNAL=
+//Index for unique symlink install targets
+__AMENT_CMAKE_SYMLINK_INSTALL_TARGETS_INDEX:INTERNAL=3
 

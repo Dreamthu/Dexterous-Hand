@@ -210,114 +210,29 @@ lbot_motion/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/build
 .PHONY : lbot_motion/fast
 
-#=============================================================================
-# Target rules for targets named motion_demo_node
-
-# Build rule for target.
-motion_demo_node: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 motion_demo_node
-.PHONY : motion_demo_node
-
-# fast build rule for target.
-motion_demo_node/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/motion_demo_node.dir/build.make CMakeFiles/motion_demo_node.dir/build
-.PHONY : motion_demo_node/fast
-
-src/camera_motion_plan.o: src/camera_motion_plan.cpp.o
-.PHONY : src/camera_motion_plan.o
+src/left_arm_motion_device.o: src/left_arm_motion_device.cpp.o
+.PHONY : src/left_arm_motion_device.o
 
 # target to build an object file
-src/camera_motion_plan.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.o
-.PHONY : src/camera_motion_plan.cpp.o
+src/left_arm_motion_device.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/left_arm_motion_device.cpp.o
+.PHONY : src/left_arm_motion_device.cpp.o
 
-src/camera_motion_plan.i: src/camera_motion_plan.cpp.i
-.PHONY : src/camera_motion_plan.i
-
-# target to preprocess a source file
-src/camera_motion_plan.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.i
-.PHONY : src/camera_motion_plan.cpp.i
-
-src/camera_motion_plan.s: src/camera_motion_plan.cpp.s
-.PHONY : src/camera_motion_plan.s
-
-# target to generate assembly for a file
-src/camera_motion_plan.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/camera_motion_plan.cpp.s
-.PHONY : src/camera_motion_plan.cpp.s
-
-src/motion_demo_node.o: src/motion_demo_node.cpp.o
-.PHONY : src/motion_demo_node.o
-
-# target to build an object file
-src/motion_demo_node.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/motion_demo_node.dir/build.make CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.o
-.PHONY : src/motion_demo_node.cpp.o
-
-src/motion_demo_node.i: src/motion_demo_node.cpp.i
-.PHONY : src/motion_demo_node.i
+src/left_arm_motion_device.i: src/left_arm_motion_device.cpp.i
+.PHONY : src/left_arm_motion_device.i
 
 # target to preprocess a source file
-src/motion_demo_node.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/motion_demo_node.dir/build.make CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.i
-.PHONY : src/motion_demo_node.cpp.i
+src/left_arm_motion_device.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/left_arm_motion_device.cpp.i
+.PHONY : src/left_arm_motion_device.cpp.i
 
-src/motion_demo_node.s: src/motion_demo_node.cpp.s
-.PHONY : src/motion_demo_node.s
-
-# target to generate assembly for a file
-src/motion_demo_node.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/motion_demo_node.dir/build.make CMakeFiles/motion_demo_node.dir/src/motion_demo_node.cpp.s
-.PHONY : src/motion_demo_node.cpp.s
-
-src/motion_device.o: src/motion_device.cpp.o
-.PHONY : src/motion_device.o
-
-# target to build an object file
-src/motion_device.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_device.cpp.o
-.PHONY : src/motion_device.cpp.o
-
-src/motion_device.i: src/motion_device.cpp.i
-.PHONY : src/motion_device.i
-
-# target to preprocess a source file
-src/motion_device.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_device.cpp.i
-.PHONY : src/motion_device.cpp.i
-
-src/motion_device.s: src/motion_device.cpp.s
-.PHONY : src/motion_device.s
+src/left_arm_motion_device.s: src/left_arm_motion_device.cpp.s
+.PHONY : src/left_arm_motion_device.s
 
 # target to generate assembly for a file
-src/motion_device.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_device.cpp.s
-.PHONY : src/motion_device.cpp.s
-
-src/motion_planner.o: src/motion_planner.cpp.o
-.PHONY : src/motion_planner.o
-
-# target to build an object file
-src/motion_planner.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.o
-.PHONY : src/motion_planner.cpp.o
-
-src/motion_planner.i: src/motion_planner.cpp.i
-.PHONY : src/motion_planner.i
-
-# target to preprocess a source file
-src/motion_planner.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.i
-.PHONY : src/motion_planner.cpp.i
-
-src/motion_planner.s: src/motion_planner.cpp.s
-.PHONY : src/motion_planner.s
-
-# target to generate assembly for a file
-src/motion_planner.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/motion_planner.cpp.s
-.PHONY : src/motion_planner.cpp.s
+src/left_arm_motion_device.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lbot_motion.dir/build.make CMakeFiles/lbot_motion.dir/src/left_arm_motion_device.cpp.s
+.PHONY : src/left_arm_motion_device.cpp.s
 
 # Help Target
 help:
@@ -335,19 +250,9 @@ help:
 	@echo "... lbot_motion_uninstall"
 	@echo "... uninstall"
 	@echo "... lbot_motion"
-	@echo "... motion_demo_node"
-	@echo "... src/camera_motion_plan.o"
-	@echo "... src/camera_motion_plan.i"
-	@echo "... src/camera_motion_plan.s"
-	@echo "... src/motion_demo_node.o"
-	@echo "... src/motion_demo_node.i"
-	@echo "... src/motion_demo_node.s"
-	@echo "... src/motion_device.o"
-	@echo "... src/motion_device.i"
-	@echo "... src/motion_device.s"
-	@echo "... src/motion_planner.o"
-	@echo "... src/motion_planner.i"
-	@echo "... src/motion_planner.s"
+	@echo "... src/left_arm_motion_device.o"
+	@echo "... src/left_arm_motion_device.i"
+	@echo "... src/left_arm_motion_device.s"
 .PHONY : help
 
 
