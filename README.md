@@ -65,11 +65,36 @@
 ./scripts/test.sh
 ```
 
+遇到灰色窗口、深度流未启动或 rqt 卸载警告时，参见
+[运行与故障排查](docs/troubleshooting.md)。
+
+## 无硬件二维识别调试
+
+无需 ROS、相机或机器人，可在安装 C++17 / CMake / OpenCV 4 开发库 / PyYAML 后使用：
+
+```bash
+bash scripts/build_offline.sh
+bash scripts/test_offline.sh
+bash scripts/run_detector_offline.sh artifacts/datasets/scene_001.png
+```
+
+Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测核心，阈值仍只从
+`config/vision/nut_detector.yaml` 读取。原图、配置快照、掩膜、候选拒绝原因和结果写入
+被 Git 忽略的 `artifacts/offline_detection/`。
+
+静态离线回放仍是逐张独立检测，不输出可执行抓取坐标。ROS 感知节点另外接入了固定任务专用的
+阶段顺序模块：初始稳定识别三颗后固定 `nut_large/nut_medium/nut_small`，只有外部明确的
+`start/complete/retry/reset` 反馈才推进 3→2→1 阶段，目标消失不会自动判定完成。它不是
+通用空间跟踪器，剩余目标仍按当前像素尺寸重新排序。详见
+[离线识别说明](docs/offline_detection.md)、[螺母顺序身份与状态](docs/nut_sequence.md) 和
+[2026-09-07 交接/提交说明](docs/nut_sequence_changes.md)。
+
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
 - `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
+- `config/vision/offline.yaml`：离线构建目录、输出目录和低并发构建设置。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
 - `config/control/nut_task.yaml`：桌面上方关节路线和机械臂速度。
 - `config/experimental/nut_task.yaml`：旧运动原型参数，仅供参考。

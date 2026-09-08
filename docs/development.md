@@ -31,3 +31,21 @@ git status --short
 真实相机/机械臂测试结果应在提交说明中注明设备、固件、分辨率和测试时长。
 相机 profile 或图像 topic 发生变化时，还必须同步更新
 [`troubleshooting.md`](troubleshooting.md) 中的已验证运行状态和排查步骤。
+
+## 离线核心改动的额外检查
+
+```bash
+bash scripts/build_offline.sh
+bash scripts/test_offline.sh
+```
+
+这组检查无需 ROS，但**不能代替**上面的完整 ROS 自检与低并发构建。
+无 ROS 的开发环境应明确记录未执行项，交给现场队友补测，不能把离线通过写成整仓构建通过。
+新 Bash 入口首次提交时请记录可执行位（示例见 [本次提交说明](offline_detection_changes.md)）。
+不得提交 `artifacts/` 内的私有图片、运行日志、测试依赖或 `build/` 产物。
+
+## 顺序状态改动的额外要求
+
+`NutSequence` 必须保持 ROS-free，并通过 `nut_sequence_test` 验证。任何阶段推进都只能来自
+带 session/round/event_sequence 的显式事件；禁止使用检测数量、目标消失或超时自动写入
+`completed`。修改接口后，现场还必须完成 ROS Jazzy 的 rosidl 构建和话题/service 联调。
