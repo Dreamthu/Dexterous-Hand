@@ -320,8 +320,8 @@ public:
     };
     for (size_t candidate : candidates) append_if_new(candidate);
 
-    // Preserve the existing fallback; diagnostics explicitly identify its source.
-    if (accepted.size() < 3) {
+    // Hough is an explicit compatibility fallback, disabled for honest 0--3 output.
+    if (config_.enable_hough_fallback && accepted.size() < 3) {
       std::vector<cv::Vec3f> circles;
       cv::HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1.2,
                        std::max(10.0, config_.min_nut_radius_px * 1.4), 90.0, config_.hough_param2,
@@ -353,6 +353,7 @@ Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config)
   if (bgr.empty() || bgr.type() != CV_8UC3)
     throw std::invalid_argument("detect_2d requires a non-empty BGR8 image");
   Detection2D result;
+  result.hough_fallback_enabled = config.enable_hough_fallback;
   Detector detector(config, result);
   result.geometry = detector.find_geometry(bgr, result.annotated);
   result.frame_found = result.geometry.frame.size() >= 4;

@@ -10,7 +10,7 @@ from unittest.mock import patch
 import yaml
 
 from linkerbot.offline import (build, collect_frames, detector_parameters, executable, replay,
-                              settings, source_version)
+                              sequence_parameters, settings, source_version)
 from linkerbot.runtime import ConfigurationError, REPOSITORY_ROOT
 
 
@@ -32,23 +32,41 @@ class OfflineConfigurationTests(unittest.TestCase):
         self.assertEqual(params["black_v_max"], 90)
         self.assertEqual(params["min_frame_area_ratio"], 0.03)
         self.assertNotIn("depth_topic", params)
-        self.assertEqual(len(params), 22)
+        self.assertFalse(params["enable_hough_fallback"])
+        self.assertEqual(len(params), 23)
+        sequence = sequence_parameters(config["detector_config"])
+        self.assertEqual(sequence["sequence_stable_frames"], 3)
+        self.assertEqual(sequence["sequence_min_size_gap_ratio"], 0.10)
+        self.assertEqual(len(sequence), 5)
 
     def test_missing_detector_field(self):
         path = self.yaml_file({"nut_detector_node": {"ros__parameters": {}}})
         with self.assertRaisesRegex(ConfigurationError, "black_v_max"):
             detector_parameters(path)
 
+    def test_missing_sequence_field(self):
+        config = settings("config/vision/offline.yaml")
+        document = yaml.safe_load(config["detector_config"].read_text(encoding="utf-8"))
+        del document["nut_detector_node"]["ros__parameters"]["sequence_stable_frames"]
+        with self.assertRaisesRegex(ConfigurationError, "sequence_stable_frames"):
+            sequence_parameters(self.yaml_file(document))
+
     def test_bad_scalar_types(self):
         config = settings("config/vision/offline.yaml")
         document = yaml.safe_load(config["detector_config"].read_text(encoding="utf-8"))
         for name, value in (("black_v_max", True), ("adaptive_block_size", 3.5),
-                            ("hough_param2", float("nan")), ("basket_side", None)):
+                            ("hough_param2", float("nan")), ("enable_hough_fallback", 0),
+                            ("basket_side", None), ("sequence_stable_frames", True),
+                             ("sequence_max_gap_ms", float("nan"))):
             with self.subTest(name=name):
                 modified = {"nut_detector_node": {"ros__parameters": dict(document["nut_detector_node"]["ros__parameters"])}}
                 modified["nut_detector_node"]["ros__parameters"][name] = value
                 with self.assertRaisesRegex(ConfigurationError, name):
-                    detector_parameters(self.yaml_file(modified))
+                    path = self.yaml_file(modified)
+                    if name.startswith("sequence_"):
+                        sequence_parameters(path)
+                    else:
+                        detector_parameters(path)
 
     def test_offline_config_validation(self):
         original = yaml.safe_load((REPOSITORY_ROOT / "config/vision/offline.yaml").read_text(encoding="utf-8"))
@@ -119,6 +137,10 @@ class OfflineConfigurationTests(unittest.TestCase):
         self.assertIn("include(detector_core.cmake)", ros)
         self.assertIn("detector_core.cmake", standalone)
         self.assertIn("lbot_vision::detect_2d", node)
+        self.assertIn("lbot_vision_sequence", ros)
+        self.assertIn("nut_sequence_test", standalone)
+        self.assertIn("sequence_->observe", node)
+        self.assertNotIn("need_exactly_three_nuts", node)
         self.assertNotIn("cv::HoughCircles", node)
         self.assertLess(node.index("lbot_vision::detect_2d"), node.index("if (!depth_msg_"))
         for name in ("build_offline", "run_detector_offline", "test_offline"):

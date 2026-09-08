@@ -1,7 +1,8 @@
 # 任务一改动清单与提交说明
 
 
-本次实现视觉解耦和离线回放，未实现任务二的身份关联/抓取状态。
+本文主要记录任务一的视觉解耦和离线回放。随后已增加固定任务专用的阶段身份/抓取状态，
+最新交接与提交清单以 [nut_sequence_changes.md](nut_sequence_changes.md) 为准。
 先阅读 [使用说明](offline_detection.md) 和 [2026-09-07 验证报告](offline_detection_validation.md)。
 当前代码未执行 git add、commit 或 push；不要将离线验证通过表述为 ROS/真机通过。
 
@@ -22,7 +23,7 @@
 |---|---|
 | `src/lbot_vision/include/lbot_vision/nut_detector.hpp` | 普通 C++ 配置、二维结果与诊断接口 |
 | `src/lbot_vision/include/lbot_vision/detector_fields.inc` | 共享参数名称/类型表，无第二份阈值 |
-| `src/lbot_vision/src/core/nut_detector.cpp` | 唯一的场景几何、轮廓、Hough 与候选筛选实现 |
+| `src/lbot_vision/src/core/nut_detector.cpp` | 唯一的场景几何、轮廓、可选 Hough 与候选筛选实现 |
 | `src/lbot_vision/detector_core.cmake` | ROS/独立 CMake 共用库目标定义 |
 | `tools/offline_detection/CMakeLists.txt` | 不依赖 ROS 的构建、测试及 Windows 路径兼容 |
 | `tools/offline_detection/offline_io.hpp` | 离线配置和结果读写接口 |
@@ -40,7 +41,7 @@
 | `docs/offline_detection_validation.md` | 构建、测试、准确性问题与未验证事项 |
 | `docs/offline_detection_changes.md` | 本文件 |
 
-`config/vision/nut_detector.yaml`、CameraGeometry、实验运动代码和外部 SDK 均未修改。
+`config/vision/nut_detector.yaml` 新增默认关闭的 `enable_hough_fallback`；黑框最大面积比例仍为 `0.30`，螺母最大像素面积仍为 `100000.0`。CameraGeometry、实验运动代码和外部 SDK 均未修改。
 `artifacts/logs/dev/` 的脚本/库/旧版对比器只是本地验证辅助，不是待提交源码。
 
 ## 如何提交到名为 branch 的分支
@@ -95,7 +96,7 @@ git diff --cached
 提交信息示例：
 
 ```bash
-git commit -m "refactor: extract shared 2D detector and add offline replay" -m "Tested on Windows with OpenCV 4.12.0: offline build, 13 Python tests and 2 C++ contract tests passed; 8 sample outputs match baseline. Known legacy Hough false positives remain. ROS Jazzy build and hardware validation pending."
+git commit -m "refactor: extract shared 2D detector and add offline replay" -m "Tested on Windows with OpenCV 4.12.0: offline build, 13 Python tests and 2 C++ contract tests passed; 8 sample outputs match baseline. Hough fallback is disabled by default for honest 0--3 contour counts. ROS Jazzy build and hardware validation pending."
 git push -u origin branch
 ```
 

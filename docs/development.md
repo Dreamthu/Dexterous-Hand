@@ -43,3 +43,9 @@ bash scripts/test_offline.sh
 无 ROS 的开发环境应明确记录未执行项，交给现场队友补测，不能把离线通过写成整仓构建通过。
 新 Bash 入口首次提交时请记录可执行位（示例见 [本次提交说明](offline_detection_changes.md)）。
 不得提交 `artifacts/` 内的私有图片、运行日志、测试依赖或 `build/` 产物。
+
+## 顺序状态改动的额外要求
+
+`NutSequence` 必须保持 ROS-free，并通过 `nut_sequence_test` 验证。任何阶段推进都只能来自
+带 session/round/event_sequence 的显式事件；禁止使用检测数量、目标消失或超时自动写入
+`completed`。修改接口后，现场还必须完成 ROS Jazzy 的 rosidl 构建和话题/service 联调。

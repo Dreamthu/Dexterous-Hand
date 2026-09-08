@@ -4,9 +4,12 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <limits>
 #include <optional>
+#include <random>
 #include <sstream>
 #include <string>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -18,6 +21,9 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "lbot_vision/camera_geometry.hpp"
 #include "lbot_vision/nut_detector.hpp"
+#include "lbot_vision/nut_sequence.hpp"
+#include "lbot_vision/msg/nut_sequence_state.hpp"
+#include "lbot_vision/srv/set_nut_state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
@@ -32,6 +38,7 @@ using std::placeholders::_1;
 namespace {
 
 struct Detection {
+  int target_id{0};
   cv::Point2f pixel;
   float radius_px{0.0F};
   double radius_m{0.0};
@@ -63,6 +70,38 @@ public:
 #include "lbot_vision/detector_fields.inc"
 #undef LBOT_DETECTOR_FIELD
     detector_config_.validate();
+    lbot_vision::NutSequenceConfig sequence_config;
+#define LBOT_SEQUENCE_FIELD(type, name) sequence_config.name = declare_parameter<type>(#name);
+#include "lbot_vision/sequence_fields.inc"
+#undef LBOT_SEQUENCE_FIELD
+    sequence_ = std::make_unique<lbot_vision::NutSequence>(sequence_config);
+    max_image_age_ms_ = declare_parameter<double>("max_image_age_ms");
+    max_depth_delta_ms_ = declare_parameter<double>("max_depth_delta_ms");
+    if (!std::isfinite(max_image_age_ms_) || max_image_age_ms_ <= 0 ||
+        !std::isfinite(max_depth_delta_ms_) || max_depth_delta_ms_ <= 0)
+      throw std::invalid_argument("max_image_age_ms/max_depth_delta_ms must be finite and positive");
+    session_id_ = std::to_string(std::random_device{}()) + "-" + std::to_string(now().nanoseconds());
+    sequence_pub_ = create_publisher<lbot_vision::msg::NutSequenceState>(
+      declare_parameter<std::string>("sequence_topic"), 10);
+    sequence_event_service_ = create_service<lbot_vision::srv::SetNutState>(
+      declare_parameter<std::string>("sequence_event_service"),
+      [this](const std::shared_ptr<lbot_vision::srv::SetNutState::Request> request,
+             std::shared_ptr<lbot_vision::srv::SetNutState::Response> response) {
+        if (request->session_id != session_id_) {
+          response->accepted = false; response->reason = "wrong_session";
+        } else if (request->action == "start" && (!color_is_fresh() ||
+                   rclcpp::Time(color_msg_->header.stamp).nanoseconds() != last_processed_ns_)) {
+          sequence_->invalidate("stale_color_image");
+          response->accepted = false;
+          response->reason = "stale_color_image";
+        } else {
+          response->accepted = sequence_->event(request->round_id, request->event_sequence,
+              request->target_id, request->action, response->reason);
+          if (response->accepted && request->action == "reset") last_processed_ns_ = -1;
+        }
+        response->round_id = sequence_->snapshot().round;
+        clear_poses(); publish_sequence_state();
+      });
     min_nut_clearance_m_ = declare_parameter("min_nut_clearance_m", 0.003);
     depth_min_m_ = declare_parameter("depth_min_m", 0.15);
     depth_max_m_ = declare_parameter("depth_max_m", 5.0);
@@ -94,6 +133,14 @@ private:
   bool use_tf_{true};
   double publish_rate_hz_{5.0};
   lbot_vision::DetectorConfig detector_config_;
+  std::unique_ptr<lbot_vision::NutSequence> sequence_;
+  std::string session_id_;
+  std_msgs::msg::Header observation_header_;
+  double max_image_age_ms_{0}, max_depth_delta_ms_{0};
+  std::int64_t last_processed_ns_{-1};
+  std::optional<geometry_msgs::msg::TransformStamped> frame_tf_;
+  rclcpp::Publisher<lbot_vision::msg::NutSequenceState>::SharedPtr sequence_pub_;
+  rclcpp::Service<lbot_vision::srv::SetNutState>::SharedPtr sequence_event_service_;
   double min_nut_clearance_m_{0.003}, depth_min_m_{0.15}, depth_max_m_{5.0};
 
   sensor_msgs::msg::Image::ConstSharedPtr color_msg_, depth_msg_;
@@ -187,30 +234,74 @@ private:
     if (!use_tf_ || target_frame_.empty() || source == target_frame_) {
       return true;
     }
-    try {
-      auto tf = tf_buffer_.lookupTransform(target_frame_, source, tf2::TimePointZero,
-                                           tf2::durationFromSec(0.05));
-      geometry_msgs::msg::PointStamped in, out;
-      in.header.frame_id = source;
-      in.header.stamp = now();
-      in.point = input;
-      tf2::doTransform(in, out, tf);
-      output = out.point;
-      frame = target_frame_;
-      return true;
-    } catch (const tf2::TransformException &e) {
-      RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
-                           "No TF %s <- %s; publishing camera-frame coordinates: %s",
-                           target_frame_.c_str(), source.c_str(), e.what());
-      return false;
+    if (!frame_tf_) return false;
+    geometry_msgs::msg::PointStamped in, out;
+    in.header = color_msg_->header;
+    in.point = input;
+    tf2::doTransform(in, out, *frame_tf_);
+    output = out.point; frame = target_frame_;
+    return true;
+  }
+
+  bool color_is_fresh()
+  {
+    if (!color_msg_) return false;
+    const double age = (now() - rclcpp::Time(color_msg_->header.stamp)).seconds() * 1000.0;
+    return age >= 0 && age <= max_image_age_ms_;
+  }
+
+  void clear_poses()
+  {
+    geometry_msgs::msg::PoseArray empty;
+    if (color_msg_) empty.header = color_msg_->header;
+    detections_pub_->publish(empty); slots_pub_->publish(empty);
+  }
+
+  void publish_sequence_state(const std::vector<Detection> &positions = {})
+  {
+    lbot_vision::msg::NutSequenceState message;
+    message.header = observation_header_;
+    const auto &snapshot = sequence_->snapshot();
+    message.session_id = session_id_; message.round_id = snapshot.round;
+    message.initialized = snapshot.initialized;
+    message.observation_valid = snapshot.observation_valid;
+    message.observed_count = snapshot.observed_count;
+    message.expected_count = snapshot.expected_count;
+    message.current_target_id = snapshot.current_target_id;
+    message.status = snapshot.status;
+    for (const auto &target : snapshot.targets) {
+      lbot_vision::msg::NutTarget message_target;
+      message_target.id = target.id;
+      message_target.size_class = target.size_class;
+      message_target.task_state = target.state;
+      message_target.visible = target.visible;
+      message_target.observation_index = target.observation_index;
+      message_target.last_u = target.last_observation[0];
+      message_target.last_v = target.last_observation[1];
+      message_target.last_radius_px = target.last_observation[2];
+      message_target.last_seen_ms = target.last_seen_ms;
+      for (const auto &d : positions) {
+        if (d.target_id == target.id && target.visible && snapshot.observation_valid) {
+          message_target.position_valid = true;
+          message_target.position.header = message.header;
+          message_target.position.header.frame_id = d.frame_id;
+          message_target.position.point = d.point;
+        }
+      }
+      message.targets.push_back(message_target);
     }
+    sequence_pub_->publish(message);
   }
 
   void publish_status(const std::string &status, size_t count)
   {
     std_msgs::msg::String msg;
     std::ostringstream out;
-    out << "{\"status\":\"" << status << "\",\"count\":" << count << "}";
+    const auto &snapshot = sequence_->snapshot();
+    out << "{\"status\":\"" << status << "\",\"count\":" << count
+        << ",\"expected_count\":" << snapshot.expected_count
+        << ",\"current_target_id\":" << snapshot.current_target_id
+        << ",\"round_id\":" << snapshot.round << "}";
     msg.data = out.str();
     status_pub_->publish(msg);
   }
@@ -218,11 +309,23 @@ private:
   void process()
   {
     if (!color_msg_) return;
+    if (!color_is_fresh()) {
+      sequence_->invalidate("stale_color_image"); clear_poses(); publish_sequence_state(); return;
+    }
+    const auto stamp_ns = rclcpp::Time(color_msg_->header.stamp).nanoseconds();
+    if (stamp_ns == last_processed_ns_) return;  // timers are not new observations
+    clear_poses();
+    if (stamp_ns < last_processed_ns_) {
+      sequence_->invalidate("non_increasing_timestamp"); publish_sequence_state(); return;
+    }
+    last_processed_ns_ = stamp_ns;
+    observation_header_ = color_msg_->header;
     cv::Mat color;
     try {
       color = cv_bridge::toCvCopy(color_msg_, sensor_msgs::image_encodings::BGR8)->image;
     } catch (const std::exception &error) {
       RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000, "Color conversion failed: %s", error.what());
+      sequence_->invalidate("invalid_color_image"); publish_sequence_state();
       publish_status("invalid_color_image", 0);
       return;
     }
@@ -231,11 +334,19 @@ private:
       observation = lbot_vision::detect_2d(color, detector_config_);
     } catch (const std::exception &error) {
       RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 3000, "2D detection failed: %s", error.what());
+      sequence_->invalidate("detection_2d_failed"); publish_sequence_state();
       publish_status("detection_2d_failed", 0);
       return;
     }
     cv::Mat debug = observation.annotated;
     const auto &geometry = observation.geometry;
+    const auto &sequence_snapshot = sequence_->observe(
+      stamp_ns / 1000000, observation.frame_found, color.size(), observation.circles);
+    publish_sequence_state();  // 2D identity/state remains available without basket/depth/TF.
+    if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
+      publish_status(sequence_snapshot.status, observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
     if (!observation.frame_found) {
       publish_status("frame_not_found", 0);
       return publish_debug(debug, color_msg_->header);
@@ -252,6 +363,22 @@ private:
         camera_geometry_->height() != static_cast<std::uint32_t>(color.rows)) {
       publish_status("camera_info_size_mismatch", observation.circles.size());
       return publish_debug(debug, color_msg_->header);
+    }
+    if (std::abs((rclcpp::Time(color_msg_->header.stamp) -
+                  rclcpp::Time(depth_msg_->header.stamp)).seconds() * 1000.0) > max_depth_delta_ms_) {
+      publish_status("depth_color_timestamp_mismatch", observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
+    // One timestamped transform for the entire observation; never mix TF frames in a PoseArray.
+    frame_tf_.reset();
+    if (use_tf_ && !target_frame_.empty() && color_msg_->header.frame_id != target_frame_) {
+      try {
+        frame_tf_ = tf_buffer_.lookupTransform(target_frame_, color_msg_->header.frame_id,
+            rclcpp::Time(color_msg_->header.stamp), rclcpp::Duration::from_seconds(0.05));
+      } catch (const tf2::TransformException &error) {
+        RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
+            "No capture-time TF; all positions remain in camera frame: %s", error.what());
+      }
     }
     cv::Mat depth;
     try {
@@ -272,12 +399,15 @@ private:
     const double sx = static_cast<double>(depth.cols) / color.cols;
     const double sy = static_cast<double>(depth.rows) / color.rows;
     std::vector<Detection> detections;
-    for (const auto &circle : observation.circles) {
+    for (const auto &track : sequence_snapshot.targets) {
+      if (!track.visible || track.state == "completed") continue;
+      const auto &circle = observation.circles.at(track.observation_index);
       cv::Point2f px(circle[0], circle[1]);
       double z = sample_depth(depth, {px.x * static_cast<float>(sx), px.y * static_cast<float>(sy)});
       if (!valid_depth(z, depth_min_m_, depth_max_m_)) continue;
       auto camera_point = project_pixel(px, z);
       Detection d;
+      d.target_id = track.id; d.size_class = track.size_class;
       d.pixel = px;
       d.radius_px = circle[2];
       d.radius_m = camera_geometry_->projected_radius_m(px, circle[2], z);
@@ -288,15 +418,10 @@ private:
       }
       detections.push_back(d);
     }
-    if (detections.size() != 3) {
-      publish_status("need_exactly_three_nuts", detections.size());
+    if (detections.size() != sequence_snapshot.expected_count) {
+      publish_status("target_localization_incomplete", detections.size());
       return publish_debug(debug, color_msg_->header);
     }
-    std::sort(detections.begin(), detections.end(),
-              [](const Detection &a, const Detection &b) { return a.radius_px > b.radius_px; });
-    detections[0].size_class = "large";
-    detections[1].size_class = "medium";
-    detections[2].size_class = "small";
     bool separated = true;
     for (size_t i = 0; i < detections.size(); ++i) {
       for (size_t j = i + 1; j < detections.size(); ++j) {
@@ -318,7 +443,7 @@ private:
 
     geometry_msgs::msg::PoseArray poses;
     poses.header = color_msg_->header;
-    poses.header.frame_id = detections.front().frame_id;
+    poses.header.frame_id = frame_tf_ ? target_frame_ : color_msg_->header.frame_id;
     geometry_msgs::msg::PoseArray slots;
     slots.header = poses.header;
     std::ostringstream json;
@@ -329,10 +454,12 @@ private:
       pose.position = d.point;
       pose.orientation.w = 1.0;
       poses.poses.push_back(pose);
-      cv::putText(debug, d.size_class, d.pixel + cv::Point2f(8, 8), cv::FONT_HERSHEY_SIMPLEX,
-                  0.75, cv::Scalar(0, 255, 0), 2);
+      const auto &target = sequence_snapshot.targets.at(static_cast<std::size_t>(d.target_id - 1));
+      cv::putText(debug, d.size_class + ":" + target.state, d.pixel + cv::Point2f(8, 8),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.65, cv::Scalar(0, 255, 0), 2);
       if (i) json << ',';
-      json << "{\"size\":\"" << d.size_class << "\",\"u\":" << d.pixel.x
+      json << "{\"id\":" << d.target_id << ",\"size\":\"" << d.size_class
+           << "\",\"state\":\"" << target.state << "\",\"u\":" << d.pixel.x
            << ",\"v\":" << d.pixel.y << ",\"x\":" << d.point.x
            << ",\"y\":" << d.point.y << ",\"z\":" << d.point.z
            << ",\"frame\":\"" << d.frame_id << "\"}";
@@ -361,6 +488,7 @@ private:
     status.data = json.str();
     status_pub_->publish(status);
     detections_pub_->publish(poses);
+    publish_sequence_state(detections);
     if (slots.poses.size() == 3) slots_pub_->publish(slots);
     publish_debug(debug, color_msg_->header);
   }

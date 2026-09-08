@@ -71,16 +71,19 @@ int main(int argc, char **argv)
     const auto without_basket = lbot_vision::detect_2d(scene(false, 3), config);
     require(without_basket.frame_found && !without_basket.basket_found && without_basket.circles.size() == 3,
             "Basket must not gate nut detection");
+    require(!config.enable_hough_fallback, "Hough fallback must be disabled by default");
     const auto empty = lbot_vision::detect_2d(scene(true, 0), config);
-    require(empty.frame_found && empty.circles.size() == 3,
-            "Legacy empty-frame Hough fallback changed during refactor");
-    for (const auto &candidate : empty.candidates)
-      if (candidate.accepted) require(candidate.source == "hough", "Expected known Hough false positives");
-    std::cerr << "KNOWN ACCURACY FAILURE: empty synthetic frame produces three Hough candidates\n";
+    require(empty.frame_found && empty.circles.empty(),
+            "Empty frame must report zero nuts when Hough fallback is disabled");
     const auto one = lbot_vision::detect_2d(scene(true, 1), config);
     const auto two = lbot_vision::detect_2d(scene(true, 2), config);
-    require(one.circles.size() == 3 && two.circles.size() == 3,
-            "Legacy Hough fallback no longer pads one/two observations to three");
+    require(one.circles.size() == 1 && two.circles.size() == 2,
+            "Contour-only mode must honestly report one/two observations");
+    auto hough_config = config;
+    hough_config.enable_hough_fallback = true;
+    const auto compatibility_empty = lbot_vision::detect_2d(scene(true, 0), hough_config);
+    require(compatibility_empty.hough_fallback_enabled && compatibility_empty.circles.size() == 3,
+            "Compatibility switch must report and execute the legacy Hough fallback");
     const auto four = lbot_vision::detect_2d(scene(true, 4), config);
     require(four.circles.size() == 3, "Legacy three-target cap changed during refactor");
     const auto repeated = lbot_vision::detect_2d(image, config);

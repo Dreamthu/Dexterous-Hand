@@ -94,9 +94,12 @@ Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测
 `config/vision/nut_detector.yaml` 读取。原图、配置快照、掩膜、候选拒绝原因和结果写入
 被 Git 忽略的 `artifacts/offline_detection/`。
 
-本次是任务一解耦：**不是目标跟踪，也未解决连续取走后的身份关联**；不输出可执行抓取坐标。
-具体环境、图片/序列用法、现场数据交接和限制见 [离线识别说明](docs/offline_detection.md)，
-文件清单和提交步骤见 [本次修改与提交说明](docs/offline_detection_changes.md)。
+静态离线回放仍是逐张独立检测，不输出可执行抓取坐标。ROS 感知节点另外接入了固定任务专用的
+阶段顺序模块：初始稳定识别三颗后固定 `nut_large/nut_medium/nut_small`，只有外部明确的
+`start/complete/retry/reset` 反馈才推进 3→2→1 阶段，目标消失不会自动判定完成。它不是
+通用空间跟踪器，剩余目标仍按当前像素尺寸重新排序。详见
+[离线识别说明](docs/offline_detection.md)、[螺母顺序身份与状态](docs/nut_sequence.md) 和
+[2026-09-07 交接/提交说明](docs/nut_sequence_changes.md)。
 
 ## 配置入口
 

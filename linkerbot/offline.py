@@ -63,7 +63,7 @@ def detector_parameters(path: Path) -> dict:
     if not isinstance(params, dict):
         raise ConfigurationError(f"ros__parameters must be a mapping: {path}")
     schema = (REPOSITORY_ROOT / "src/lbot_vision/include/lbot_vision/detector_fields.inc").read_text(encoding="utf-8")
-    fields = re.findall(r"LBOT_DETECTOR_FIELD\((int|double|std::string), (\w+)\)", schema)
+    fields = re.findall(r"LBOT_DETECTOR_FIELD\((bool|int|double|std::string), (\w+)\)", schema)
     if not fields:
         raise ConfigurationError("Empty detector field schema")
     effective = {}
@@ -71,10 +71,42 @@ def detector_parameters(path: Path) -> dict:
         value = params.get(name)
         if kind == "std::string":
             valid = isinstance(value, str)
+        elif kind == "bool":
+            valid = type(value) is bool
         elif kind == "int":
             valid = type(value) is int and -(2**31) <= value < 2**31
         else:
             valid = type(value) in (int, float) and math.isfinite(value)
+        if not valid:
+            raise ConfigurationError(f"{path}: {name} must be {kind} (finite, not null/bool)")
+        effective[name] = value
+    return effective
+
+
+def sequence_parameters(path: Path) -> dict:
+    """Validate transport types for the ROS-free stage sequence configuration."""
+    document = load_yaml(path)
+    try:
+        params = document["nut_detector_node"]["ros__parameters"]
+    except (KeyError, TypeError) as error:
+        raise ConfigurationError(f"Missing nut_detector_node.ros__parameters: {path}") from error
+    if not isinstance(params, dict):
+        raise ConfigurationError(f"ros__parameters must be a mapping: {path}")
+    schema = (REPOSITORY_ROOT / "src/lbot_vision/include/lbot_vision/sequence_fields.inc").read_text(encoding="utf-8")
+    fields = re.findall(r"LBOT_SEQUENCE_FIELD\((bool|int|double|std::string), (\w+)\)", schema)
+    if not fields:
+        raise ConfigurationError("Empty nut sequence field schema")
+    effective = {}
+    for kind, name in fields:
+        value = params.get(name)
+        if kind == "std::string":
+            valid = isinstance(value, str)
+        elif kind == "bool":
+            valid = type(value) is bool
+        elif kind == "int":
+            valid = type(value) is int and -(2**31) <= value < 2**31
+        else:
+            valid = type(value) in (int, float) and not isinstance(value, bool) and math.isfinite(value)
         if not valid:
             raise ConfigurationError(f"{path}: {name} must be {kind} (finite, not null/bool)")
         effective[name] = value
@@ -134,6 +166,7 @@ def run_command(command: list[str], **kwargs) -> None:
 def build(config: dict) -> None:
     directory = config["build_directory"]
     parameters = detector_parameters(config["detector_config"])
+    sequence_parameters(config["detector_config"])
     directory.mkdir(parents=True, exist_ok=True)
     effective = directory / "test_detector_config.json"
     write_json(effective, parameters)

@@ -32,8 +32,9 @@ struct CandidateDiagnostic {
 
 struct Detection2D {
   SceneGeometry geometry;
-  // Legacy capped/fallback selection is intentionally preserved in this refactor.
+  // At most three accepted observations; optional Hough fallback is reported explicitly.
   std::vector<cv::Vec3f> circles;
+  bool hough_fallback_enabled{false};
   std::vector<CandidateDiagnostic> candidates;
   cv::Mat annotated, black_mask, blue_mask, roi_mask, adaptive_mask, blackhat_mask;
   bool frame_found{false};

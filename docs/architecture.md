@@ -74,4 +74,11 @@ Python 只负责配置、路径、构建/子进程和复现记录，不实现识
 算法参数类型来自同一个字段声明表，数值只维护在中央 YAML；生成 JSON 仅作为运行快照。
 
 二维结果不依赖篮筐存在、深度或 CameraInfo；三维与 TF 留在 ROS adapter，已有 CameraGeometry
-不变。跨帧身份和任务执行状态不属于此次二维解耦。详细边界见 [离线识别说明](offline_detection.md)。
+不变。详细边界见 [离线识别说明](offline_detection.md)。
+
+## 阶段顺序核心
+
+`lbot_vision_sequence` 是第二个 ROS-free 核心，只接收带时间戳的二维圆观测。它不做通用位置
+关联，而是针对固定“大→中→小”任务维护三个固定 ID，并在显式完成反馈后分别验证 3、2、1
+颗剩余目标。检测数量只用于 fail-closed 验证，不能改变任务阶段。ROS adapter 通过结构化消息和
+service 暴露状态；感知节点仍不发送机械臂动作。详细接口见 [螺母顺序身份与状态](nut_sequence.md)。

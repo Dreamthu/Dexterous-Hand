@@ -11,6 +11,18 @@ nut_detector_node:
     debug_image_topic: /nut_detection/debug_image
     publish_rate_hz: 5.0
 
+    # Stage-aware large -> medium -> small identity/status output. The count
+    # validates the current stage; only the event service advances the stage.
+    sequence_topic: /nut_detections/sequence
+    sequence_event_service: /nut_detections/set_state
+    sequence_stable_frames: 3
+    sequence_max_center_shift_px: 40.0
+    sequence_max_radius_change_ratio: 0.20
+    sequence_min_size_gap_ratio: 0.10
+    sequence_max_gap_ms: 1000.0
+    max_image_age_ms: 500.0
+    max_depth_delta_ms: 100.0
+
     # HSV/geometry values; tune only if the lighting or materials change.
     black_v_max: 90
     blue_h_min: 90
@@ -32,6 +44,8 @@ nut_detector_node:
     blackhat_threshold: 25.0
     min_nut_solidity: 0.72
     min_nut_circularity: 0.45
+    # Disabled by default: Hough used to pad 0--2 contour detections to three.
+    enable_hough_fallback: false
     hough_param2: 13.0
     min_nut_clearance_m: 0.003
     depth_min_m: 0.15

@@ -36,6 +36,9 @@ if(BUILD_TESTING)
   add_executable(nut_detector_core_test "../../src/lbot_vision/tests/nut_detector_core_test.cpp")
   target_link_libraries(nut_detector_core_test PRIVATE lbot_offline_io)
   add_test(NAME nut_detector_core_test COMMAND nut_detector_core_test "${DETECTOR_TEST_CONFIG}")
+  add_executable(nut_sequence_test "../../src/lbot_vision/tests/nut_sequence_test.cpp")
+  target_link_libraries(nut_sequence_test PRIVATE lbot_vision_sequence)
+  add_test(NAME nut_sequence_test COMMAND nut_sequence_test)
   add_executable(camera_geometry_offline_test
     "../../src/lbot_vision/tests/camera_geometry_test.cpp"
     "../../src/lbot_vision/src/core/camera_geometry.cpp")
