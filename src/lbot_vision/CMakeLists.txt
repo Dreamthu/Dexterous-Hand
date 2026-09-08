@@ -10,6 +10,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -19,6 +20,13 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
+include(detector_core.cmake)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/NutTarget.msg"
+  "msg/NutSequenceState.msg"
+  "srv/SetNutState.srv"
+  DEPENDENCIES geometry_msgs std_msgs)
 
 add_library(lbot_vision_geometry src/core/camera_geometry.cpp)
 target_include_directories(lbot_vision_geometry
@@ -33,17 +41,22 @@ target_include_directories(nut_detector_node PRIVATE ${OpenCV_INCLUDE_DIRS})
 ament_target_dependencies(nut_detector_node
   rclcpp sensor_msgs geometry_msgs std_msgs cv_bridge tf2 tf2_ros
   tf2_geometry_msgs)
-target_link_libraries(nut_detector_node lbot_vision_geometry ${OpenCV_LIBRARIES})
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(nut_detector_node lbot_vision_detector lbot_vision_sequence
+  lbot_vision_geometry ${OpenCV_LIBRARIES} "${cpp_typesupport_target}")
 
 if(BUILD_TESTING)
   enable_testing()
   add_executable(camera_geometry_test tests/camera_geometry_test.cpp)
   target_link_libraries(camera_geometry_test PRIVATE lbot_vision_geometry ${OpenCV_LIBRARIES})
   add_test(NAME camera_geometry_test COMMAND camera_geometry_test)
+  add_executable(nut_sequence_test tests/nut_sequence_test.cpp)
+  target_link_libraries(nut_sequence_test PRIVATE lbot_vision_sequence)
+  add_test(NAME nut_sequence_test COMMAND nut_sequence_test)
 endif()
 
 install(
-  TARGETS lbot_vision_geometry
+  TARGETS lbot_vision_geometry lbot_vision_detector lbot_vision_sequence
   EXPORT export_lbot_vision_geometry
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -54,7 +67,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 ament_export_targets(export_lbot_vision_geometry HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
-ament_export_dependencies(OpenCV)
+ament_export_dependencies(OpenCV rosidl_default_runtime)
 
 # The old motion prototype is intentionally kept under experimental/ but is
 # not built. It contains placeholder poses and must not be exposed as a

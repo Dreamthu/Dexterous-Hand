@@ -5,12 +5,12 @@
 
 ## 目录关系
 
-无论三个目录位于哪一个父目录，都必须保持如下同级关系：
+默认配置使用以下同级目录；实际目录名可通过本地配置覆盖：
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库：比赛代码、配置、工具和入口
 ├── OrbbecSDK_ROS2/     # 静态外部相机 SDK/已编译工作区
-└── Dexterous-Hand/     # 静态外部机器人 SDK，不再包含 lbot_vision（主办方提供的SDK）
+└── lbot_ws/            # 静态外部机器人 SDK/工作区，包含 src/lbot_arm_interfaces
 ```
 
 仓库内部：
@@ -35,6 +35,18 @@ linkerbot_ws/
 ```
 
 ## 快速开始
+
+外部路径以 `config/workspace.env` 为默认值。本机目录不同时，新建被 Git 忽略的
+`config/workspace.local.env`，只填写需要覆盖的变量，例如：
+
+```bash
+LINKERBOT_CAMERA_WORKSPACE=../OrbbecSDK_ROS2
+LINKERBOT_ROBOT_WORKSPACE=../Dexterous-Hand
+```
+
+相对路径始终相对本仓库根目录；不要将个人绝对路径提交到共享配置。外部机器人工作区
+必须包含 `src/lbot_arm_interfaces/package.xml`。本仓库自身即使也叫 `Dexterous-Hand`，
+仍不能代替外部机器人 SDK。
 
 首次构建：
 
@@ -84,13 +96,36 @@ cd linkerbot_ws
 遇到灰色窗口、深度流未启动或 rqt 卸载警告时，参见
 [运行与故障排查](docs/troubleshooting.md)。
 
+## 无硬件二维识别调试
+
+无需 ROS、相机或机器人，可在安装 C++17 / CMake / OpenCV 4 开发库 / PyYAML 后使用：
+
+```bash
+bash scripts/build_offline.sh
+bash scripts/test_offline.sh
+bash scripts/run_detector_offline.sh artifacts/datasets/scene_001.png
+```
+
+Windows 提供同名 `.ps1` 入口。配置加载、离线检测和 `--help` 不依赖 POSIX 相机锁；
+真实相机入口仍要求 Linux/POSIX 与 ROS，Windows 上会明确拒绝启动。离线和现场 ROS 节点共用 C++ 检测核心，阈值仍只从
+`config/vision/nut_detector.yaml` 读取。原图、配置快照、掩膜、候选拒绝原因和结果写入
+被 Git 忽略的 `artifacts/offline_detection/`。
+
+静态离线回放仍是逐张独立检测，不输出可执行抓取坐标。ROS 感知节点另外接入了固定任务专用的
+阶段顺序模块：初始稳定识别三颗后固定 `nut_large/nut_medium/nut_small`，只有外部明确的
+`start/complete/retry/reset` 反馈才推进 3→2→1 阶段，目标消失不会自动判定完成。它不是
+通用空间跟踪器，剩余目标仍按当前像素尺寸重新排序。详见
+[离线识别说明](docs/offline_detection.md)、[螺母顺序身份与状态](docs/nut_sequence.md) 和
+[2026-09-08 交接/提交说明](docs/nut_sequence_changes.md)。
+
 ## 配置入口
 
 - `config/workspace.env`：ROS、外部工作区路径和低内存构建并行度。
-- `config/camera/gemini2.yaml`：相机 profile、流开关及内参文件。
+- `config/camera/gemini2.yaml`：相机 profile、流开关及 IMU 接口；内参来自驱动 CameraInfo。
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
+- `config/vision/offline.yaml`：离线构建目录、输出目录和低并发构建设置。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
-- `- `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
+- `config/experimental/nut_task.yaml`：仅用于保存旧运动原型参数，不属于运行入口。
 
 
 ## 安全边界
@@ -103,3 +138,6 @@ cd linkerbot_ws
 继续开发前请阅读 [开发交接规范](HANDOFF.md)。更多信息见
 [架构说明](docs/architecture.md)、[开发约定](docs/development.md)、
 [运行与故障排查](docs/troubleshooting.md) 和 [迁移来源](docs/provenance.md)。
+
+本次 main/branch 整合结果、验证边界和 PR 验收清单见
+[2026-09-08 整合记录](docs/integration_20260908.md)。

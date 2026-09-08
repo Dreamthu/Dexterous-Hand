@@ -1,0 +1,10 @@
+std_msgs/Header header
+string session_id
+uint64 round_id
+bool initialized
+bool observation_valid
+uint32 observed_count
+uint32 expected_count
+uint8 current_target_id
+string status
+NutTarget[] targets

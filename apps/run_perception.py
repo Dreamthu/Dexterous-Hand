@@ -73,8 +73,11 @@ def main() -> int:
     except KeyboardInterrupt:
         return_code = 130
     finally:
-        for process in reversed(processes):
-            stop_process(process)
+        try:
+            for process in reversed(processes):
+                stop_process(process)
+        finally:
+            camera_lock.close()
     return return_code
 
 

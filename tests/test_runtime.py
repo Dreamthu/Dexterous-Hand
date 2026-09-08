@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -18,6 +19,10 @@ from linkerbot.runtime import (
 
 class RuntimeConfigurationTests(unittest.TestCase):
     def test_camera_lock_rejects_a_second_entry_point(self) -> None:
+        if os.name != "posix":
+            with self.assertRaisesRegex(ConfigurationError, "require Linux/POSIX"):
+                acquire_camera_lock()
+            return  # Windows refusal is tested; POSIX contention requires Linux.
         with tempfile.TemporaryDirectory() as runtime_directory:
             with patch.dict(os.environ, {"XDG_RUNTIME_DIR": runtime_directory}):
                 first_lock = acquire_camera_lock()
@@ -58,9 +63,9 @@ class RuntimeConfigurationTests(unittest.TestCase):
 
     def test_detector_is_direct_executable_with_central_config(self) -> None:
         command = detector_command(require_built=False)
-        self.assertTrue(command[0].endswith("/lbot_vision/nut_detector_node"))
+        self.assertEqual(Path(command[0]), REPOSITORY_ROOT / "install/lbot_vision/lib/lbot_vision/nut_detector_node")
         self.assertEqual(command[1:3], ["--ros-args", "--params-file"])
-        self.assertTrue(command[3].endswith("/config/vision/nut_detector.yaml"))
+        self.assertEqual(Path(command[3]), REPOSITORY_ROOT / "config/vision/nut_detector.yaml")
 
     def test_viewer_resolves_ros_package_executable(self) -> None:
         command = viewer_command()

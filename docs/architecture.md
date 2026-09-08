@@ -41,13 +41,14 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 半径估算都经过该模块去畸变。
 
 深度注册由驱动使用设备内部的彩色—深度外参完成。相机到机器人或现场的外参不属于
-设备出厂参数，未来由独立工具求解并通过 TF 接入。两者不得放入同一配置文件或相互覆盖。
+设备出厂参数，由独立 R8/ArUco 外参工具求解并通过 TF 接入。两者不得放入同一配置文件或相互覆盖。
 
 ## 外部库
 
 `../OrbbecSDK_ROS2` 和外部机器人 SDK 不属于本仓库，也不会由运行脚本更新、拉取或修改。
-构建脚本只读取 `Dexterous-Hand/src/lbot_arm_interfaces` 并把生成物写入本仓库自己的
-`build/install/log`。
+机器人工作区默认是 `../lbot_ws`，由 `config/workspace.env` 配置；本机差异只写入被忽略的
+`config/workspace.local.env`。构建脚本只读取该工作区的 `src/lbot_arm_interfaces`，并把
+生成物写入本仓库自己的 `build/install/log`。
 
 ## 参数
 
@@ -62,3 +63,33 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 - 急停、关节状态、工作空间和 TF 检查；
 - 明确的超时与失败状态；
 - 仿真/录包验证后才能连接真实机械臂。
+
+## 二维核心与离线适配（任务一）
+
+`src/lbot_vision/detector_core.cmake` 定义共享 `lbot_vision_detector` 目标，由 ROS package
+和 `tools/offline_detection` 的独立 CMake 工程复用。`detect_2d` 只处理 BGR8 与普通配置结构。
+场景几何、轮廓过滤、Hough fallback、掩膜和候选诊断均在此库中，ROS 节点不再保留第二份算法。
+
+离线入口遵循 `scripts -> apps -> linkerbot/offline.py -> C++ 文件适配 -> 检测核心`。
+Python 只负责配置、路径、构建/子进程和复现记录，不实现识别算法。
+算法参数类型来自同一个字段声明表，数值只维护在中央 YAML；生成 JSON 仅作为运行快照。
+
+二维结果不依赖篮筐存在、深度或 CameraInfo；三维与 TF 留在 ROS adapter，已有 CameraGeometry
+不变。详细边界见 [离线识别说明](offline_detection.md)。
+
+## 阶段顺序核心
+
+`lbot_vision_sequence` 是第二个 ROS-free 核心，只接收带时间戳的二维圆观测。它不做通用位置
+关联，而是针对固定“大→中→小”任务维护三个固定 ID，并在显式完成反馈后分别验证 3、2、1
+颗剩余目标。检测数量只用于 fail-closed 验证，不能改变任务阶段。ROS adapter 通过结构化消息和
+service 暴露状态；感知节点仍不发送机械臂动作。详细接口见 [螺母顺序身份与状态](nut_sequence.md)。
+
+## 平台边界与缺输入诊断
+
+`runtime.py` 中路径和 YAML 配置工具可在 Windows 使用；POSIX `fcntl` 仅在实际申请
+相机锁时导入。Windows 不会因此失去离线入口，也不会假装支持真实 ROS 相机启动。
+感知进程退出时显式释放相机锁；启动相机的 exec 入口继续保留锁文件描述符。
+
+ROS 节点先检查 RGB 时效、复用二维核心并更新 sequence，再检查深度和 CameraInfo。
+缺少定位输入时发布带 `waiting_for_*` 原因的调试图和无三维位置的二维状态；不能绕过
+稳定帧、阶段反馈或图像时效检查，也不能把缺少定位数据当成抓取成功。

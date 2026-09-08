@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import os
 import tempfile
 from pathlib import Path
@@ -20,26 +19,49 @@ class ConfigurationError(RuntimeError):
 
 
 def acquire_camera_lock() -> TextIO:
-    """Prevent multiple application entry points from owning one USB camera."""
+    """Hold the POSIX camera lock; importing offline/config tools stays portable."""
+    if os.name != "posix":
+        raise ConfigurationError(
+            "Live camera applications require Linux/POSIX with ROS. "
+            "Windows supports scripts/build_offline.ps1 and scripts/test_offline.ps1."
+        )
+    # Do not import fcntl at module scope: the ROS-free adapter shares this module.
+    try:
+        import fcntl
+    except ImportError as error:
+        raise ConfigurationError(
+            "Live camera locking requires Python fcntl on Linux/POSIX."
+        ) from error
+
     runtime_directory = Path(os.environ.get("XDG_RUNTIME_DIR", tempfile.gettempdir()))
     lock_path = runtime_directory / f"linkerbot-camera-{os.getuid()}.lock"
-    lock_file = lock_path.open("a+", encoding="utf-8")
+    lock_file = None
     try:
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError as error:
+        lock_file = lock_path.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            lock_file.seek(0)
+            owner = lock_file.read().strip()
+            owner_hint = f" (PID {owner})" if owner else ""
+            raise ConfigurationError(
+                "A camera application is already running"
+                f"{owner_hint}. Stop it before starting another one."
+            ) from error
         lock_file.seek(0)
-        owner = lock_file.read().strip()
-        lock_file.close()
-        owner_hint = f" (PID {owner})" if owner else ""
+        lock_file.truncate()
+        lock_file.write(str(os.getpid()))
+        lock_file.flush()
+        return lock_file
+    except (OSError, ConfigurationError) as error:
+        if lock_file is not None:
+            lock_file.close()
+        if isinstance(error, ConfigurationError):
+            raise
         raise ConfigurationError(
-            "A camera application is already running"
-            f"{owner_hint}. Stop it before starting another one."
+            f"Cannot acquire camera lock at {lock_path}: {error}. "
+            "Check XDG_RUNTIME_DIR and directory permissions."
         ) from error
-    lock_file.seek(0)
-    lock_file.truncate()
-    lock_file.write(str(os.getpid()))
-    lock_file.flush()
-    return lock_file
 
 
 def repository_path(value: str | Path) -> Path:

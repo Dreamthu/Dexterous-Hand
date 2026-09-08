@@ -1,0 +1,11 @@
+string session_id
+uint64 round_id
+uint64 event_sequence
+# 1=nut_large, 2=nut_medium, 3=nut_small; reset uses 0.
+uint8 target_id
+# start | complete | retry | reset. This records external results and never commands motion.
+string action
+---
+bool accepted
+string reason
+uint64 round_id
