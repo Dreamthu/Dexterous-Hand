@@ -1,0 +1,7 @@
+# Copy this file to environment.local only when the terminal does not already
+# source the required ROS installations. Values may be absolute paths on the
+# deployment computer; no machine-specific paths are stored in source code.
+
+# ARUCO_CALIBRATION_ROS_SETUP=/opt/ros/<distro>/setup.bash
+# ARUCO_CALIBRATION_CAMERA_SETUP=/path/to/camera_overlay/install/setup.bash
+# ARUCO_CALIBRATION_ROBOT_SETUP=/path/to/robot_overlay/install/setup.bash

@@ -1,0 +1,57 @@
+schema_version: 1
+calibration_type: eye_to_hand
+
+# Fixed overhead Gemini 2: solve base_torso_root <- camera_color_optical_frame.
+frames:
+  base_frame: base_torso_root
+  camera_frame: camera_color_optical_frame
+  robot_pose_child_frame: arm_right_R8_Link
+
+# The calibration tool is read-only with respect to the robot. It only consumes
+# the right-arm pose published by the vendor driver.
+topics:
+  color_image: /camera/color/image_raw
+  color_camera_info: /camera/color/camera_info
+  robot_pose: /robot1/right_arm/pose_states
+
+# Board shown in the supplied photograph. Before collecting data, measure the
+# BLACK square side and the white gap with a ruler/caliper and update these two
+# values if they are not exactly 40 mm and 10 mm. Print scaling is a dominant
+# source of translation error.
+board:
+  dictionary: DICT_6X6_250
+  markers_x: 3
+  markers_y: 3
+  marker_length_m: 0.040
+  marker_separation_m: 0.010
+  first_marker_id: 0
+
+capture:
+  minimum_markers: 5
+  maximum_reprojection_rms_px: 1.5
+  maximum_sync_delta_s: 0.12
+  stationary_window_s: 0.40
+  maximum_stationary_translation_m: 0.002
+  maximum_stationary_rotation_deg: 0.30
+  calibration_dataset: artifacts/right_wrist_calibration.json
+  validation_dataset: artifacts/right_wrist_validation.json
+  save_images: true
+
+solve:
+  method: PARK
+  minimum_samples: 15
+  outlier_translation_m: 0.015
+  outlier_rotation_deg: 2.0
+  maximum_outlier_iterations: 5
+  result: artifacts/gemini2_to_base.yaml
+
+# These gates measure consistency, not absolute robot accuracy. A failed result
+# is still written for diagnosis, but publish-tf refuses to publish it.
+quality:
+  minimum_translation_span_m: 0.12
+  minimum_rotation_span_deg: 35.0
+  minimum_validation_samples: 6
+  maximum_training_translation_rms_m: 0.008
+  maximum_training_rotation_rms_deg: 1.5
+  maximum_validation_translation_rms_m: 0.010
+  maximum_validation_rotation_rms_deg: 2.0

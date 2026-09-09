@@ -1,0 +1,6 @@
+# For a non-ROS Python environment. On a ROS computer, prefer the system OpenCV
+# used by cv_bridge and install dependencies with rosdep (see package.xml).
+numpy>=1.23
+PyYAML>=6.0
+Pillow>=9.0
+opencv-contrib-python>=4.6,<5

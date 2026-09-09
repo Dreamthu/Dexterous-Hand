@@ -1,0 +1,6 @@
+/artifacts/*
+!/artifacts/.gitkeep
+/config/environment.local
+/.venv/
+__pycache__/
+*.py[cod]
