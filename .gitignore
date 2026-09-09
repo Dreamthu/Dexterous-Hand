@@ -2,6 +2,132 @@
 /build/
 /install/
 /log/
+
+# Keep generated output out of nested package checkouts as well.  Existing
+# tracked files remain tracked, but new build products are ignored.
+build/
+install/
+log/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+Testing/
+_deps/
+.colcon/
+.colcon_ignore
+COLCON_IGNORE
+AMENT_IGNORE
+devel/
+build_isolated/
+devel_isolated/
+.obj-x86_64-linux-gnu/
+logs/
+
+# C/C++ compiler and linker products (the checked-in SDK libraries are kept
+# because .gitignore never affects files that are already tracked).
+*.d
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.gch
+*.pch
+*.exe
+*.out
+*.app
+
+# External SDK checkouts.  They are read-only siblings of this repository;
+# these entries also protect against accidentally cloning one into the tree.
+/Dexterous-Hand/
+/OrbbecSDK_ROS2/
+
+# Common ROS recording output
+*.bag
+*.bag.active
+*.db3
+*.mcap
+rosbag2_*/
+.ros/
+*.log
+*.pcd
+
+# ROS 1/ROS 2 generated interface and package markers
+msg/*Action.msg
+msg/*ActionFeedback.msg
+msg/*ActionGoal.msg
+msg/*ActionResult.msg
+msg/*Feedback.msg
+msg/*Goal.msg
+msg/*Result.msg
+msg/_*.py
+srv/_*.py
+*.cfgc
+CATKIN_IGNORE
+
+# Python packaging, test and coverage output
+.Python
+*.egg
+*.egg-info/
+.eggs/
+dist/
+sdist/
+wheels/
+pip-wheel-metadata/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.ipynb_checkpoints/
+.pyre/
+.pytype/
+cython_debug/
+*$py.class
+.dmypy.json
+dmypy.json
+.pdm.toml
+__pypackages__/
+.ropeproject/
+.spyderproject
+.spyproject
+
+# Temporary files created by editors and desktop tools
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Additional IDE/project metadata
+.history/
+*.code-workspace
+*.vsix
+.project
+.cproject
+CMakeLists.txt.user
+qtcreator-*
+*.user
 orbbec_ws/build/
 orbbec_ws/install/
 orbbec_ws/install2/
@@ -33,8 +159,13 @@ __pycache__/
 
 # Local overrides and crash output
 config/*.local.env
+.env
+.env.*
+!.env.example
+*.local
 *.core
 core.*
+nohup.out
 
 # Offline datasets and replay output (may contain private camera images).
 /artifacts/offline_detection/
