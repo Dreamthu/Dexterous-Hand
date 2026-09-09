@@ -1,0 +1,46 @@
+rerun_visualizer:
+  ros__parameters:
+    # This node only subscribes to ROS data. It has no arm service clients or
+    # command publishers, so it is safe to run with any task mode.
+    application_id: lbot_task
+    viewer_mode: spawn  # spawn | connect | none
+    viewer_port: 9876
+    viewer_url: rerun+http://127.0.0.1:9876/proxy
+    # Leave empty to use the URDF installed with lbot_rerun.
+    urdf_path: ""
+
+    # base_link is the midpoint between the two shoulders, matching the arm
+    # controller and the task/vision coordinate convention.
+    base_frame: base_link
+    robot_namespace: robot1
+    model_entity: world/base_link/robot/left
+    camera_entity: world/base_link/camera
+    pointcloud_entity: world/base_link/perception/point_cloud
+    tf_timeout_s: 0.05
+
+    joint_topic: /robot1/left_arm/joint_states
+    pose_topic: /robot1/left_arm/pose_states
+    hand_topic: /robot1/left_hand/set_l6_joint
+    detection_topic: /nut_detections
+    sequence_topic: /nut_detections/sequence
+    slots_topic: /nut_slots
+    camera_info_topic: /camera/color/camera_info
+    color_topic: /camera/color/image_raw
+    pointcloud_topic: /camera/depth/color/points
+
+    # Bound Rerun traffic when the Gemini2 point-cloud stream is enabled.
+    publish_cloud: true
+    max_cloud_points: 50000
+    cloud_stride: 2
+    log_camera_image: false
+    log_pose_state: true
+
+    # These values drive only the display model. They mirror the current
+    # task configuration and must be updated when O6 calibration changes.
+    hand_open: [255, 40, 255, 255, 255, 255]
+    # ROS parameters are scalar arrays, so the three six-byte profiles are
+    # concatenated in large, medium, small order.
+    hand_closed: [0, 40, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0]
+
+    # Set an absolute .rrd path to save a replay when the node exits.
+    recording_path: ""
