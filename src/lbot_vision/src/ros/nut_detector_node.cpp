@@ -70,6 +70,8 @@ public:
 #include "lbot_vision/detector_fields.inc"
 #undef LBOT_DETECTOR_FIELD
     detector_config_.validate();
+    detector_ = std::make_unique<lbot_vision::TemporalDetector>(
+      detector_config_, declare_parameter("frame_hold_ms", 3000.0));
     lbot_vision::NutSequenceConfig sequence_config;
 #define LBOT_SEQUENCE_FIELD(type, name) sequence_config.name = declare_parameter<type>(#name);
 #include "lbot_vision/sequence_fields.inc"
@@ -133,6 +135,7 @@ private:
   bool use_tf_{true};
   double publish_rate_hz_{5.0};
   lbot_vision::DetectorConfig detector_config_;
+  std::unique_ptr<lbot_vision::TemporalDetector> detector_;
   std::unique_ptr<lbot_vision::NutSequence> sequence_;
   std::string session_id_;
   std_msgs::msg::Header observation_header_;
@@ -310,7 +313,8 @@ private:
   {
     if (!color_msg_) return;
     if (!color_is_fresh()) {
-      sequence_->invalidate("stale_color_image"); clear_poses(); publish_sequence_state(); return;
+      sequence_->invalidate("stale_color_image", false);
+      clear_poses(); publish_sequence_state(); return;
     }
     const auto stamp_ns = rclcpp::Time(color_msg_->header.stamp).nanoseconds();
     if (stamp_ns == last_processed_ns_) return;  // timers are not new observations
@@ -331,7 +335,7 @@ private:
     }
     lbot_vision::Detection2D observation;
     try {
-      observation = lbot_vision::detect_2d(color, detector_config_);
+      observation = detector_->detect(color, stamp_ns / 1000000);
     } catch (const std::exception &error) {
       RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 3000, "2D detection failed: %s", error.what());
       sequence_->invalidate("detection_2d_failed"); publish_sequence_state();
@@ -356,8 +360,12 @@ private:
                            "Black-frame candidates:%s", frame_debug_log.str().c_str());
     }
     const auto &geometry = observation.geometry;
+    // A held region may confirm newly detected nuts, but missing nuts in a
+    // region whose border is not visible must not count as a successful pick.
+    const bool frame_valid = observation.frame_found &&
+      (!observation.frame_reused || observation.circles.size() == sequence_->snapshot().expected_count);
     const auto &sequence_snapshot = sequence_->observe(
-      stamp_ns / 1000000, observation.frame_found, color.size(), observation.circles);
+      stamp_ns / 1000000, frame_valid, color.size(), observation.circles);
     publish_sequence_state();  // 2D identity/state remains available without basket/depth/TF.
     if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
       publish_status(sequence_snapshot.status, observation.circles.size());

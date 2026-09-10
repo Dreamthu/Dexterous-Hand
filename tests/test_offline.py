@@ -36,8 +36,9 @@ class OfflineConfigurationTests(unittest.TestCase):
         self.assertEqual(len(params), 27)
         sequence = sequence_parameters(config["detector_config"])
         self.assertEqual(sequence["sequence_stable_frames"], 3)
-        self.assertEqual(sequence["sequence_min_size_gap_ratio"], 0.10)
-        self.assertEqual(len(sequence), 5)
+        self.assertEqual(sequence["sequence_min_size_gap_ratio"], 0.0)
+        self.assertEqual(sequence["sequence_confirmation_window_ms"], 3000.0)
+        self.assertEqual(len(sequence), 6)
 
     def test_missing_detector_field(self):
         path = self.yaml_file({"nut_detector_node": {"ros__parameters": {}}})
@@ -136,13 +137,13 @@ class OfflineConfigurationTests(unittest.TestCase):
         node = (REPOSITORY_ROOT / "src/lbot_vision/src/ros/nut_detector_node.cpp").read_text(encoding="utf-8")
         self.assertIn("include(detector_core.cmake)", ros)
         self.assertIn("detector_core.cmake", standalone)
-        self.assertIn("lbot_vision::detect_2d", node)
+        self.assertIn("lbot_vision::TemporalDetector", node)
         self.assertIn("lbot_vision_sequence", ros)
         self.assertIn("nut_sequence_test", standalone)
         self.assertIn("sequence_->observe", node)
         self.assertNotIn("need_exactly_three_nuts", node)
         self.assertNotIn("cv::HoughCircles", node)
-        self.assertLess(node.index("lbot_vision::detect_2d"), node.index("if (!depth_msg_"))
+        self.assertLess(node.index("detector_->detect"), node.index("if (!depth_msg_"))
         for name in ("build_offline", "run_detector_offline", "test_offline"):
             script = (REPOSITORY_ROOT / f"scripts/{name}.sh").read_text(encoding="utf-8")
             self.assertNotIn('source "', script)

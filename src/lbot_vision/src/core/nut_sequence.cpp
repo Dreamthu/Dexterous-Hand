@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 #include <stdexcept>
 
 namespace lbot_vision {
@@ -12,6 +13,8 @@ void NutSequenceConfig::validate() const
     if (!valid) throw std::invalid_argument(std::string("Invalid nut sequence configuration: ") + message);
   };
   require(sequence_stable_frames >= 1, "sequence_stable_frames must be >= 1");
+  require(std::isfinite(sequence_confirmation_window_ms) && sequence_confirmation_window_ms >= 0.0,
+          "sequence_confirmation_window_ms must be finite and >= 0");
   require(std::isfinite(sequence_max_center_shift_px) && sequence_max_center_shift_px >= 0.0,
           "sequence_max_center_shift_px must be finite and >= 0");
   require(std::isfinite(sequence_max_radius_change_ratio) &&
@@ -56,6 +59,29 @@ bool NutSequence::matches(const cv::Vec3f &a, const cv::Vec3f &b) const
          radius_change <= config_.sequence_max_radius_change_ratio;
 }
 
+bool NutSequence::same_layout(
+    const std::vector<cv::Vec3f> &a, const std::vector<cv::Vec3f> &b) const
+{
+  if (a.size() != b.size()) return false;
+  // At most three targets: match positions without relying on fluctuating
+  // radius rankings. Each observation must match a different target.
+  std::vector<std::size_t> indices(b.size());
+  std::iota(indices.begin(), indices.end(), 0);
+  do {
+    bool matched = true;
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      if (std::hypot(static_cast<double>(a[i][0] - b[indices[i]][0]),
+                     static_cast<double>(a[i][1] - b[indices[i]][1])) >
+          config_.sequence_max_center_shift_px) {
+        matched = false;
+        break;
+      }
+    }
+    if (matched) return true;
+  } while (std::next_permutation(indices.begin(), indices.end()));
+  return false;
+}
+
 std::vector<NutSequence::OrderedObservation> NutSequence::order_by_size(
     const std::vector<cv::Vec3f> &observations) const
 {
@@ -70,12 +96,13 @@ std::vector<NutSequence::OrderedObservation> NutSequence::order_by_size(
   return ordered;
 }
 
-void NutSequence::invalidate(const std::string &reason)
+void NutSequence::invalidate(const std::string &reason, bool clear_confirmation)
 {
   snapshot_.observation_valid = false;
   snapshot_.status = reason;
   stable_count_ = 0;
   stability_seed_.clear();
+  if (clear_confirmation) confirmations_.clear();
   for (auto &target : snapshot_.targets) {
     target.visible = false;
     target.observation_index = -1;
@@ -103,16 +130,22 @@ const NutSequenceSnapshot &NutSequence::observe(
   const bool observation_gap = last_stamp_ms_ >= 0 &&
       static_cast<double>(stamp_ms - last_stamp_ms_) > config_.sequence_max_gap_ms;
   last_stamp_ms_ = stamp_ms;
-  if (observation_gap) {
+  const bool windowed = config_.sequence_confirmation_window_ms > 0.0;
+  while (!confirmations_.empty() &&
+         static_cast<double>(stamp_ms - confirmations_.front().stamp_ms) >
+           config_.sequence_confirmation_window_ms) {
+    confirmations_.pop_front();
+  }
+  if (observation_gap && !windowed) {
     invalidate("observation_gap");
     return snapshot_;
   }
   if (!frame_found || image_size.width <= 0 || image_size.height <= 0) {
-    invalidate("frame_not_found");
+    invalidate("frame_not_found", !windowed);
     return snapshot_;
   }
   if (observations.size() > 3) {
-    invalidate("too_many_candidates");
+    invalidate("too_many_candidates", !windowed);
     return snapshot_;
   }
   for (const auto &circle : observations) {
@@ -125,7 +158,7 @@ const NutSequenceSnapshot &NutSequence::observe(
   }
 
   if (observations.size() != snapshot_.expected_count) {
-    invalidate("observation_count_mismatch");
+    invalidate("observation_count_mismatch", !windowed);
     return snapshot_;
   }
   if (snapshot_.expected_count == 0) {
@@ -139,24 +172,36 @@ const NutSequenceSnapshot &NutSequence::observe(
     const double larger = ordered[i - 1].circle[2];
     const double gap = (larger - ordered[i].circle[2]) / larger;
     if (gap < config_.sequence_min_size_gap_ratio) {
-      invalidate("ambiguous_pixel_sizes");
+      invalidate("ambiguous_pixel_sizes", !windowed);
       return snapshot_;
     }
   }
 
-  bool stable = stability_seed_.size() == ordered.size();
-  if (stable) {
-    for (std::size_t i = 0; i < ordered.size(); ++i) {
-      if (!matches(stability_seed_[i], ordered[i].circle)) {
-        stable = false;
-        break;
+  if (windowed) {
+    confirmations_.erase(std::remove_if(confirmations_.begin(), confirmations_.end(),
+      [&](const Confirmation &sample) {return !same_layout(sample.observations, observations);}),
+      confirmations_.end());
+    confirmations_.push_back({stamp_ms, observations});
+    while (confirmations_.size() > static_cast<std::size_t>(config_.sequence_stable_frames)) {
+      confirmations_.pop_front();
+    }
+    stable_count_ = static_cast<int>(confirmations_.size());
+    snapshot_.status = "confirming_window";
+  } else {
+    bool stable = stability_seed_.size() == ordered.size();
+    if (stable) {
+      for (std::size_t i = 0; i < ordered.size(); ++i) {
+        if (!matches(stability_seed_[i], ordered[i].circle)) {
+          stable = false;
+          break;
+        }
       }
     }
+    stability_seed_.clear();
+    for (const auto &item : ordered) stability_seed_.push_back(item.circle);
+    stable_count_ = stable ? std::min(stable_count_ + 1, config_.sequence_stable_frames) : 1;
+    snapshot_.status = snapshot_.initialized ? "stabilizing_stage" : "stabilizing_three";
   }
-  stability_seed_.clear();
-  for (const auto &item : ordered) stability_seed_.push_back(item.circle);
-  stable_count_ = stable ? std::min(stable_count_ + 1, config_.sequence_stable_frames) : 1;
-  snapshot_.status = snapshot_.initialized ? "stabilizing_stage" : "stabilizing_three";
   if (stable_count_ < config_.sequence_stable_frames) return snapshot_;
 
   const std::size_t first_remaining = completed_count();
@@ -200,6 +245,7 @@ bool NutSequence::event(std::uint64_t round, std::uint64_t event_sequence, int t
     initialize_targets();
     stability_seed_.clear();
     stable_count_ = 0;
+    confirmations_.clear();
     last_stamp_ms_ = -1;
   } else {
     if (!snapshot_.initialized || target_id < 1 || target_id > 3) {

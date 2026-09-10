@@ -75,6 +75,11 @@ if(BUILD_TESTING)
   add_executable(table_route_test tests/table_route_test.cpp)
   target_link_libraries(table_route_test PRIVATE lbot_control_core)
   add_test(NAME table_route_test COMMAND table_route_test)
+
+  add_executable(ros_vision_system_test tests/ros_vision_system_test.cpp)
+  target_link_libraries(ros_vision_system_test lbot_control_ros_vision_system)
+  ament_target_dependencies(ros_vision_system_test rclcpp geometry_msgs lbot_vision)
+  add_test(NAME ros_vision_system_test COMMAND ros_vision_system_test)
 endif()
 
 install(

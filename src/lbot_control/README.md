@@ -3,6 +3,23 @@
 `lbot_control` 只保留比赛所需的最小任务流程：左臂进入桌面、按大中小抓放、检查抓取结果、
 收回左臂。
 
+## 单包编译
+
+在工作区根目录执行，包内最多同时运行 2 个编译任务：
+
+```bash
+source /opt/ros/jazzy/setup.bash
+MAKEFLAGS="-j2" CMAKE_BUILD_PARALLEL_LEVEL=2 \
+  colcon build --packages-select lbot_control --executor sequential
+source install/local_setup.bash
+```
+
+单包编译要求本机已安装与当前源码匹配的 `lbot_motion`、`lbot_vision` 等依赖。
+从其他机器复制的 `build/`、`install/` 可能包含旧机器的绝对路径和失效符号链接；
+依赖需要重新构建时，可指定新的 `--build-base build/local_dependencies`，保留旧缓存。
+工作区脚本通过自身位置定位根目录，`config/workspace.env` 中的机器人工作区使用 `.`，
+直接读取本工作区的 `src/lbot_arm_interfaces`。
+
 ## 状态机
 
 ```text
@@ -75,6 +92,35 @@ ros2 launch lbot_control lbot_start_control.launch.py \
 当前 `lbot_start_control.launch.py` 用于跑通基础路线；视觉已经通过
 `RosVisionSystem` 接入，并可使用 `lbot_task.launch.py` 同时启动驱动、视觉节点和任务控制器。
 完整任务执行仍需先填写实机路线、灵巧手和工具标定参数。
+
+`lbot_task.launch.py` 默认同时打开检测画面 `/nut_detection/debug_image`，
+显示黑框、螺母和料筐的检测标记；窗口只订阅图像，不会额外启动检测节点。
+相机仍由终端 A 的 `./scripts/run_camera.sh` 启动，终端 B 继续发布已保存的外参。
+终端 C 的无运动校验命令为：
+
+```bash
+ros2 launch lbot_control lbot_task.launch.py \
+  start_driver:=true execute_task:=true task_mode:=validate
+```
+
+可加 `show_image:=false` 关闭窗口，或加 `image_topic:=/camera/color/image_raw`
+查看原始彩色画面。任务控制器退出时，检测节点和图像窗口随本次 launch 一起关闭。
+无图形桌面时使用 `show_image:=false`。
+
+视觉默认使用“3 秒内累计命中 3 次”的确认条件，允许中间短暂漏检，
+不再要求相邻螺母的像素尺寸至少相差 10%。次数和时间窗口在
+`config/vision/nut_detector.yaml` 中分别由 `sequence_stable_frames`、
+`sequence_confirmation_window_ms` 控制。初始场景仍需三颗螺母与三个格子的
+有效三维坐标；控制端等待同一帧的完整坐标，不会因中间的二维检测消息提前失败。
+坐标系、关节限位、IK 和已有标定条件继续生效。
+`task_mode:=pregrasp` 仍只移动到大螺母的预抓位置；`full` 才执行完整抓放。
+
+固定亮度阈值未找到黑框时，检测器会尝试局部对比度提取细边线，仍检查区域形状和内部亮度。
+为容忍细黑框边线的短暂漏检，检测器默认保留最近识别到的黑框区域 3 秒
+（`config/vision/nut_detector.yaml` 的 `frame_hold_ms`），画面会标记 `frame region held`。
+期间每帧重新检测螺母并计算深度坐标；不会沿用旧的螺母位置。区域超时、
+图像尺寸变化或时间戳回退后会失效。任务等待视觉场景的上限为 30 秒，
+控制台会分别提示等待视觉、IK 校验和开始运动，便于定位停在哪一步。
 
 完整任务启动（默认仍为检查模式，不执行运动）：
 

@@ -21,21 +21,27 @@
 
 ## 2. 稳定观测
 
-每个阶段必须连续满足以下条件，才会设置 `observation_valid=true`：
+默认采用时间窗口累计确认，当前帧满足以下条件且命中次数足够时，设置 `observation_valid=true`：
 
 1. 黑框存在，图像尺寸和圆观测有效；
 2. 当前观测数等于 `expected_count`；
-3. 按像素半径排序后，相邻尺寸差不小于 `sequence_min_size_gap_ratio`；
-4. 连续 `sequence_stable_frames` 帧中，排序后目标的中心移动和半径变化不超过配置阈值；
-5. 时间戳严格递增，帧间隔不超过 `sequence_max_gap_ms`。
+3. 在最近 3 秒内，同一组位置累计被识别到 3 次，允许中间黑框丢失或检测数量不足；
+4. 各帧目标中心可一一匹配，位移不超过 `sequence_max_center_shift_px`；半径波动不清空计数；
+5. 时间戳严格递增，同一帧不能重复计数。过期命中不计入窗口。
+
+当前默认不要求相邻像素尺寸至少相差 10%，仍按当前帧像素半径从大到小排序。
+漏检帧本身不会发布有效坐标；`retry`、`complete` 和 `reset` 会清空累计记录，下一阶段重新确认。
+把 `sequence_confirmation_window_ms` 设为 `0.0` 可恢复连续帧模式，此时半径变化阈值和
+`sequence_max_gap_ms` 重新参与稳定性判断。
 
 默认参数位于唯一配置源 `config/vision/nut_detector.yaml`：
 
 ```yaml
 sequence_stable_frames: 3
+sequence_confirmation_window_ms: 3000.0
 sequence_max_center_shift_px: 40.0
 sequence_max_radius_change_ratio: 0.20
-sequence_min_size_gap_ratio: 0.10
+sequence_min_size_gap_ratio: 0.0
 sequence_max_gap_ms: 1000.0
 ```
 

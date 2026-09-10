@@ -1,4 +1,4 @@
-"""Start the driver, running vision detector, and connected nut task controller."""
+"""Start the driver, vision detector, image viewer, and nut task controller."""
 
 import os
 
@@ -31,6 +31,12 @@ def generate_launch_description():
         DeclareLaunchArgument("execute_task", default_value="false"),
         DeclareLaunchArgument("task_mode", default_value="validate"),
         DeclareLaunchArgument(
+            "show_image", default_value="true",
+            description="Open the live image viewer alongside the task"),
+        DeclareLaunchArgument(
+            "image_topic", default_value="/nut_detection/debug_image",
+            description="Image topic to display; defaults to the detection overlay"),
+        DeclareLaunchArgument(
             "control_config", default_value=os.path.join(control_share, "config", "nut_task.yaml")),
         DeclareLaunchArgument(
             "vision_config", default_value=os.path.join(vision_share, "config", "nut_detector.yaml")),
@@ -45,6 +51,11 @@ def generate_launch_description():
             package="lbot_vision", executable="nut_detector_node",
             parameters=[LaunchConfiguration("vision_config")],
             condition=IfCondition(LaunchConfiguration("execute_task")),
+            output="screen"),
+        Node(
+            package="rqt_image_view", executable="rqt_image_view",
+            arguments=[LaunchConfiguration("image_topic")],
+            condition=IfCondition(LaunchConfiguration("show_image")),
             output="screen"),
         controller_node,
         RegisterEventHandler(

@@ -71,24 +71,29 @@ bool RosVisionSystem::slot_pose(
 SceneResult RosVisionSystem::initial_scene()
 {
   std::unique_lock<std::mutex> lock(mutex_);
-  const bool ready = condition_.wait_for(lock, config_.wait_timeout, [this]() {
-    if (!sequence_ || !slots_) return false;
-    return sequence_->initialized && sequence_->observation_valid &&
-           sequence_->expected_count == 3 && sequence_->current_target_id == 1 &&
-           slots_->poses.size() == 3;
-  });
-  if (!ready) return SceneResult::fail("timed out waiting for initial vision scene");
-
   SceneObservation scene;
   scene.frame_id = config_.base_frame;
-  for (std::size_t index = 0; index < 3; ++index) {
-    Pose6 nut, slot;
-    if (!target_pose(*sequence_, index, nut) || !slot_pose(*slots_, index, slot)) {
-      return SceneResult::fail("initial scene contains an invalid target or slot pose");
+  const bool ready = condition_.wait_for(lock, config_.wait_timeout, [this, &scene]() {
+    if (!sequence_ || !slots_) return false;
+    if (!sequence_->initialized || !sequence_->observation_valid ||
+        sequence_->expected_count != 3 || sequence_->current_target_id != 1 ||
+        slots_->poses.size() != 3 ||
+        stamp_ns(sequence_->header) != stamp_ns(slots_->header)) return false;
+    // The detector publishes 2D identity before the localized result. Wait
+    // for all current-frame 3D positions instead of failing on that interim update.
+    for (std::size_t index = 0; index < 3; ++index) {
+      Pose6 nut, slot;
+      if (!target_pose(*sequence_, index, nut) || !slot_pose(*slots_, index, slot)) return false;
+      scene.targets[index].size = static_cast<NutSize>(index);
+      scene.targets[index].nut = nut;
+      scene.targets[index].slot = slot;
     }
-    scene.targets[index].size = static_cast<NutSize>(index);
-    scene.targets[index].nut = nut;
-    scene.targets[index].slot = slot;
+    return true;
+  });
+  if (!ready) {
+    return SceneResult::fail("timed out waiting for initial vision scene; sequence=" +
+      (sequence_ ? sequence_->status : "not_received") + "; slots=" +
+      (slots_ ? std::to_string(slots_->poses.size()) : "not_received"));
   }
   return SceneResult::ok(scene);
 }

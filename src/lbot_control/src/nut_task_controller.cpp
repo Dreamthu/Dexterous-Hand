@@ -176,10 +176,13 @@ int main(int argc, char **argv)
     if (!vision_calibrated && task_mode != "validate") {
       throw std::runtime_error("vision_calibrated must be true for robot motion");
     }
+    RCLCPP_INFO(node->get_logger(), "waiting for confirmed 3D vision scene (timeout=%ld ms)",
+      static_cast<long>(vision_config.wait_timeout.count()));
     const auto observed = vision->initial_scene();
     if (!observed.success) throw std::runtime_error("initial scene failed: " + observed.message);
     const auto planned = lbot_control::build_motion_plan(observed.scene, plan_options);
     if (!planned.success) throw std::runtime_error(planned.message);
+    RCLCPP_INFO(node->get_logger(), "vision scene accepted; checking table route and IK");
     auto result = motion->prepare(planned.plan);
     if (!result.success) throw std::runtime_error(result.message);
 
@@ -195,6 +198,7 @@ int main(int argc, char **argv)
       throw std::runtime_error("tool_calibrated must be true for robot motion");
     }
     if (task_mode == "pregrasp") {
+      RCLCPP_INFO(node->get_logger(), "checks passed; starting table route, then LARGE pregrasp");
       result = motion->execute(lbot_control::MotionStage::MoveAboveTable);
       if (result.success) {
         result = motion->execute(

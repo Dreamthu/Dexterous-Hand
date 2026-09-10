@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
@@ -60,11 +61,28 @@ struct Detection2D {
   cv::Mat annotated, value_channel, black_mask_before_close, black_mask, blue_mask,
       frame_candidate_debug, roi_mask, adaptive_mask, blackhat_mask;
   bool frame_found{false};
+  bool frame_reused{false};
   bool basket_found{false};
 };
 
 // BGR8 only. No ROS, depth, intrinsics, filesystem or task-state dependencies.
 // Throws std::invalid_argument for an empty/wrong-type image or invalid config.
 Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config);
+
+// Holds only the frame region through short detection gaps. Nuts and basket
+// are always detected again from the current image; no target poses are cached.
+class TemporalDetector {
+public:
+  TemporalDetector(const DetectorConfig &config, double frame_hold_ms);
+  Detection2D detect(const cv::Mat &bgr, std::int64_t stamp_ms);
+
+private:
+  DetectorConfig config_;
+  double frame_hold_ms_;
+  cv::Size image_size_;
+  std::vector<cv::Point> frame_;
+  std::int64_t frame_stamp_ms_{-1};
+  std::int64_t last_stamp_ms_{-1};
+};
 
 }  // namespace lbot_vision

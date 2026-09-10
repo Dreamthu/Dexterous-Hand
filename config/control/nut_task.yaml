@@ -65,5 +65,5 @@
     sequence_topic: /nut_detections/sequence
     slots_topic: /nut_slots
     event_service: /nut_detections/set_state
-    vision_wait_timeout_ms: 10000
+    vision_wait_timeout_ms: 30000
     vision_service_timeout_ms: 3000

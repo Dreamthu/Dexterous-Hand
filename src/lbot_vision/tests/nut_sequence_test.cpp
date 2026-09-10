@@ -116,6 +116,67 @@ int main()
     ambiguous.observe(0, true, {640, 480}, close_sizes);
     require(ambiguous.snapshot().status == "ambiguous_pixel_sizes", "ambiguous sizes were accepted");
 
+    auto relaxed = config();
+    relaxed.sequence_confirmation_window_ms = 3000.0;
+    relaxed.sequence_min_size_gap_ratio = 0.0;
+    lbot_vision::NutSequence intermittent(relaxed);
+    intermittent.observe(0, true, {640, 480}, close_sizes);
+    intermittent.observe(200, false, {640, 480}, {});
+    require(!intermittent.snapshot().observation_valid, "missing frame reused old target positions");
+    // Radii may fluctuate and change ranking; spatially matching detections
+    // still confirm the same group, even across a gap longer than max_gap_ms.
+    auto fluctuating = close_sizes;
+    fluctuating[0][2] = 25;
+    intermittent.observe(1600, true, {640, 480}, fluctuating);
+    require(!intermittent.snapshot().initialized, "two hits passed the three-hit threshold");
+    intermittent.observe(1700, true, {640, 480}, {close_sizes[0]});
+    intermittent.observe(2500, true, {640, 480}, close_sizes);
+    require(intermittent.snapshot().observation_valid, "nonconsecutive hits did not confirm the group");
+    require(intermittent.snapshot().targets[0].last_seen_ms == 2500,
+            "confirmation did not use the current observation");
+    require(intermittent.event(1, 1, 1, "start", reason), "confirmed target could not start");
+    require(intermittent.event(1, 2, 1, "retry", reason), "confirmed target could not retry");
+    intermittent.observe(2600, true, {640, 480}, close_sizes);
+    require(!intermittent.snapshot().observation_valid, "retry reused pre-action confirmations");
+    intermittent.observe(2700, true, {640, 480}, close_sizes);
+    intermittent.observe(2800, true, {640, 480}, close_sizes);
+    require(intermittent.event(1, 3, 1, "start", reason), "fresh retry confirmations failed");
+    require(intermittent.event(1, 4, 1, "complete", reason), "confirmed target could not complete");
+    intermittent.observe(2900, true, {640, 480}, {close_sizes[1], close_sizes[2]});
+    require(!intermittent.snapshot().observation_valid, "next stage reused previous target confirmations");
+    require(intermittent.event(1, 5, 0, "reset", reason), "windowed reset failed");
+    intermittent.observe(3000, true, {640, 480}, close_sizes);
+    require(!intermittent.snapshot().initialized, "reset reused previous-round confirmations");
+
+    lbot_vision::NutSequence expired(relaxed);
+    expired.observe(0, true, {640, 480}, three);
+    expired.observe(200, true, {640, 480}, three);
+    expired.observe(3300, true, {640, 480}, three);
+    require(!expired.snapshot().observation_valid, "expired hits counted toward confirmation");
+    expired.observe(3400, true, {640, 480}, three);
+    require(!expired.snapshot().observation_valid, "expired history was revived");
+    expired.observe(3500, true, {640, 480}, three);
+    require(expired.snapshot().observation_valid, "fresh window did not confirm");
+
+    lbot_vision::NutSequence moved(relaxed);
+    moved.observe(0, true, {640, 480}, three);
+    moved.observe(100, true, {640, 480}, three);
+    auto elsewhere = three;
+    for (auto &circle : elsewhere) circle[1] += 100;
+    moved.observe(200, true, {640, 480}, elsewhere);
+    require(!moved.snapshot().observation_valid, "unrelated target locations shared confirmations");
+    moved.observe(200, true, {640, 480}, elsewhere);
+    require(moved.snapshot().status == "non_increasing_timestamp", "duplicate frame counted as a hit");
+    moved.observe(300, true, {640, 480}, elsewhere);
+    require(!moved.snapshot().observation_valid, "duplicate frame preserved confirmations");
+
+    auto invalid_window = config();
+    invalid_window.sequence_confirmation_window_ms = -1.0;
+    bool invalid_window_rejected = false;
+    try { lbot_vision::NutSequence invalid(invalid_window); }
+    catch (const std::invalid_argument &) { invalid_window_rejected = true; }
+    require(invalid_window_rejected, "negative confirmation window was accepted");
+
     auto bad = config();
     bad.sequence_max_gap_ms = std::numeric_limits<double>::quiet_NaN();
     bool rejected = false;

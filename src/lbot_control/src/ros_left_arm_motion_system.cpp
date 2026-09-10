@@ -1,6 +1,7 @@
 #include "lbot_control/ros_left_arm_motion_system.hpp"
 
 #include <cmath>
+#include <sstream>
 #include <thread>
 #include <utility>
 
@@ -51,14 +52,21 @@ MotionResult RosLeftArmMotionSystem::validate_target(
   const std::array<const Pose6 *, 6> poses{{
     &target.pregrasp, &target.grasp, &target.lift,
     &target.slot_pre, &target.slot_release, &target.slot_retreat}};
-  for (const auto *pose : poses) {
+  const std::array<const char *, 6> names{{
+    "pregrasp", "grasp", "lift", "slot_pre", "slot_release", "slot_retreat"}};
+  for (std::size_t index = 0; index < poses.size(); ++index) {
+    const auto *pose = poses[index];
     if (!finite_pose(*pose)) {
       return MotionResult::fail(std::string("non-finite pose for ") + to_string(target.size));
     }
     auto result = solve_ik(*pose, seed);
     if (!result.success) {
-      return MotionResult::fail(
-        std::string("IK validation failed for ") + to_string(target.size) + ": " + result.message);
+      std::ostringstream message;
+      message << "IK validation failed for " << to_string(target.size) << '/' << names[index]
+              << " in " << config_.base_frame << ": xyz=[" << pose->x << ',' << pose->y
+              << ',' << pose->z << "] rpy=[" << pose->roll << ',' << pose->pitch << ','
+              << pose->yaw << "]; " << result.message;
+      return MotionResult::fail(message.str());
     }
   }
   return MotionResult::ok();

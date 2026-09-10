@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -50,7 +51,7 @@ public:
   const NutSequenceSnapshot &snapshot() const { return snapshot_; }
 
   // Used by adapters when the source image itself is stale or invalid.
-  void invalidate(const std::string &reason);
+  void invalidate(const std::string &reason, bool clear_confirmation = true);
 
   // Explicit feedback only. Exact retries of the last accepted event are
   // idempotent; event_sequence must otherwise increase, including after reset.
@@ -62,11 +63,16 @@ private:
     int input_index{-1};
     cv::Vec3f circle{};
   };
+  struct Confirmation {
+    std::int64_t stamp_ms;
+    std::vector<cv::Vec3f> observations;
+  };
 
   NutSequenceConfig config_;
   NutSequenceSnapshot snapshot_;
   std::vector<cv::Vec3f> stability_seed_;
   int stable_count_{0};
+  std::deque<Confirmation> confirmations_;
   std::int64_t last_stamp_ms_{-1};
   std::uint64_t last_event_sequence_{0};
   std::uint64_t last_event_round_{0};
@@ -76,6 +82,8 @@ private:
   void initialize_targets();
   std::size_t completed_count() const;
   bool matches(const cv::Vec3f &a, const cv::Vec3f &b) const;
+  bool same_layout(const std::vector<cv::Vec3f> &a,
+                   const std::vector<cv::Vec3f> &b) const;
   std::vector<OrderedObservation> order_by_size(
       const std::vector<cv::Vec3f> &observations) const;
 };

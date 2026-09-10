@@ -10,15 +10,20 @@ nut_detector_node:
     slot_topic: /nut_slots
     debug_image_topic: /nut_detection/debug_image
     publish_rate_hz: 5.0
+    # Briefly retain the detected frame region; re-detect nuts in each new image.
+    frame_hold_ms: 3000.0
 
     # Stage-aware large -> medium -> small identity/status output. The count
     # validates the current stage; only the event service advances the stage.
     sequence_topic: /nut_detections/sequence
     sequence_event_service: /nut_detections/set_state
+    # Confirm 3 matching observations within 3 seconds; misses need not reset
+    # the count. Set the window to 0.0 to restore consecutive-frame checking.
     sequence_stable_frames: 3
+    sequence_confirmation_window_ms: 3000.0
     sequence_max_center_shift_px: 40.0
     sequence_max_radius_change_ratio: 0.20
-    sequence_min_size_gap_ratio: 0.10
+    sequence_min_size_gap_ratio: 0.0
     sequence_max_gap_ms: 1000.0
     max_image_age_ms: 500.0
     max_depth_delta_ms: 100.0

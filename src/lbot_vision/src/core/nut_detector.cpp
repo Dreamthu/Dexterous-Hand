@@ -177,7 +177,8 @@ public:
     return result;
   }
 
-  SceneGeometry find_geometry(const cv::Mat &bgr, cv::Mat &debug)
+  SceneGeometry find_geometry(const cv::Mat &bgr, cv::Mat &debug,
+                              const std::vector<cv::Point> &fallback_frame)
   {
     SceneGeometry geometry;
     cv::Mat hsv;
@@ -201,6 +202,25 @@ public:
     const double image_area = static_cast<double>(bgr.cols * bgr.rows);
     geometry.frame = best_frame_quadrilateral(
       black_mask, gray, image_area * config_.min_frame_area_ratio, image_area * config_.max_frame_area_ratio);
+    if (geometry.frame.empty()) {
+      // Thin borders may merge with shadows in the global HSV mask. Local
+      // contrast preserves their outline without relaxing the geometry checks.
+      cv::Mat local_mask;
+      cv::adaptiveThreshold(gray, local_mask, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                            cv::THRESH_BINARY_INV, 15, 10.0);
+      cv::morphologyEx(local_mask, local_mask, cv::MORPH_CLOSE,
+                      cv::getStructuringElement(cv::MORPH_RECT, {3, 3}));
+      const auto first_local = result_.frame_candidates.size();
+      geometry.frame = best_frame_quadrilateral(
+        local_mask, gray, image_area * config_.min_frame_area_ratio,
+        image_area * config_.max_frame_area_ratio);
+      for (auto index = first_local; index < result_.frame_candidates.size(); ++index)
+        result_.frame_candidates[index].reason = "local_" + result_.frame_candidates[index].reason;
+    }
+    if (geometry.frame.empty() && !fallback_frame.empty()) {
+      geometry.frame = fallback_frame;
+      result_.frame_reused = true;
+    }
     std::vector<std::vector<cv::Point>> blue_contours;
     cv::findContours(blue_mask, blue_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     cv::Point2f frame_center(bgr.cols * 0.5F, bgr.rows * 0.5F);
@@ -251,6 +271,9 @@ public:
     }
     if (geometry.frame.size() >= 4)
       cv::polylines(debug, geometry.frame, true, cv::Scalar(0, 0, 255), 3);
+    if (result_.frame_reused)
+      cv::putText(debug, "frame region held", cv::boundingRect(geometry.frame).tl(),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(0, 165, 255), 1);
     if (geometry.basket.size() >= 4)
       cv::polylines(debug, geometry.basket, true, cv::Scalar(255, 0, 0), 3);
     for (size_t i = 0; i < geometry.slots.size(); ++i) {
@@ -434,7 +457,8 @@ private:
 };
 }  // namespace
 
-Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config)
+static Detection2D detect_with_frame(const cv::Mat &bgr, const DetectorConfig &config,
+                                     const std::vector<cv::Point> &fallback_frame)
 {
   config.validate();
   if (bgr.empty() || bgr.type() != CV_8UC3)
@@ -443,12 +467,42 @@ Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config)
   result.hough_fallback_enabled = config.enable_hough_fallback;
   result.black_frame_debug_enabled = config.debug_black_frame;
   Detector detector(config, result);
-  result.geometry = detector.find_geometry(bgr, result.annotated);
+  result.geometry = detector.find_geometry(bgr, result.annotated, fallback_frame);
   result.frame_found = result.geometry.frame.size() >= 4;
   result.basket_found = result.geometry.basket.size() >= 4 && result.geometry.slots.size() == 3;
   // Missing basket/depth must not prevent inspection of nut recognition.
   if (result.frame_found)
     result.circles = detector.find_nut_circles(bgr, result.geometry, result.annotated);
+  return result;
+}
+
+Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config)
+{
+  return detect_with_frame(bgr, config, {});
+}
+
+TemporalDetector::TemporalDetector(const DetectorConfig &config, double frame_hold_ms)
+: config_(config), frame_hold_ms_(frame_hold_ms)
+{
+  config_.validate();
+  if (!std::isfinite(frame_hold_ms_) || frame_hold_ms_ < 0.0)
+    throw std::invalid_argument("frame_hold_ms must be finite and >= 0");
+}
+
+Detection2D TemporalDetector::detect(const cv::Mat &bgr, std::int64_t stamp_ms)
+{
+  if (stamp_ms < 0) throw std::invalid_argument("image timestamp must be nonnegative");
+  if (bgr.size() != image_size_ || stamp_ms <= last_stamp_ms_ ||
+      frame_hold_ms_ == 0.0 || static_cast<double>(stamp_ms - frame_stamp_ms_) > frame_hold_ms_) {
+    frame_.clear();
+  }
+  image_size_ = bgr.size();
+  last_stamp_ms_ = stamp_ms;
+  auto result = detect_with_frame(bgr, config_, frame_);
+  if (result.frame_found && !result.frame_reused) {
+    frame_ = result.geometry.frame;
+    frame_stamp_ms_ = stamp_ms;
+  }
   return result;
 }
 }  // namespace lbot_vision
