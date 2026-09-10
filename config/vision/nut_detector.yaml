@@ -4,7 +4,7 @@ nut_detector_node:
     color_topic: /camera/color/image_raw
     depth_topic: /camera/depth/image_raw
     camera_info_topic: /camera/color/camera_info
-    target_frame: base_torso_root
+    target_frame: base_link
     use_tf: true
     detection_topic: /nut_detections
     slot_topic: /nut_slots
@@ -65,6 +65,6 @@ nut_detector_node:
     depth_min_m: 0.15
     depth_max_m: 5.0
     slot_axis: long
-    # Reference photos include both camera orientations. Use "right" for the
-    # fixed contest layout where the blue box is required to be on the right.
-    basket_side: any
+    # The competition layout fixes the blue basket on the right side of the
+    # black source frame, so reject blue candidates left of the frame centre.
+    basket_side: right

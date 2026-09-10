@@ -58,7 +58,7 @@ public:
     color_topic_ = declare_parameter("color_topic", "/camera/color/image_raw");
     depth_topic_ = declare_parameter("depth_topic", "/camera/depth/image_raw");
     camera_info_topic_ = declare_parameter("camera_info_topic", "/camera/color/camera_info");
-    target_frame_ = declare_parameter("target_frame", "base_torso_root");
+    target_frame_ = declare_parameter("target_frame", "base_link");
     use_tf_ = declare_parameter("use_tf", true);
     detection_topic_ = declare_parameter("detection_topic", "/nut_detections");
     slot_topic_ = declare_parameter("slot_topic", "/nut_slots");

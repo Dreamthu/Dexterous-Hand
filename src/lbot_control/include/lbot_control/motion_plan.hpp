@@ -9,7 +9,7 @@ namespace lbot_control {
 
 struct MotionPlanOptions
 {
-  std::string base_frame{"base_torso_root"};
+  std::string base_frame{"base_link"};
   double pregrasp_height_m{0.10};
   double lift_height_m{0.15};
   double slot_release_offset_m{0.04};

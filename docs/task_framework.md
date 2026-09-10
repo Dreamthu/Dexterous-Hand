@@ -42,7 +42,7 @@ IDLE → MOVE_ABOVE_TABLE → PICK_AND_PLACE
 - 初始场景要求 `initialized=true`、`observation_valid=true`、`expected_count=3`，三个目标均有
   `visible=true`、`position_valid=true` 的位置；
 - 目标 ID 固定为 1/2/3，对应大/中/小；
-- `/nut_slots` 必须包含 3 个 Pose，且其 `header.frame_id` 与目标位置均为 `base_torso_root`；
+- `/nut_slots` 必须包含 3 个 Pose，且其 `header.frame_id` 与目标位置均为 `base_link`；
 - 所有坐标必须已经完成相机到机器人基座的 TF 转换。
 
 每颗动作开始前，控制器发送带当前 `session_id`、`round_id` 和递增 `event_sequence` 的 `start`。

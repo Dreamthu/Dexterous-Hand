@@ -18,7 +18,7 @@ namespace lbot_control {
 
 struct RosVisionConfig
 {
-  std::string base_frame{"base_torso_root"};
+  std::string base_frame{"base_link"};
   std::string sequence_topic{"/nut_detections/sequence"};
   std::string slots_topic{"/nut_slots"};
   std::string event_service{"/nut_detections/set_state"};

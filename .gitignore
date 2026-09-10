@@ -144,6 +144,8 @@ orbbec_ws/src/OrbbecSDK_ROS2/
 !/artifacts/calibration/extrinsics/
 /artifacts/calibration/extrinsics/*
 !/artifacts/calibration/extrinsics/.gitkeep
+!/artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/
+!/artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml
 
 # Python and editor caches
 __pycache__/

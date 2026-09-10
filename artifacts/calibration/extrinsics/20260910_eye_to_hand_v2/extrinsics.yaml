@@ -1,0 +1,95 @@
+schema_version: 1
+mount: fixed_to_base
+units: metres
+created_at: '2026-09-10T04:55:26+00:00'
+source_branch: calibration
+source_commit: 27081f9
+source_result: artifacts/gemini2_to_base_v2.yaml
+verified_at: '2026-09-10T04:57:22+00:00'
+note: >
+  The robot controller and calibration branch use base_link as the task frame.
+  In the workstation URDF, base_link is the child of the model-only
+  base_torso_root frame by a fixed +1.2 m z offset. The competition task,
+  lbot_vision target_frame, and lbot_control base_frame are therefore
+  configured to base_link, matching the robot pose_states and MoveJP/MoveL
+  controller inputs.
+transform:
+  parent_frame: base_link
+  child_frame: camera_color_optical_frame
+  translation_m:
+  - 0.09842810283401945
+  - 0.05740493511149311
+  - 0.24110711157764436
+  quaternion_xyzw:
+  - -0.6738964859598493
+  - 0.7072539342636964
+  - -0.13786831760443372
+  - 0.1632413111942332
+  matrix:
+  - - -0.038431601061
+    - -0.908220272087
+    - 0.416724068671
+    - 0.098428102834
+  - - -0.998243491839
+    - 0.053711706424
+    - 0.024999671882
+    - 0.057404935111
+  - - -0.045088169635
+    - -0.415031312027
+    - -0.908689202641
+    - 0.241107111578
+  - - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+  convention: p_parent = R_parent_child * p_child + t_parent_child
+camera_root_frame: camera_link
+configuration:
+  frames:
+    base: base_link
+    optical: camera_color_optical_frame
+    camera_root: camera_link
+    flange: arm_right_R8_Link
+camera_info:
+  frame_id: camera_color_optical_frame
+  image_width: 1280
+  image_height: 720
+  distortion_model: plumb_bob
+  camera_matrix:
+    rows: 3
+    cols: 3
+    data:
+    - 693.1459350585938
+    - 0.0
+    - 642.1784057617188
+    - 0.0
+    - 693.3707275390625
+    - 356.345947265625
+    - 0.0
+    - 0.0
+    - 1.0
+  distortion_coefficients:
+    rows: 1
+    cols: 8
+    data:
+    - 52.28756332397461
+    - -112.41032409667969
+    - 4.5997894631000236e-05
+    - 6.287490396061912e-05
+    - 120.32437896728516
+    - 52.12627410888672
+    - -112.0571060180664
+    - 120.63700103759766
+quality:
+  training_passed: true
+  validation_passed: true
+  accepted: true
+  training_translation_rms_m: 0.007256414128969722
+  training_rotation_rms_deg: 1.1935819215809618
+  validation_translation_rms_m: 0.00801371105732341
+  validation_rotation_rms_deg: 1.6796457154659497
+  training_sample_count: 20.0
+  used_training_samples: 16.0
+  rejected_training_samples: 4.0
+  validation_sample_count: 9.0
+  failures: []

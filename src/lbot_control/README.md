@@ -101,7 +101,7 @@ ros2 launch lbot_control lbot_task.launch.py start_driver:=false execute_task:=f
 | 黑框和蓝框 | 桌面高度、黑框内边界、三个格子中心和格子底面高度 | 供视觉/临时人工输入产生螺母和格子的基座坐标 |
 | 灵巧手 | 张开数组、适用于大/中/小螺母的三组闭合数组 | 配置 `hand_open` 和 `hand_closed[large/medium/small]`；每组是 6 个 `0..255` 值 |
 | 灵巧手力度 | 合适的速度、力矩和张闭稳定等待时间 | 配置 `hand_speed`、`hand_force`、`grip_settle`；先从低速度、低力矩空载测试 |
-| 相机外参 | 相机内参、相机到 `base_torso_root` 的外参 | 让 `VisionSystem` 输出基座坐标系下的螺母和格子位姿 |
+| 相机外参 | 相机内参、相机到 `base_link` 的外参 | 让 `VisionSystem` 输出控制器基座坐标系下的螺母和格子位姿 |
 
 O6 左手数组顺序固定为：
 

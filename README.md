@@ -38,7 +38,8 @@
 ./scripts/run_perception.sh
 ```
 
-该脚本运行无界面的感知服务。保持它运行，再在另一个终端启动查看器：
+该脚本会先启动相机，再自动发布已标定的
+`base_link -> camera_link` 静态 TF，最后启动螺母识别。保持它运行，再在另一个终端启动查看器：
 
 ```bash
 ./scripts/show_camera.sh
@@ -55,6 +56,13 @@
 ```bash
 ./scripts/run_camera.sh
 ./scripts/run_detector.sh
+```
+
+如果单独运行检测节点，而不是使用 `run_perception.sh`，需要另开终端发布已标定的外参：
+
+```bash
+./scripts/calibrate_extrinsics.sh publish \
+  --result artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml
 ```
 
 躯干固定 Gemini2 的 R8 定位板外参标定、A4 打印和离线求解见 [相机外参标定](docs/camera_extrinsic_calibration.md)。入口为 `./scripts/calibrate_extrinsics.sh`，默认不发送机械臂运动命令。

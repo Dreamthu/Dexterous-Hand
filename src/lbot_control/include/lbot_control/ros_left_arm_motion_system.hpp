@@ -19,7 +19,7 @@ namespace lbot_control {
 struct RosLeftArmMotionConfig
 {
   std::string robot_namespace{"/robot1"};
-  std::string base_frame{"base_torso_root"};
+  std::string base_frame{"base_link"};
 
   // Keeping this false prevents placeholder arrays from becoming executable.
   bool table_route_calibrated{false};

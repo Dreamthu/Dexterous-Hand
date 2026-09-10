@@ -48,7 +48,7 @@ public:
 lbot_control::SceneObservation scene()
 {
   lbot_control::SceneObservation value;
-  value.frame_id = "base_torso_root";
+  value.frame_id = "base_link";
   for (std::size_t index = 0; index < value.targets.size(); ++index) {
     value.targets[index].size = static_cast<lbot_control::NutSize>(index);
     value.targets[index].nut = {0.3, 0.2, 0.01, 0.0, 0.0, 0.0};

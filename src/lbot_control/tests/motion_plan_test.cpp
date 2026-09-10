@@ -11,7 +11,7 @@ using lbot_control::SceneObservation;
 int main()
 {
   SceneObservation scene;
-  scene.frame_id = "base_torso_root";
+  scene.frame_id = "base_link";
   for (std::size_t i = 0; i < scene.targets.size(); ++i) {
     auto &target = scene.targets[i];
     target.size = static_cast<NutSize>(i);

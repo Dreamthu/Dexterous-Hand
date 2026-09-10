@@ -1,9 +1,13 @@
 # Fixed Gemini2 on the torso. All lengths are metres; angles are degrees.
 frames:
-  base: base_torso_root
+  base: base_link
   optical: camera_color_optical_frame
   camera_root: camera_link
   flange: arm_right_R8_Link
+
+# base_link is the robot controller task frame. It is not the model-only
+# base_torso_root frame; the workstation URDF connects them with a fixed
+# +1.2 m z offset, but MoveJP/MoveL and pose_states use base_link.
 
 topics:
   color: /camera/color/image_raw

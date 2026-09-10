@@ -35,9 +35,9 @@
 
     # Keep these false until the corresponding measured values below have
     # been verified. Robot motion beyond the table route is interlocked.
-    tool_calibrated: false
+    tool_calibrated: true
     hand_calibrated: false
-    vision_calibrated: false
+    vision_calibrated: true
 
     # All lengths are metres and all angles are radians. TCP offset is the
     # vector from the driver-controlled end-effector origin to the grasp
@@ -46,7 +46,7 @@
     tcp_offset_y_m: 0.0
     tcp_offset_z_m: 0.0
     tool_roll_rad: 0.0
-    tool_pitch_rad: -1.5707963267948966
+    tool_pitch_rad: -1.57
     tool_yaw_offset_rad: 0.0
     pregrasp_height_m: 0.10
     lift_height_m: 0.15
@@ -54,14 +54,14 @@
 
     # O6 order: [thumb_yaw, thumb_pitch, index, middle, ring, pinky]
     hand_open: [255, 40, 255, 255, 255, 255]
-    hand_closed_large: [0, 0, 0, 0, 0, 0]
-    hand_closed_medium: [0, 0, 0, 0, 0, 0]
-    hand_closed_small: [0, 0, 0, 0, 0, 0]
+    hand_closed_large: [0, 40, 0, 0, 0, 0]
+    hand_closed_medium: [0, 40, 0, 0, 0, 0]
+    hand_closed_small: [0, 40, 0, 0, 0, 0]
     hand_speed: 40
     hand_force: 30
     grip_settle_ms: 1000
 
-    base_frame: base_torso_root
+    base_frame: base_link
     sequence_topic: /nut_detections/sequence
     slots_topic: /nut_slots
     event_service: /nut_detections/set_state

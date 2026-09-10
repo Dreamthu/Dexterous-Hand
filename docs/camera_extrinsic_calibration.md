@@ -33,7 +33,7 @@ joint_positions_rad:
   arm_right_R7_Joint: ...
 ```
 
-程序会通过 `workstation.urdf` 的 FK 计算 `base_torso_root → arm_right_R8_Link`，不使用
+程序会通过 `workstation.urdf` 的 FK 计算 `base_link → arm_right_R8_Link`，不使用
 桌面高度，也不会假定 URDF 的 `world` 就是真实地面。
 
 ## 3. 离线单张图求解
@@ -78,13 +78,18 @@ T_base_camera = T_base_board · inverse(T_camera_board)
 
 ```bash
 ./scripts/calibrate_extrinsics.sh publish \
-  --result artifacts/calibration/extrinsics/<timestamp>/extrinsics.yaml
+  --result artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml
 ```
+
+当前已通过的固定相机外参存放在
+`artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml`。
+`./scripts/run_perception.sh` 会在相机启动后自动发布这条静态 TF；若单独运行检测节点，
+则需先执行上面的 `publish` 命令。
 
 检查：
 
 ```bash
-ros2 run tf2_ros tf2_echo base_torso_root camera_color_optical_frame
+ros2 run tf2_ros tf2_echo base_link camera_color_optical_frame
 ```
 
 程序只发布静态 TF，不发送任何机械臂运动命令。当前离线模式需要操作者保证图像和关节角

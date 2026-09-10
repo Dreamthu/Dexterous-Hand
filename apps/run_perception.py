@@ -15,7 +15,12 @@ from typing import List
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from linkerbot.runtime import ConfigurationError, camera_command, detector_command  # noqa: E402
+from linkerbot.runtime import (  # noqa: E402
+    ConfigurationError,
+    camera_command,
+    detector_command,
+    extrinsic_calibration_command,
+)
 
 
 def stop_process(process: subprocess.Popen[bytes], timeout_seconds: float = 8.0) -> None:
@@ -37,10 +42,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--camera-config", default="config/camera/gemini2.yaml")
     parser.add_argument("--vision-config", default="config/vision/nut_detector.yaml")
+    parser.add_argument(
+        "--extrinsics-result",
+        default="artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml",
+    )
+    parser.add_argument("--skip-extrinsics", action="store_true")
     arguments = parser.parse_args()
     try:
         camera, camera_environment = camera_command(arguments.camera_config)
         detector = detector_command(arguments.vision_config)
+        extrinsics = (
+            None
+            if arguments.skip_extrinsics
+            else extrinsic_calibration_command(["publish", "--result", arguments.extrinsics_result])
+        )
     except ConfigurationError as error:
         parser.error(str(error))
 
@@ -54,6 +69,13 @@ def main() -> int:
         time.sleep(3.0)
         if processes[0].poll() is not None:
             return processes[0].returncode or 1
+
+        if extrinsics is not None:
+            print("Starting fixed camera extrinsic publisher...", flush=True)
+            processes.append(subprocess.Popen(extrinsics, start_new_session=True))
+            time.sleep(1.0)
+            if processes[-1].poll() is not None:
+                return processes[-1].returncode or 1
 
         print("Starting perception adapter...", flush=True)
         processes.append(subprocess.Popen(detector, start_new_session=True))
