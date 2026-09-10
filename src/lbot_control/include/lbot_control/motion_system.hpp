@@ -10,6 +10,7 @@ namespace lbot_control {
 enum class MotionStage
 {
   MoveAboveTable,
+  MoveToPregrasp,
   // Executes the mechanical portion through slot retreat.  The coordinator
   // performs the camera check at that visible pose, then invokes
   // ReturnAboveTable before this task action is considered complete.

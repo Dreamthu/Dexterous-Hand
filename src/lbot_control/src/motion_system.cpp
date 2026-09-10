@@ -6,6 +6,7 @@ const char *to_string(MotionStage stage) noexcept
 {
   switch (stage) {
     case MotionStage::MoveAboveTable: return "MOVE_ABOVE_TABLE";
+    case MotionStage::MoveToPregrasp: return "MOVE_TO_PREGRASP";
     case MotionStage::PickAndPlace: return "PICK_AND_PLACE";
     case MotionStage::ReturnAboveTable: return "RETURN_ABOVE_TABLE";
     case MotionStage::Retract: return "RETRACT";

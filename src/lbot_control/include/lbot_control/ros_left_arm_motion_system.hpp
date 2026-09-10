@@ -40,10 +40,14 @@ struct RosLeftArmMotionConfig
   double cartesian_speed{0.05};
   double cartesian_acceleration{0.05};
   std::chrono::milliseconds state_timeout{3000};
-  std::chrono::milliseconds service_timeout{5000};
+  std::chrono::milliseconds service_timeout{30000};
   std::chrono::milliseconds grip_settle{500};
+  // The standalone table-route bring-up is a joint-route diagnostic. Keep
+  // hand commands opt-in so a missing/unavailable hand topic cannot prevent
+  // the arm route from being tested.
+  bool route_control_hand{false};
 
-  std::array<uint8_t, 6> hand_open{{128, 128, 128, 128, 128, 128}};
+  std::array<uint8_t, 6> hand_open{{255, 40, 255, 255, 255, 255}};
   std::array<std::array<uint8_t, 6>, 3> hand_closed{};
   uint8_t hand_speed{80};
   uint8_t hand_force{60};
@@ -59,6 +63,8 @@ public:
     RosLeftArmMotionConfig config);
 
   MotionResult prepare_table_route();
+  MotionResult begin_route_motion();
+  MotionResult finish_route_motion();
   MotionResult prepare(const MotionPlan &plan) override;
   MotionResult execute(MotionStage stage, const PlannedTarget *target = nullptr) override;
   void stop() noexcept override;

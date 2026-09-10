@@ -18,6 +18,26 @@ namespace {
 
 using lbot_control::RosLeftArmMotionConfig;
 
+class ExecutorRunner
+{
+public:
+  explicit ExecutorRunner(rclcpp::executors::SingleThreadedExecutor &executor)
+  : executor_(executor), thread_([this]() {executor_.spin();}) {}
+
+  ~ExecutorRunner()
+  {
+    executor_.cancel();
+    if (thread_.joinable()) thread_.join();
+  }
+
+  ExecutorRunner(const ExecutorRunner &) = delete;
+  ExecutorRunner &operator=(const ExecutorRunner &) = delete;
+
+private:
+  rclcpp::executors::SingleThreadedExecutor &executor_;
+  std::thread thread_;
+};
+
 std::array<double, 7> joints(const rclcpp::Node::SharedPtr &node, const std::string &name)
 {
   const auto values = node->declare_parameter<std::vector<double>>(name, std::vector<double>{});
@@ -40,6 +60,19 @@ RosLeftArmMotionConfig load_motion_config(const rclcpp::Node::SharedPtr &node)
   config.joint_acceleration = node->declare_parameter("joint_acceleration", config.joint_acceleration);
   config.cartesian_speed = node->declare_parameter("cartesian_speed", config.cartesian_speed);
   config.cartesian_acceleration = node->declare_parameter("cartesian_acceleration", config.cartesian_acceleration);
+  config.waypoint_tolerance_rad = node->declare_parameter(
+    "waypoint_tolerance_rad", config.waypoint_tolerance_rad);
+  config.stable_joint_samples = static_cast<std::size_t>(std::max<int64_t>(1,
+    node->declare_parameter<int64_t>(
+      "stable_joint_samples", static_cast<int64_t>(config.stable_joint_samples))));
+  config.waypoint_timeout = std::chrono::milliseconds(
+    node->declare_parameter<int64_t>("waypoint_timeout_ms", config.waypoint_timeout.count()));
+  config.waypoint_settle = std::chrono::milliseconds(
+    node->declare_parameter<int64_t>("waypoint_settle_ms", config.waypoint_settle.count()));
+  config.state_timeout = std::chrono::milliseconds(
+    node->declare_parameter<int64_t>("state_timeout_ms", config.state_timeout.count()));
+  config.service_timeout = std::chrono::milliseconds(
+    node->declare_parameter<int64_t>("service_timeout_ms", config.service_timeout.count()));
   config.grip_settle = std::chrono::milliseconds(
     node->declare_parameter<int64_t>("grip_settle_ms", config.grip_settle.count()));
   const auto open = node->declare_parameter<std::vector<int64_t>>(
@@ -75,6 +108,9 @@ lbot_control::MotionPlanOptions load_plan_options(const rclcpp::Node::SharedPtr 
   options.tool_roll_rad = node->declare_parameter("tool_roll_rad", options.tool_roll_rad);
   options.tool_pitch_rad = node->declare_parameter("tool_pitch_rad", options.tool_pitch_rad);
   options.tool_yaw_offset_rad = node->declare_parameter("tool_yaw_offset_rad", options.tool_yaw_offset_rad);
+  options.tcp_offset_x_m = node->declare_parameter("tcp_offset_x_m", options.tcp_offset_x_m);
+  options.tcp_offset_y_m = node->declare_parameter("tcp_offset_y_m", options.tcp_offset_y_m);
+  options.tcp_offset_z_m = node->declare_parameter("tcp_offset_z_m", options.tcp_offset_z_m);
   return options;
 }
 
@@ -86,12 +122,45 @@ int main(int argc, char **argv)
   auto node = std::make_shared<rclcpp::Node>("nut_task_controller");
   try {
     const bool execute_task = node->declare_parameter("execute_task", false);
+    const std::string task_mode = node->declare_parameter("task_mode", std::string("validate"));
+    if (task_mode != "validate" && task_mode != "pregrasp" &&
+      task_mode != "return" && task_mode != "full")
+    {
+      throw std::runtime_error("task_mode must be validate, pregrasp, return, or full");
+    }
     if (!execute_task) {
-      RCLCPP_INFO(node->get_logger(), "task execution disabled; no robot command was sent");
+      RCLCPP_INFO(
+        node->get_logger(),
+        "task controller disabled; no vision wait or robot command was performed (task_mode=%s)",
+        task_mode.c_str());
       rclcpp::shutdown();
       return 0;
     }
     const auto motion_config = load_motion_config(node);
+    const auto plan_options = load_plan_options(node);
+    const bool tool_calibrated = node->declare_parameter("tool_calibrated", false);
+    const bool hand_calibrated = node->declare_parameter("hand_calibrated", false);
+    const bool vision_calibrated = node->declare_parameter("vision_calibrated", false);
+
+    auto motion = std::make_shared<lbot_control::RosLeftArmMotionSystem>(node, motion_config);
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    ExecutorRunner executor_runner(executor);
+
+    if (task_mode == "return") {
+      auto result = motion->prepare_table_route();
+      if (result.success) result = motion->execute(lbot_control::MotionStage::ReturnAboveTable);
+      if (result.success) result = motion->execute(lbot_control::MotionStage::Retract);
+      if (!result.success) {
+        RCLCPP_ERROR(node->get_logger(), "calibration return failed: %s", result.message.c_str());
+        motion->stop();
+      } else {
+        RCLCPP_INFO(node->get_logger(), "returned above table and completed RETRACT");
+      }
+      rclcpp::shutdown();
+      return result.success ? 0 : 1;
+    }
+
     lbot_control::RosVisionConfig vision_config;
     node->get_parameter("base_frame", vision_config.base_frame);
     vision_config.sequence_topic = node->declare_parameter("sequence_topic", vision_config.sequence_topic);
@@ -103,14 +172,50 @@ int main(int argc, char **argv)
       node->declare_parameter<int64_t>("vision_service_timeout_ms", vision_config.service_timeout.count()));
 
     auto vision = std::make_shared<lbot_control::RosVisionSystem>(node, vision_config);
-    auto motion = std::make_shared<lbot_control::RosLeftArmMotionSystem>(node, motion_config);
-    lbot_control::TaskCoordinator coordinator(motion, vision, load_plan_options(node));
 
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node);
-    std::thread spin_thread([&executor]() { executor.spin(); });
+    if (!vision_calibrated && task_mode != "validate") {
+      throw std::runtime_error("vision_calibrated must be true for robot motion");
+    }
+    const auto observed = vision->initial_scene();
+    if (!observed.success) throw std::runtime_error("initial scene failed: " + observed.message);
+    const auto planned = lbot_control::build_motion_plan(observed.scene, plan_options);
+    if (!planned.success) throw std::runtime_error(planned.message);
+    auto result = motion->prepare(planned.plan);
+    if (!result.success) throw std::runtime_error(result.message);
 
-    auto result = coordinator.begin();
+    if (task_mode == "validate") {
+      RCLCPP_INFO(
+        node->get_logger(),
+        "vision scene, table route, TCP-adjusted targets, joint limits, and IK validated; no motion sent");
+      rclcpp::shutdown();
+      return 0;
+    }
+
+    if (!tool_calibrated) {
+      throw std::runtime_error("tool_calibrated must be true for robot motion");
+    }
+    if (task_mode == "pregrasp") {
+      result = motion->execute(lbot_control::MotionStage::MoveAboveTable);
+      if (result.success) {
+        result = motion->execute(
+          lbot_control::MotionStage::MoveToPregrasp, &planned.plan.targets[0]);
+      }
+      if (!result.success) {
+        RCLCPP_ERROR(node->get_logger(), "pregrasp calibration move failed: %s", result.message.c_str());
+        motion->stop();
+      } else {
+        RCLCPP_INFO(node->get_logger(), "stopped at LARGE nut pregrasp; use task_mode:=return to retract");
+      }
+      rclcpp::shutdown();
+      return result.success ? 0 : 1;
+    }
+
+    if (!hand_calibrated) {
+      throw std::runtime_error("hand_calibrated must be true for full mode");
+    }
+    lbot_control::TaskCoordinator coordinator(motion, vision, plan_options);
+
+    result = coordinator.begin();
     while (result.success && !coordinator.state_machine().terminal()) result = coordinator.step();
     if (!result.success) {
       RCLCPP_ERROR(node->get_logger(), "nut task failed: %s", result.message.c_str());
@@ -118,8 +223,6 @@ int main(int argc, char **argv)
     } else {
       RCLCPP_INFO(node->get_logger(), "nut task completed");
     }
-    executor.cancel();
-    spin_thread.join();
     rclcpp::shutdown();
     return result.success ? 0 : 1;
   } catch (const std::exception &error) {

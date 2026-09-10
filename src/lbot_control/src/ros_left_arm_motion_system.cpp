@@ -116,6 +116,27 @@ MotionResult RosLeftArmMotionSystem::prepare_table_route()
   return MotionResult::ok("table route generated and joint limits accepted");
 }
 
+MotionResult RosLeftArmMotionSystem::begin_route_motion()
+{
+  if (!route_prepared_) return MotionResult::fail("table route has not been prepared");
+  motion_started_ = true;
+  const auto result = set_hand({{0, 0, 0, 0, 0, 0}});
+  if (result.success && config_.grip_settle.count() > 0) {
+    std::this_thread::sleep_for(config_.grip_settle);
+  }
+  return result;
+}
+
+MotionResult RosLeftArmMotionSystem::finish_route_motion()
+{
+  if (!route_prepared_) return MotionResult::fail("table route has not been prepared");
+  const auto result = set_hand(config_.hand_open);
+  if (result.success && config_.grip_settle.count() > 0) {
+    std::this_thread::sleep_for(config_.grip_settle);
+  }
+  return result;
+}
+
 MotionResult RosLeftArmMotionSystem::move_joints(
   const std::array<double, 7> &joints, const std::string &label)
 {
@@ -201,6 +222,9 @@ MotionResult RosLeftArmMotionSystem::execute(
   switch (stage) {
     case MotionStage::MoveAboveTable:
       return execute_joint_route(table_route_.enter);
+    case MotionStage::MoveToPregrasp:
+      if (target == nullptr) return MotionResult::fail("pregrasp move requires a target");
+      return move_pose(target->pregrasp, "calibration pregrasp");
     case MotionStage::Retract:
       return execute_joint_route(table_route_.leave);
     case MotionStage::PickAndPlace: {

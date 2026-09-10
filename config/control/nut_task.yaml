@@ -4,17 +4,66 @@
   ros__parameters:
     execute_motion: false
     mode: check  # check | enter | leave | round_trip
+    execute_task: false
+    task_mode: validate  # validate | pregrasp | return | full
     robot_namespace: /robot1
 
     # The left arm follows route.names from first to last. The first point is
     # natural-down and the last point is the working pose above the table.
     # Add/remove intermediate names and matching 7-value arrays as needed.
-    table_route_calibrated: false
+    table_route_calibrated: true
     route:
       names: [natural_down, outside_table, above_table]
       natural_down:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-      outside_table: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-      above_table:   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      outside_table: [0.6, 0.0, 0.0, -1.5, 0.0, -1.5, 0.0]
+      above_table:   [-0.7, 0.0, 0.0, -0.8, 1.5, 0.0, 0.0]
 
-    joint_speed: 0.08
-    joint_acceleration: 0.08
+    joint_speed: 0.2
+    joint_acceleration: 0.2
+    cartesian_speed: 0.03
+    cartesian_acceleration: 0.03
+    waypoint_tolerance_rad: 0.03
+    stable_joint_samples: 3
+    waypoint_timeout_ms: 35000
+    waypoint_settle_ms: 200
+    state_timeout_ms: 3000
+    # Allow DDS service discovery and robot connection to complete on startup.
+    service_timeout_ms: 30000
+    # Standalone enter/leave route testing sends only MoveJ commands.
+    # Enable only after hand topics have been verified independently.
+    route_control_hand: false
+
+    # Keep these false until the corresponding measured values below have
+    # been verified. Robot motion beyond the table route is interlocked.
+    tool_calibrated: false
+    hand_calibrated: false
+    vision_calibrated: false
+
+    # All lengths are metres and all angles are radians. TCP offset is the
+    # vector from the driver-controlled end-effector origin to the grasp
+    # centre, expressed in the tool frame.
+    tcp_offset_x_m: 0.0
+    tcp_offset_y_m: 0.0
+    tcp_offset_z_m: 0.0
+    tool_roll_rad: 0.0
+    tool_pitch_rad: -1.5707963267948966
+    tool_yaw_offset_rad: 0.0
+    pregrasp_height_m: 0.10
+    lift_height_m: 0.15
+    slot_release_offset_m: 0.04
+
+    # O6 order: [thumb_yaw, thumb_pitch, index, middle, ring, pinky]
+    hand_open: [255, 40, 255, 255, 255, 255]
+    hand_closed_large: [0, 0, 0, 0, 0, 0]
+    hand_closed_medium: [0, 0, 0, 0, 0, 0]
+    hand_closed_small: [0, 0, 0, 0, 0, 0]
+    hand_speed: 40
+    hand_force: 30
+    grip_settle_ms: 1000
+
+    base_frame: base_torso_root
+    sequence_topic: /nut_detections/sequence
+    slots_topic: /nut_slots
+    event_service: /nut_detections/set_state
+    vision_wait_timeout_ms: 10000
+    vision_service_timeout_ms: 3000

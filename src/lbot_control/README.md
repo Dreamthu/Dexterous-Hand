@@ -44,6 +44,7 @@ route:
   natural_down:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   outside_table: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   above_table:   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+hand_open: [255, 40, 255, 255, 255, 255]
 ```
 
 节点数量可以任意调整。进入时按列表正序执行，`RETRACT` 严格按反序执行。每个节点必须是
@@ -65,6 +66,11 @@ ros2 launch lbot_control lbot_start_control.launch.py \
 ros2 launch lbot_control lbot_start_control.launch.py \
   mode:=round_trip execute_motion:=true
 ```
+
+基础路线执行时，每个方向的路线都会先向左 O6 下发 `[0, 0, 0, 0, 0, 0]`，再执行关节路线；只有该方向
+路线成功后才下发 `hand_open`，路线失败时保持收手。`round_trip` 在 enter 成功后张手，leave 开始前
+再次收手，leave 成功后再次张手。
+手指顺序为 `[thumb_yaw, thumb_pitch, index, middle, ring, pinky]`，取值范围为 `0..255`。
 
 当前 `lbot_start_control.launch.py` 用于跑通基础路线；视觉已经通过
 `RosVisionSystem` 接入，并可使用 `lbot_task.launch.py` 同时启动驱动、视觉节点和任务控制器。
@@ -107,7 +113,7 @@ O6 左手数组顺序固定为：
 `check_nut_in_source()` 判断抓取是否成功。视觉检查发生在放置后的撤离位、返回 `above_table` 前，
 因此相机标定时应确认该姿态下黑框完整可见。
 
-当前 YAML 只加载基础路线和关节速度/加速度。上述抓放、灵巧手和视觉参数将在完整任务 launch
-接入时加载；对应默认值见
-[`motion_plan.hpp`](include/lbot_control/motion_plan.hpp) 与
-[`ros_left_arm_motion_system.hpp`](include/lbot_control/ros_left_arm_motion_system.hpp)。
+以上参数均由 `lbot_task.launch.py` 加载，默认控制参数文件是工作区根目录的
+`config/control/nut_task.yaml`；也可以通过 `control_config:=/绝对路径/文件.yaml` 指定副本。
+视觉节点参数位于 `config/vision/nut_detector.yaml`，可通过
+`vision_config:=/绝对路径/文件.yaml` 覆盖。

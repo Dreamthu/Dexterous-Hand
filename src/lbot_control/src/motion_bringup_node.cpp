@@ -47,6 +47,30 @@ RosLeftArmMotionConfig load_config(const rclcpp::Node::SharedPtr &node)
   config.joint_speed = node->declare_parameter("joint_speed", config.joint_speed);
   config.joint_acceleration = node->declare_parameter(
     "joint_acceleration", config.joint_acceleration);
+  config.waypoint_tolerance_rad = node->declare_parameter(
+    "waypoint_tolerance_rad", config.waypoint_tolerance_rad);
+  config.stable_joint_samples = static_cast<std::size_t>(node->declare_parameter<int64_t>(
+    "stable_joint_samples", static_cast<int64_t>(config.stable_joint_samples)));
+  config.waypoint_timeout = std::chrono::milliseconds(node->declare_parameter<int64_t>(
+    "waypoint_timeout_ms", config.waypoint_timeout.count()));
+  config.waypoint_settle = std::chrono::milliseconds(node->declare_parameter<int64_t>(
+    "waypoint_settle_ms", config.waypoint_settle.count()));
+  config.state_timeout = std::chrono::milliseconds(node->declare_parameter<int64_t>(
+    "state_timeout_ms", config.state_timeout.count()));
+  config.service_timeout = std::chrono::milliseconds(node->declare_parameter<int64_t>(
+    "service_timeout_ms", config.service_timeout.count()));
+  config.route_control_hand = node->declare_parameter("route_control_hand", false);
+  const auto open = node->declare_parameter<std::vector<int64_t>>(
+    "hand_open", std::vector<int64_t>{});
+  if (!open.empty()) {
+    if (open.size() != 6) throw std::runtime_error("hand_open must contain 6 values");
+    for (std::size_t i = 0; i < 6; ++i) {
+      if (open[i] < 0 || open[i] > 255) {
+        throw std::runtime_error("hand_open values must be in range 0..255");
+      }
+      config.hand_open[i] = static_cast<uint8_t>(open[i]);
+    }
+  }
   return config;
 }
 
@@ -95,10 +119,14 @@ int run(int argc, char **argv)
 
     MotionResult result = motion->prepare_table_route();
     if (result.success && (mode == "enter" || mode == "round_trip")) {
-      result = motion->execute(MotionStage::MoveAboveTable);
+      if (config.route_control_hand) result = motion->begin_route_motion();
+      if (result.success) result = motion->execute(MotionStage::MoveAboveTable);
+      if (result.success && config.route_control_hand) result = motion->finish_route_motion();
     }
     if (result.success && (mode == "leave" || mode == "round_trip")) {
-      result = motion->execute(MotionStage::Retract);
+      if (config.route_control_hand) result = motion->begin_route_motion();
+      if (result.success) result = motion->execute(MotionStage::Retract);
+      if (result.success && config.route_control_hand) result = motion->finish_route_motion();
     }
 
     if (!result.success) {

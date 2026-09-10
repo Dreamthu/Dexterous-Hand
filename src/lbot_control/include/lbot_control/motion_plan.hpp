@@ -16,6 +16,11 @@ struct MotionPlanOptions
   double tool_roll_rad{0.0};
   double tool_pitch_rad{-1.5707963267948966};
   double tool_yaw_offset_rad{0.0};
+  // Vector from the driver-controlled end-effector origin to the grasp TCP,
+  // expressed in the tool frame.
+  double tcp_offset_x_m{0.0};
+  double tcp_offset_y_m{0.0};
+  double tcp_offset_z_m{0.0};
 };
 
 struct PlanResult

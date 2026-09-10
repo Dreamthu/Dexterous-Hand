@@ -56,7 +56,7 @@ public:
     const rclcpp::Node::SharedPtr &node,
     std::string robot_namespace = "/robot1",
     std::chrono::milliseconds state_timeout = std::chrono::milliseconds(3000),
-    std::chrono::milliseconds service_timeout = std::chrono::milliseconds(5000));
+    std::chrono::milliseconds service_timeout = std::chrono::milliseconds(30000));
 
   bool wait_for_state();
   std::array<double, 7> left_joints() const;

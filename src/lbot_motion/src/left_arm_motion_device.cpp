@@ -135,8 +135,14 @@ DeviceResult LeftArmMotionDevice::move_joints(
   const ArmMotionOptions &options,
   const std::string &label)
 {
+  RCLCPP_INFO(
+    node_->get_logger(), "waiting for left MoveJ service '%s' (timeout=%ld ms)",
+    endpoint("left_arm/move_joint").c_str(),
+    static_cast<long>(service_timeout_.count()));
   if (!move_j_client_->wait_for_service(service_timeout_)) {
-    return DeviceResult::fail("left MoveJ service unavailable" + suffix_label(label));
+    return DeviceResult::fail(
+      "left MoveJ service unavailable at " + endpoint("left_arm/move_joint") +
+      suffix_label(label));
   }
   auto request = std::make_shared<MoveJ::Request>();
   request->joints.assign(target.begin(), target.end());
@@ -144,8 +150,11 @@ DeviceResult LeftArmMotionDevice::move_joints(
   request->acce = static_cast<float>(std::max(0.0, options.acceleration));
   request->block = options.block;
   auto future = move_j_client_->async_send_request(request);
-  const auto response_timeout = options.block ?
-    service_timeout_ + std::chrono::seconds(30) : service_timeout_;
+  // Some driver/firmware combinations acknowledge a non-blocking command
+  // only after the trajectory request has been accepted.  Keep the response
+  // window long enough for that acknowledgement; joint-state settling is
+  // checked separately by the control layer.
+  const auto response_timeout = service_timeout_ + std::chrono::seconds(30);
   if (!response_ready(future, response_timeout)) {
     return DeviceResult::fail("left MoveJ response timeout" + suffix_label(label));
   }

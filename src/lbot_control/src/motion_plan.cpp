@@ -13,6 +13,32 @@ bool finite_pose(const Pose6 &pose)
          std::isfinite(pose.roll) && std::isfinite(pose.pitch) && std::isfinite(pose.yaw);
 }
 
+Pose6 end_effector_pose_for_tcp(const Pose6 &tcp, const MotionPlanOptions &options)
+{
+  const double cr = std::cos(tcp.roll);
+  const double sr = std::sin(tcp.roll);
+  const double cp = std::cos(tcp.pitch);
+  const double sp = std::sin(tcp.pitch);
+  const double cy = std::cos(tcp.yaw);
+  const double sy = std::sin(tcp.yaw);
+  const double offset_x =
+    cy * cp * options.tcp_offset_x_m +
+    (cy * sp * sr - sy * cr) * options.tcp_offset_y_m +
+    (cy * sp * cr + sy * sr) * options.tcp_offset_z_m;
+  const double offset_y =
+    sy * cp * options.tcp_offset_x_m +
+    (sy * sp * sr + cy * cr) * options.tcp_offset_y_m +
+    (sy * sp * cr - cy * sr) * options.tcp_offset_z_m;
+  const double offset_z =
+    -sp * options.tcp_offset_x_m + cp * sr * options.tcp_offset_y_m +
+    cp * cr * options.tcp_offset_z_m;
+  Pose6 result = tcp;
+  result.x -= offset_x;
+  result.y -= offset_y;
+  result.z -= offset_z;
+  return result;
+}
+
 }  // namespace
 
 PlanResult build_motion_plan(
@@ -26,6 +52,13 @@ PlanResult build_motion_plan(
   if (!(options.pregrasp_height_m > 0.0) || !(options.lift_height_m > 0.0) ||
       !(options.slot_release_offset_m >= 0.0)) {
     result.message = "motion height options are invalid";
+    return result;
+  }
+  if (!std::isfinite(options.tool_roll_rad) || !std::isfinite(options.tool_pitch_rad) ||
+      !std::isfinite(options.tool_yaw_offset_rad) ||
+      !std::isfinite(options.tcp_offset_x_m) || !std::isfinite(options.tcp_offset_y_m) ||
+      !std::isfinite(options.tcp_offset_z_m)) {
+    result.message = "tool pose or TCP offset options are invalid";
     return result;
   }
 
@@ -43,22 +76,26 @@ PlanResult build_motion_plan(
     }
     PlannedTarget target;
     target.size = expected;
-    target.grasp = detected.nut;
-    target.grasp.roll = options.tool_roll_rad;
-    target.grasp.pitch = options.tool_pitch_rad;
-    target.grasp.yaw = detected.nut.yaw + options.tool_yaw_offset_rad;
-    target.pregrasp = target.grasp;
-    target.pregrasp.z += options.pregrasp_height_m;
-    target.lift = target.grasp;
-    target.lift.z += options.lift_height_m;
-
-    target.slot_release = detected.slot;
-    target.slot_release.roll = options.tool_roll_rad;
-    target.slot_release.pitch = options.tool_pitch_rad;
-    target.slot_release.yaw = options.tool_yaw_offset_rad;
-    target.slot_release.z += options.slot_release_offset_m;
-    target.slot_pre = target.slot_release;
-    target.slot_pre.z += options.pregrasp_height_m;
+    Pose6 grasp_tcp = detected.nut;
+    grasp_tcp.roll = options.tool_roll_rad;
+    grasp_tcp.pitch = options.tool_pitch_rad;
+    grasp_tcp.yaw = detected.nut.yaw + options.tool_yaw_offset_rad;
+    Pose6 pregrasp_tcp = grasp_tcp;
+    pregrasp_tcp.z += options.pregrasp_height_m;
+    Pose6 lift_tcp = grasp_tcp;
+    lift_tcp.z += options.lift_height_m;
+    Pose6 release_tcp = detected.slot;
+    release_tcp.roll = options.tool_roll_rad;
+    release_tcp.pitch = options.tool_pitch_rad;
+    release_tcp.yaw = options.tool_yaw_offset_rad;
+    release_tcp.z += options.slot_release_offset_m;
+    Pose6 slot_pre_tcp = release_tcp;
+    slot_pre_tcp.z += options.pregrasp_height_m;
+    target.grasp = end_effector_pose_for_tcp(grasp_tcp, options);
+    target.pregrasp = end_effector_pose_for_tcp(pregrasp_tcp, options);
+    target.lift = end_effector_pose_for_tcp(lift_tcp, options);
+    target.slot_release = end_effector_pose_for_tcp(release_tcp, options);
+    target.slot_pre = end_effector_pose_for_tcp(slot_pre_tcp, options);
     target.slot_retreat = target.slot_pre;
     result.plan.targets[i] = target;
   }
