@@ -1,0 +1,359 @@
+schema_version: 1
+calibration_type: eye_to_hand
+created_at: '2026-09-10T04:55:26+00:00'
+parent_frame: base_link
+child_frame: camera_color_optical_frame
+translation:
+- 0.09842810283401945
+- 0.05740493511149311
+- 0.24110711157764436
+rotation_xyzw:
+- -0.6738964859598493
+- 0.7072539342636964
+- -0.13786831760443372
+- 0.1632413111942332
+matrix_parent_from_child:
+- - -0.038431601061
+  - -0.908220272087
+  - 0.416724068671
+  - 0.098428102834
+- - -0.998243491839
+  - 0.053711706424
+  - 0.024999671882
+  - 0.057404935111
+- - -0.045088169635
+  - -0.415031312027
+  - -0.908689202641
+  - 0.241107111578
+- - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+convention: p_parent = R_parent_child * p_child + t_parent_child
+frames:
+  base_frame: base_link
+  camera_frame: camera_color_optical_frame
+  robot_pose_child_frame: Arm_Tip
+robot_contract:
+  model_end_link: R8_Link
+  expected_tool_name: Arm_Tip
+  expected_tool_translation_m:
+  - 0.0
+  - 0.0
+  - 0.0
+  expected_tool_euler_rad:
+  - 0.0
+  - 0.0
+  - 0.0
+  tool_translation_tolerance_m: 1.0e-06
+  tool_euler_tolerance_rad: 1.0e-06
+board:
+  dictionary: DICT_6X6_250
+  markers_x: 3
+  markers_y: 3
+  marker_length_m: 0.04
+  marker_separation_m: 0.01
+  first_marker_id: 0
+camera_info:
+  frame_id: camera_color_optical_frame
+  width: 1280
+  height: 720
+  distortion_model: plumb_bob
+  k:
+  - 693.1459350585938
+  - 0.0
+  - 642.1784057617188
+  - 0.0
+  - 693.3707275390625
+  - 356.345947265625
+  - 0.0
+  - 0.0
+  - 1.0
+  d:
+  - 52.28756332397461
+  - -112.41032409667969
+  - 4.5997894631000236e-05
+  - 6.287490396061912e-05
+  - 120.32437896728516
+  - 52.12627410888672
+  - -112.0571060180664
+  - 120.63700103759766
+solver:
+  method: PARK
+  source_dataset: artifacts/right_wrist_calibration_v2.json
+  used_sample_indices:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+  - 10
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 20
+  rejected_sample_indices:
+  - 6
+  - 7
+  - 11
+  - 19
+  training_image_stamps:
+  - '1789015986.704322000'
+  - '1789015989.176524000'
+  - '1789015991.616452000'
+  - '1789015995.437372000'
+  - '1789015997.684563000'
+  - '1789016006.160263000'
+  - '1789016010.320672000'
+  - '1789016022.489887000'
+  - '1789016024.737548000'
+  - '1789016027.434483000'
+  - '1789016036.648004000'
+  - '1789016042.682659000'
+  - '1789016051.031012000'
+  - '1789016059.862411000'
+  - '1789016061.915979000'
+  - '1789016065.320979000'
+  - '1789016068.431767000'
+  - '1789016073.890506000'
+  - '1789016078.413022000'
+  - '1789016084.323013000'
+  training_observation_fingerprints:
+  - cd6217966014c57746bd6f2f6cbc9aab788069528208053c2a7a90353d1d3c7a
+  - 7ec2a8f33311e2759986776d3770234df90a215ba73c8582b2f37d30fba3283a
+  - 8509912398d3fca54ad63f349fa71d3021e7c5271a4734bafafede81655e9836
+  - 546f04a8712cd3487fc4218683a80c68599c175d3a11236509dbcc60eedb5785
+  - 68d05f1ee57df5b1e21b18c3afcca69966cc4c8552d7cd66f7b0680c4f70f1b5
+  - 9c3f327a2b2940538dcb34d0abb1914b52b89b94b38920a5eca21a54bf0b5619
+  - 22c23dee6e291cc2303e9ead2e1164e81a252cbc3eae16ef057288028b33422f
+  - 6ff5aabd20d75d53af612e7e3ad365468efe1b94d1a182a0404e84a6cab1a0ed
+  - 945c0626b3c107364a5b5c1d0927980eb5356076514385a2fdbee9d1f506da8b
+  - 55d58fa01031b154b6f750782ceecd97ab2e3370364fe13e5c0ba4b03de250b9
+  - 28d5cad25459732575be99f48f10580482cfcd19d32b91e408c945a8307479f9
+  - e17ed8b93e7a39d23d5fac1d295558a0a479e60d3d8ecbe419914018d8b4a257
+  - c7402c6d70f324b6f6092928a13edf3156aaaeeee7d996799525939263b929eb
+  - 98fa922cc0d151f98c72e9aff9f9f90fac6c14a8192579801ed525418c53e328
+  - 934b0e4946bb3338621e6d2063b98726a7142b5c3cb4c1a167859dc4e874a810
+  - fe14e9149d86a327d803a399689570da40915c87234d5b654d84f3c101821514
+  - 70536a1251b0df8a9459c48ed66fe1bb241427fbfadaeb70f7f5b4b2d5a542d3
+  - 1969e34e1449196a6da0d9bc3f1484a4507450e60065c115378068ef1a29279b
+  - cfe380dd6aeafc1119405339f1084fade4b1f86af598a0c60fe48e4de3e66b98
+  - d4d1f13ab0cdd8e75804aae69d20cf46c93233cd0ee0a52816c212b418d146e6
+sample_residuals:
+- sample_index: 1
+  used: true
+  translation_error_mm: 9.032023371616576
+  rotation_error_deg: 1.0657353865703125
+  reprojection_rms_px: 0.43512853117667216
+  image: right_wrist_calibration_v2_images/sample_001.png
+- sample_index: 2
+  used: true
+  translation_error_mm: 5.57514818259776
+  rotation_error_deg: 1.0000797190813489
+  reprojection_rms_px: 0.3736798855847765
+  image: right_wrist_calibration_v2_images/sample_002.png
+- sample_index: 3
+  used: true
+  translation_error_mm: 4.652216153136423
+  rotation_error_deg: 1.3791206723238763
+  reprojection_rms_px: 0.5434708907169328
+  image: right_wrist_calibration_v2_images/sample_003.png
+- sample_index: 4
+  used: true
+  translation_error_mm: 1.8345435898695173
+  rotation_error_deg: 0.880161770901519
+  reprojection_rms_px: 0.25941323942607
+  image: right_wrist_calibration_v2_images/sample_004.png
+- sample_index: 5
+  used: true
+  translation_error_mm: 4.681241121686608
+  rotation_error_deg: 0.44748766930530615
+  reprojection_rms_px: 0.2990867885751361
+  image: right_wrist_calibration_v2_images/sample_005.png
+- sample_index: 6
+  used: false
+  translation_error_mm: 15.847564692938604
+  rotation_error_deg: 4.26762426997208
+  reprojection_rms_px: 0.29608427735407095
+  image: right_wrist_calibration_v2_images/sample_006.png
+- sample_index: 7
+  used: false
+  translation_error_mm: 16.002227646062945
+  rotation_error_deg: 3.757038320066327
+  reprojection_rms_px: 0.312487299877994
+  image: right_wrist_calibration_v2_images/sample_007.png
+- sample_index: 8
+  used: true
+  translation_error_mm: 5.219212402080954
+  rotation_error_deg: 0.7750094494005663
+  reprojection_rms_px: 0.26714735776179027
+  image: right_wrist_calibration_v2_images/sample_008.png
+- sample_index: 9
+  used: true
+  translation_error_mm: 1.174429175919968
+  rotation_error_deg: 1.0241659722993555
+  reprojection_rms_px: 0.36495015935460823
+  image: right_wrist_calibration_v2_images/sample_009.png
+- sample_index: 10
+  used: true
+  translation_error_mm: 11.041566217416051
+  rotation_error_deg: 1.5696422399927907
+  reprojection_rms_px: 0.3316110212305304
+  image: right_wrist_calibration_v2_images/sample_010.png
+- sample_index: 11
+  used: false
+  translation_error_mm: 11.79929320259238
+  rotation_error_deg: 2.0551000411033917
+  reprojection_rms_px: 0.2940780978015951
+  image: right_wrist_calibration_v2_images/sample_011.png
+- sample_index: 12
+  used: true
+  translation_error_mm: 2.6541098172405406
+  rotation_error_deg: 1.0563912727411526
+  reprojection_rms_px: 0.23616551534650718
+  image: right_wrist_calibration_v2_images/sample_012.png
+- sample_index: 13
+  used: true
+  translation_error_mm: 13.162316652587181
+  rotation_error_deg: 1.5998280331234571
+  reprojection_rms_px: 0.3937303008631756
+  image: right_wrist_calibration_v2_images/sample_013.png
+- sample_index: 14
+  used: true
+  translation_error_mm: 5.8817384629610245
+  rotation_error_deg: 1.1798741394942365
+  reprojection_rms_px: 0.5364045295354022
+  image: right_wrist_calibration_v2_images/sample_014.png
+- sample_index: 15
+  used: true
+  translation_error_mm: 7.281276784741349
+  rotation_error_deg: 1.399683186231169
+  reprojection_rms_px: 0.30863352653513304
+  image: right_wrist_calibration_v2_images/sample_015.png
+- sample_index: 16
+  used: true
+  translation_error_mm: 1.3920627610137246
+  rotation_error_deg: 0.8529031340807134
+  reprojection_rms_px: 0.9230952863129301
+  image: right_wrist_calibration_v2_images/sample_016.png
+- sample_index: 17
+  used: true
+  translation_error_mm: 11.946913813355696
+  rotation_error_deg: 1.5503691415201255
+  reprojection_rms_px: 0.5538146227206717
+  image: right_wrist_calibration_v2_images/sample_017.png
+- sample_index: 18
+  used: true
+  translation_error_mm: 10.378032889208791
+  rotation_error_deg: 1.8055737952567519
+  reprojection_rms_px: 0.507509722171987
+  image: right_wrist_calibration_v2_images/sample_018.png
+- sample_index: 19
+  used: false
+  translation_error_mm: 15.912935053989157
+  rotation_error_deg: 2.6880433703464455
+  reprojection_rms_px: 0.5297677832045794
+  image: right_wrist_calibration_v2_images/sample_019.png
+- sample_index: 20
+  used: true
+  translation_error_mm: 3.4781906020330813
+  rotation_error_deg: 0.5002040982455607
+  reprojection_rms_px: 0.6219389056729016
+  image: right_wrist_calibration_v2_images/sample_020.png
+estimated_gripper_from_board:
+  translation_m:
+  - 0.22586206982475945
+  - -0.20914369480259987
+  - 0.001423251219824619
+  rotation_xyzw:
+  - -0.0004793727640103071
+  - -0.9995794471838424
+  - 0.016129875481195086
+  - 0.02409410895548305
+training_metrics:
+  sample_count: 20.0
+  used_sample_count: 16.0
+  rejected_sample_count: 4.0
+  translation_span_m: 0.4770821121852257
+  rotation_span_deg: 88.1739345440128
+  training_translation_rms_m: 0.007256414128969722
+  training_translation_max_m: 0.01316231665258718
+  training_rotation_rms_deg: 1.1935819215809618
+  training_rotation_max_deg: 1.8055737952567519
+  mean_marker_reprojection_rms_px: 0.4347362676865766
+  max_marker_reprojection_rms_px: 0.9230952863129301
+validation_metrics:
+  sample_count: 9.0
+  validation_translation_rms_m: 0.00801371105732341
+  validation_translation_max_m: 0.013420857493007612
+  validation_rotation_rms_deg: 1.6796457154659497
+  validation_rotation_max_deg: 3.2074021210306003
+  mean_marker_reprojection_rms_px: 0.31878899073179373
+quality:
+  training_passed: true
+  validation_passed: true
+  accepted: true
+  failures: []
+verified_at: '2026-09-10T04:57:22+00:00'
+validation_dataset: artifacts/right_wrist_validation_v2.json
+validation_sample_residuals:
+- sample_index: 1
+  used: true
+  translation_error_mm: 5.033599540034783
+  rotation_error_deg: 1.6189537485295933
+  reprojection_rms_px: 0.2573520874164588
+  image: right_wrist_validation_v2_images/sample_001.png
+- sample_index: 2
+  used: true
+  translation_error_mm: 7.74277181145992
+  rotation_error_deg: 0.7414808752243469
+  reprojection_rms_px: 0.31125560381243833
+  image: right_wrist_validation_v2_images/sample_002.png
+- sample_index: 3
+  used: true
+  translation_error_mm: 10.99381452656754
+  rotation_error_deg: 1.8144595067304594
+  reprojection_rms_px: 0.34813683452899913
+  image: right_wrist_validation_v2_images/sample_003.png
+- sample_index: 4
+  used: true
+  translation_error_mm: 4.1915509167565075
+  rotation_error_deg: 1.0830934810032968
+  reprojection_rms_px: 0.32138389684647095
+  image: right_wrist_validation_v2_images/sample_004.png
+- sample_index: 5
+  used: true
+  translation_error_mm: 3.4144486397898497
+  rotation_error_deg: 0.49411708692726203
+  reprojection_rms_px: 0.2627916026377743
+  image: right_wrist_validation_v2_images/sample_005.png
+- sample_index: 6
+  used: true
+  translation_error_mm: 1.5103649649719257
+  rotation_error_deg: 1.0019582727041845
+  reprojection_rms_px: 0.29725177597153785
+  image: right_wrist_validation_v2_images/sample_006.png
+- sample_index: 7
+  used: true
+  translation_error_mm: 7.577518313132537
+  rotation_error_deg: 1.966939091616696
+  reprojection_rms_px: 0.33338932276132544
+  image: right_wrist_validation_v2_images/sample_007.png
+- sample_index: 8
+  used: true
+  translation_error_mm: 13.420857493007611
+  rotation_error_deg: 3.2074021210306003
+  reprojection_rms_px: 0.3843636477654009
+  image: right_wrist_validation_v2_images/sample_008.png
+- sample_index: 9
+  used: true
+  translation_error_mm: 10.137925139378664
+  rotation_error_deg: 1.5330941963998466
+  reprojection_rms_px: 0.35317614484573767
+  image: right_wrist_validation_v2_images/sample_009.png

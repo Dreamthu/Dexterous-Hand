@@ -138,6 +138,40 @@ def load_config(path: Path) -> dict[str, Any]:
         raise CalibrationError("'solve.result' must be a path string")
     for name, value in quality.items():
         require_positive(value, f"quality.{name}")
+    # Legacy configuration remains readable for offline diagnosis only. New
+    # capture/publish entry points require these explicit safety sections.
+    if "robot" in config:
+        robot = require_mapping(config["robot"], "robot")
+        for name in ("model_end_link", "tool_service", "tool_service_type", "expected_tool_name"):
+            if not isinstance(robot.get(name), str) or not robot[name].strip():
+                raise CalibrationError(f"'robot.{name}' must be a non-empty string")
+        if not robot["tool_service"].startswith("/"):
+            raise CalibrationError("'robot.tool_service' must be an absolute ROS service name")
+        if robot["expected_tool_name"] != frames["robot_pose_child_frame"]:
+            raise CalibrationError("robot_pose_child_frame must name the expected controller tool")
+        for name in ("expected_tool_translation_m", "expected_tool_euler_rad"):
+            values = np.asarray(robot.get(name), dtype=float)
+            if values.shape != (3,) or not np.all(np.isfinite(values)):
+                raise CalibrationError(f"'robot.{name}' must contain three finite numbers")
+        for name in ("tool_translation_tolerance_m", "tool_euler_tolerance_rad",
+                     "tool_poll_interval_s", "tool_service_timeout_s", "maximum_tool_age_s"):
+            require_positive(robot.get(name), f"robot.{name}")
+        if robot["tool_poll_interval_s"] >= robot["maximum_tool_age_s"]:
+            raise CalibrationError("tool_poll_interval_s must be less than maximum_tool_age_s")
+        for name in ("maximum_pose_gap_s", "maximum_pose_age_s", "maximum_image_age_s"):
+            require_positive(capture.get(name), f"capture.{name}")
+        if capture["maximum_pose_gap_s"] >= capture["stationary_window_s"]:
+            raise CalibrationError("maximum_pose_gap_s must be less than stationary_window_s")
+    if "tf_publish" in config:
+        tf = require_mapping(config["tf_publish"], "tf_publish")
+        if not isinstance(tf.get("camera_root_frame"), str) or not tf["camera_root_frame"].strip():
+            raise CalibrationError("'tf_publish.camera_root_frame' must be non-empty")
+        if len({tf["camera_root_frame"], frames["camera_frame"], frames["base_frame"]}) != 3:
+            raise CalibrationError("camera root, optical frame and base must be distinct")
+        for name in ("lookup_timeout_s", "discovery_window_s"):
+            require_positive(tf.get(name), f"tf_publish.{name}")
+        if tf["lookup_timeout_s"] <= tf["discovery_window_s"]:
+            raise CalibrationError("TF lookup timeout must exceed discovery window")
     return config
 
 
@@ -556,6 +590,10 @@ def validation_metrics(
 
 def validation_quality(metrics: Mapping[str, float], quality: Mapping[str, Any]) -> tuple[bool, list[str]]:
     failures: list[str] = []
+    if any(not math.isfinite(float(metrics[key])) for key in (
+        "sample_count", "validation_translation_rms_m", "validation_rotation_rms_deg"
+    )):
+        return False, ["validation metrics contain non-finite values"]
     if metrics["sample_count"] < float(quality["minimum_validation_samples"]):
         failures.append("validation sample count is too small")
     if metrics["validation_translation_rms_m"] > float(

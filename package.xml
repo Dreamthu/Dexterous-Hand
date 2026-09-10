@@ -11,6 +11,11 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+  <exec_depend>tf2_msgs</exec_depend>
+  <exec_depend>rosidl_runtime_py</exec_depend>
+  <!-- Supplied by the separately installed robot overlay, never vendored here. -->
+  <exec_depend>lbot_arm_interfaces</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python3-yaml</exec_depend>

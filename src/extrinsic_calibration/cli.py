@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 from collections import deque
 import copy
+import hashlib
 import importlib
+import json
 import os
 from pathlib import Path
 import shlex
@@ -29,17 +31,19 @@ from .core import (
     load_config,
     load_json,
     load_yaml,
+    invert_transform,
     matrix_from_pose,
-    motion_span,
     pose_dict,
     rounded_matrix,
     solve_eye_to_hand,
     training_quality,
     transform_from_dict,
+    transform_errors,
     utc_now,
     validation_metrics,
     validation_quality,
 )
+from .safety import base_from_camera_root, robot_contract, stationary_window, validate_tool_snapshot
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -101,6 +105,13 @@ def _same_capture_contract(dataset: Mapping[str, Any], config: Mapping[str, Any]
     }
     if dataset.get("frames") != expected_frames:
         raise CalibrationError("dataset frame contract differs from current configuration")
+    if "robot" in config:
+        if dataset.get("robot_contract") != robot_contract(config):
+            raise CalibrationError("dataset tool contract differs or is missing; use a new capture dataset")
+        for sample in dataset.get("samples", []):
+            if "tool_snapshot" not in sample:
+                raise CalibrationError("dataset contains unmonitored legacy tool samples")
+            validate_tool_snapshot(sample["tool_snapshot"], config["robot"])
 
 
 def new_dataset(config: Mapping[str, Any], kind: str, camera: Mapping[str, Any]) -> dict[str, Any]:
@@ -116,6 +127,7 @@ def new_dataset(config: Mapping[str, Any], kind: str, camera: Mapping[str, Any])
             "robot_pose_child_frame": str(config["frames"]["robot_pose_child_frame"]),
         },
         "topics": dict(config["topics"]),
+        "robot_contract": robot_contract(config),
         "board": board_snapshot(config["board"]),
         "camera_info": dict(camera),
         "samples": [],
@@ -149,6 +161,8 @@ def _put_lines(image: np.ndarray, lines: Sequence[str]) -> None:
 
 
 def collect(config: Mapping[str, Any], kind: str) -> int:
+    robot_contract(config)  # Legacy datasets are diagnosis-only, never append silently.
+    from .tool_monitor import ToolMonitor
     try:
         import rclpy
         from cv_bridge import CvBridge
@@ -175,6 +189,8 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             self.image_received_monotonic = 0.0
             self.latest_info: Any | None = None
             self.poses: deque[tuple[float, Any, np.ndarray]] = deque(maxlen=500)
+            self.pose_advanced_monotonic = 0.0
+            self.tool = ToolMonitor(self, config["robot"])
             self.create_subscription(
                 Image, str(topics["color_image"]), self._image_callback, qos_profile_sensor_data
             )
@@ -207,40 +223,55 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             except CalibrationError as error:
                 self.get_logger().error(f"invalid robot pose: {error}")
                 return
-            self.poses.append((stamp_seconds(message.header.stamp), message, transform))
+            timestamp = stamp_seconds(message.header.stamp)
+            if timestamp <= 0:
+                self.poses.clear()
+                return
+            if self.poses and timestamp <= self.poses[-1][0]:
+                # Clear history on duplicates/backwards time; repeated messages
+                # cannot count as proof of continuous stationary observations.
+                self.poses.clear()
+                return
+            self.poses.append((timestamp, message, transform))
+            self.pose_advanced_monotonic = time.monotonic()
 
         def nearest_pose(self, image_time: float):
             if not self.poses:
                 return None
             return min(self.poses, key=lambda entry: abs(entry[0] - image_time))
 
-        def stationarity(self, image_time: float) -> tuple[bool, float, float, int]:
-            window = float(capture_config["stationary_window_s"])
-            transforms = [
-                transform
-                for timestamp, _, transform in self.poses
-                if image_time - window <= timestamp <= image_time
-            ]
-            if len(transforms) < 3:
-                return False, float("inf"), float("inf"), len(transforms)
-            translation_span, rotation_span = motion_span(transforms)
-            passed = (
-                translation_span <= float(capture_config["maximum_stationary_translation_m"])
-                and rotation_span <= float(capture_config["maximum_stationary_rotation_deg"])
+        def stationarity(self, image_time: float, paired_pose_time: float | None):
+            return stationary_window(
+                [(t, str(msg.header.frame_id), transform) for t, msg, transform in self.poses],
+                image_time, str(frames["base_frame"]), capture_config, paired_pose_time,
             )
-            return passed, translation_span, rotation_span, len(transforms)
 
     rclpy.init(args=None)
-    node = CaptureNode()
+    node = None
     window_name = f"ArUco eye-to-hand: {kind}"
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     last_key: tuple[int, int] | None = None
     detection = None
     preview: np.ndarray | None = None
     try:
+        node = CaptureNode()
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         print("采集窗口按键：SPACE 保存当前静止姿态，Q/ESC 结束。工具不会发送机械臂命令。")
         while rclpy.ok():
             rclpy.spin_once(node, timeout_sec=0.02)
+            # PnP/rendering may be slower than pose publication. Drain queued
+            # callbacks before pairing observations rather than falling behind.
+            for _ in range(32):
+                rclpy.spin_once(node, timeout_sec=0.0)
+            node.tool.poll()
+            try:
+                tool_snapshot = node.tool.require_current()
+                tool_error = ""
+            except CalibrationError as error:
+                tool_snapshot = None
+                tool_error = str(error)
+                # Observations spanning a tool-service outage are not a valid
+                # stationary window even if the pose numbers did not move.
+                node.poses.clear()
             if node.latest_bgr is None or node.latest_image is None or node.latest_info is None:
                 canvas = np.zeros((360, 640, 3), dtype=np.uint8)
                 _put_lines(canvas, ["Waiting for image, CameraInfo and robot pose..."])
@@ -261,6 +292,8 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
                     raise CalibrationError(
                         f"CameraInfo frame is {info.header.frame_id!r}, expected {frames['camera_frame']!r}"
                     )
+                if str(image_message.header.frame_id) != str(frames["camera_frame"]):
+                    raise CalibrationError("color Image frame differs from CameraInfo / configured optical frame")
                 camera_matrix, distortion = _camera_arrays(info)
                 detection = detect_board_pose(
                     node.latest_bgr,
@@ -289,7 +322,7 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             display = preview.copy()
             image_time = stamp_seconds(image_message.header.stamp)
             nearest = node.nearest_pose(image_time)
-            stable, stable_translation, stable_rotation, stable_count = node.stationarity(image_time)
+            stationary = node.stationarity(image_time, nearest[0] if nearest is not None else None)
             sync_delta = float("inf") if nearest is None else abs(nearest[0] - image_time)
             lines = [
                 f"set={kind}  saved={len(load_json(output)['samples']) if output.is_file() else 0}",
@@ -298,7 +331,9 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
                     if detection is not None
                     else "board not detected / too few configured markers"
                 ),
-                f"pose sync={sync_delta * 1000:.0f}ms  stable={'YES' if stable else 'NO'} ({stable_count})",
+                f"pose sync={sync_delta * 1000:.0f}ms  stable={'YES' if stationary.passed else 'NO'} ({stationary.sample_count})",
+                f"tool={'OK' if tool_snapshot is not None else 'BLOCKED'}  history={stationary.coverage_s:.2f}s",
+                tool_error or stationary.reason,
                 "SPACE=capture  Q/ESC=finish",
             ]
             _put_lines(display, lines)
@@ -309,8 +344,15 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             if key != 32:
                 continue
 
-            if time.monotonic() - node.image_received_monotonic > 1.0:
-                print("拒绝：图像流已超过 1 秒未更新。", file=sys.stderr)
+            try:
+                tool_snapshot = node.tool.require_current()
+            except CalibrationError as error:
+                print("拒绝：工具配置检查失败：" + str(error), file=sys.stderr)
+                continue
+            ros_now = node.get_clock().now().nanoseconds * 1e-9
+            if (time.monotonic() - node.image_received_monotonic > float(capture_config["maximum_image_age_s"])
+                    or not -float(capture_config["maximum_sync_delta_s"]) <= ros_now - image_time <= float(capture_config["maximum_image_age_s"])):
+                print("拒绝：图像过期或时间基准不一致；检查相机时间戳与 ROS 时钟。", file=sys.stderr)
                 continue
             if detection is None:
                 print("拒绝：未检测到足够的标定板 marker。", file=sys.stderr)
@@ -321,10 +363,14 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             if nearest is None or sync_delta > float(capture_config["maximum_sync_delta_s"]):
                 print("拒绝：图像与右臂位姿时间不同步。", file=sys.stderr)
                 continue
-            if not stable:
+            if (time.monotonic() - node.pose_advanced_monotonic > float(capture_config["maximum_pose_age_s"])
+                    or not -float(capture_config["maximum_sync_delta_s"]) <= ros_now - nearest[0] <= float(capture_config["maximum_pose_age_s"])):
+                print("拒绝：机器人位姿过期或时间基准不一致。", file=sys.stderr)
+                continue
+            if not stationary.passed:
                 print(
-                    f"拒绝：右臂尚未静止（位移 {stable_translation * 1000:.2f} mm，"
-                    f"转角 {stable_rotation:.2f} deg）。",
+                    f"拒绝：静止检查未通过：{stationary.reason}（位移 {stationary.translation_span_m * 1000:.2f} mm，"
+                    f"转角 {stationary.rotation_span_deg:.2f} deg）。",
                     file=sys.stderr,
                 )
                 continue
@@ -332,7 +378,7 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             if str(pose_message.header.frame_id) != str(frames["base_frame"]):
                 print(
                     f"拒绝：右臂位姿父坐标系为 {pose_message.header.frame_id!r}，"
-                    f"必须是 {frames['base_frame']!r}。请先恢复机器人基坐标/工作坐标系。",
+                    f"配置为 {frames['base_frame']!r}。请核实控制器坐标定义，不要仅重命名消息。",
                     file=sys.stderr,
                 )
                 continue
@@ -355,8 +401,11 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
                 "camera_from_board": pose_dict(detection.camera_from_board),
                 "marker_ids": list(detection.marker_ids),
                 "reprojection_rms_px": detection.reprojection_rms_px,
-                "stationary_translation_span_m": stable_translation,
-                "stationary_rotation_span_deg": stable_rotation,
+                "stationary_translation_span_m": stationary.translation_span_m,
+                "stationary_rotation_span_deg": stationary.rotation_span_deg,
+                "stationary_coverage_s": stationary.coverage_s,
+                "stationary_sample_count": stationary.sample_count,
+                "tool_snapshot": tool_snapshot,
             }
             if bool(capture_config.get("save_images", True)):
                 image_directory = output.parent / f"{output.stem}_images"
@@ -374,7 +423,8 @@ def collect(config: Mapping[str, Any], kind: str) -> int:
             )
     finally:
         cv2.destroyAllWindows()
-        node.destroy_node()
+        if node is not None:
+            node.destroy_node()
         rclpy.shutdown()
     count = len(load_json(output)["samples"]) if output.is_file() else 0
     print(f"采集结束：{output}，共 {count} 帧。")
@@ -388,6 +438,25 @@ def ensure_dataset_matches_result(dataset: Mapping[str, Any], result: Mapping[st
         raise CalibrationError("validation CameraInfo differs from the solved result")
     if dataset.get("frames") != result.get("frames"):
         raise CalibrationError("validation frame contract differs from the solved result")
+    if dataset.get("robot_contract") != result.get("robot_contract"):
+        raise CalibrationError("validation tool contract differs from the solved result")
+
+
+def observation_fingerprint(sample: Mapping[str, Any]) -> str:
+    payload = {key: sample[key] for key in ("base_from_gripper", "camera_from_board")}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def residual_report(samples, base_from_camera, gripper_from_board, used_indices):
+    mounts = [invert_transform(transform_from_dict(sample["base_from_gripper"]))
+              @ base_from_camera @ transform_from_dict(sample["camera_from_board"])
+              for sample in samples]
+    translations, rotations = transform_errors(mounts, gripper_from_board)
+    return [{"sample_index": index + 1, "used": index in used_indices,
+             "translation_error_mm": translation * 1000.0, "rotation_error_deg": rotation,
+             "reprojection_rms_px": float(sample["reprojection_rms_px"]),
+             "image": sample.get("image")}
+            for index, (sample, translation, rotation) in enumerate(zip(samples, translations, rotations))]
 
 
 def solve_command(config: Mapping[str, Any]) -> int:
@@ -407,6 +476,7 @@ def solve_command(config: Mapping[str, Any]) -> int:
         "matrix_parent_from_child": rounded_matrix(solved.base_from_camera),
         "convention": "p_parent = R_parent_child * p_child + t_parent_child",
         "frames": dict(dataset["frames"]),
+        "robot_contract": copy.deepcopy(dataset.get("robot_contract")),
         "board": dict(dataset["board"]),
         "camera_info": copy.deepcopy(dataset["camera_info"]),
         "solver": {
@@ -414,7 +484,11 @@ def solve_command(config: Mapping[str, Any]) -> int:
             "source_dataset": portable_path(dataset_file),
             "used_sample_indices": [int(index + 1) for index in solved.used_indices],
             "rejected_sample_indices": [int(index + 1) for index in solved.rejected_indices],
+            "training_image_stamps": [sample.get("image_stamp") for sample in dataset["samples"]],
+            "training_observation_fingerprints": [observation_fingerprint(sample) for sample in dataset["samples"]],
         },
+        "sample_residuals": residual_report(dataset["samples"], solved.base_from_camera,
+                                            solved.gripper_from_board, set(solved.used_indices)),
         "estimated_gripper_from_board": pose_dict(solved.gripper_from_board),
         "training_metrics": {key: float(value) for key, value in solved.metrics.items()},
         "validation_metrics": None,
@@ -438,6 +512,10 @@ def solve_command(config: Mapping[str, Any]) -> int:
         f"运动跨度 {solved.metrics['translation_span_m'] * 1000:.0f} mm / "
         f"{solved.metrics['rotation_span_deg']:.1f} deg。"
     )
+    print("逐帧残差（相对于最终估计的腕板安装关系）：")
+    for row in document["sample_residuals"]:
+        print(f"  #{row['sample_index']:02d} {'used' if row['used'] else 'rejected':8s} "
+              f"{row['translation_error_mm']:.2f} mm / {row['rotation_error_deg']:.3f} deg")
     if not passed:
         print("训练质量门未通过：" + "；".join(failures), file=sys.stderr)
         return 1
@@ -451,17 +529,26 @@ def verify_command(config: Mapping[str, Any]) -> int:
     validation_file = dataset_path(config, "validation")
     dataset = load_compatible_dataset(validation_file, config, "validation")
     ensure_dataset_matches_result(dataset, result)
+    solver = result.get("solver", {})
+    fingerprints = set(solver.get("training_observation_fingerprints", []))
+    if not fingerprints:
+        raise CalibrationError("result lacks training observation fingerprints; rerun solve before independent validation")
+    stamps = set(solver.get("training_image_stamps", [])) - {None}
+    if any(observation_fingerprint(sample) in fingerprints
+           or (sample.get("image_stamp") is not None and sample["image_stamp"] in stamps)
+           for sample in dataset["samples"]):
+        raise CalibrationError("validation reuses training observations; collect genuinely independent poses")
     base_from_camera = transform_from_dict(result)
     gripper_from_board = transform_from_dict(result["estimated_gripper_from_board"])
     metrics = validation_metrics(dataset["samples"], base_from_camera, gripper_from_board)
     passed, failures = validation_quality(metrics, config["quality"])
-    training_passed = bool(result.get("quality", {}).get("training_passed", False))
-    all_failures = list(result.get("quality", {}).get("failures", []))
-    all_failures = [item for item in all_failures if item != "independent validation has not been run"]
-    all_failures.extend(failures)
+    training_passed, training_failures = training_quality(result["training_metrics"], config["quality"])
+    all_failures = training_failures + failures
     result["verified_at"] = utc_now()
     result["validation_dataset"] = portable_path(validation_file)
     result["validation_metrics"] = metrics
+    result["validation_sample_residuals"] = residual_report(
+        dataset["samples"], base_from_camera, gripper_from_board, set(range(len(dataset["samples"]))))
     result["quality"] = {
         "training_passed": training_passed,
         "validation_passed": passed,
@@ -483,6 +570,8 @@ def verify_command(config: Mapping[str, Any]) -> int:
 
 
 def publish_command(config: Mapping[str, Any], dry_run: bool) -> int:
+    if "tf_publish" not in config:
+        raise CalibrationError("missing tf_publish configuration; legacy configuration is offline diagnosis-only")
     result = load_yaml(result_path(config))
     if not bool(result.get("quality", {}).get("accepted", False)):
         raise CalibrationError("result has not passed both training and independent validation")
@@ -493,8 +582,20 @@ def publish_command(config: Mapping[str, Any], dry_run: bool) -> int:
     }
     if result.get("frames") != expected_frames or result.get("board") != board_snapshot(config["board"]):
         raise CalibrationError("accepted result no longer matches the current frame/board configuration")
-    translation = result["translation"]
-    quaternion = result["rotation_xyzw"]
+    if (result.get("parent_frame") != expected_frames["base_frame"]
+            or result.get("child_frame") != expected_frames["camera_frame"]):
+        raise CalibrationError("result parent/child fields disagree with its frame contract")
+    if result.get("robot_contract") != robot_contract(config):
+        raise CalibrationError("result does not match the current tool contract")
+    training_passed, _ = training_quality(result["training_metrics"], config["quality"])
+    validation_passed, _ = validation_quality(result["validation_metrics"], config["quality"])
+    if not training_passed or not validation_passed:
+        raise CalibrationError("result fails the current quality thresholds")
+    from .tf_publish import lookup_camera_internal_transform
+    root_from_optical = lookup_camera_internal_transform(config)
+    publish_pose = pose_dict(base_from_camera_root(transform_from_dict(result), root_from_optical))
+    translation = publish_pose["translation_m"]
+    quaternion = publish_pose["rotation_xyzw"]
     arguments = [
         "ros2",
         "run",
@@ -517,9 +618,10 @@ def publish_command(config: Mapping[str, Any], dry_run: bool) -> int:
         "--frame-id",
         str(result["parent_frame"]),
         "--child-frame-id",
-        str(result["child_frame"]),
+        str(config["tf_publish"]["camera_root_frame"]),
     ]
-    print(" ".join(shlex.quote(item) for item in arguments))
+    print("保留相机内部 TF；发布的是 base <- camera_root，非原始 optical 外参。")
+    print(" ".join(shlex.quote(item) for item in arguments), flush=True)
     if dry_run:
         return 0
     os.execvp(arguments[0], arguments)
@@ -542,7 +644,8 @@ def doctor_command(config: Mapping[str, Any]) -> int:
     )
     print(f"OpenCV {cv2.__version__}，aruco=OK，calibrateHandEye=OK")
     missing: list[str] = []
-    for module_name in ("numpy", "yaml", "PIL", "rclpy", "cv_bridge", "sensor_msgs", "geometry_msgs"):
+    for module_name in ("numpy", "yaml", "PIL", "rclpy", "cv_bridge", "sensor_msgs", "geometry_msgs",
+                        "tf2_ros", "tf2_msgs", "rosidl_runtime_py"):
         try:
             importlib.import_module(module_name)
         except ImportError:
@@ -552,6 +655,10 @@ def doctor_command(config: Mapping[str, Any]) -> int:
     if missing:
         raise CalibrationError("缺少运行依赖或 ROS 环境未加载：" + ", ".join(missing))
     print("Python/ROS 运行依赖：OK")
+    if "robot" in config:
+        from .tool_monitor import tool_service_class
+        tool_service_class(config["robot"])
+        print(f"工具查询类型：OK；采集时只读检查 {config['robot']['tool_service']}")
     print("注意：doctor 只能检查软件配置；请用尺实测标定板并在 collect 时确认。")
     return 0
 
@@ -580,7 +687,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("solve", help="求解 T_base_camera 并执行训练质量检查")
     subparsers.add_parser("verify", help="用独立数据验证，并决定是否允许发布")
     publish = subparsers.add_parser("publish-tf", help="发布通过验证的静态 TF")
-    publish.add_argument("--dry-run", action="store_true", help="只打印命令")
+    publish.add_argument("--dry-run", action="store_true", help="只读查询相机内部 TF 并打印命令，不发布；需启动相机")
     return parser
 
 

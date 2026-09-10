@@ -1,6 +1,33 @@
-/artifacts/*
+# Track only the reusable calibration tool and the accepted deployment baseline.
+# Raw observations/images, local environments, logs, caches, experiments and
+# future calibration outputs stay on disk but do not enter Git automatically.
+*
+!/.gitignore
+!/README.md
+!/calibrate.sh
+!/package.xml
+!/requirements.txt
+
+!/config/
+!/config/environment.example
+!/config/eye_to_hand_aruco.yaml
+
+!/src/
+!/src/extrinsic_calibration/
+!/src/extrinsic_calibration/*.py
+
+!/scripts/
+!/scripts/run_calibration.py
+!/scripts/test.sh
+!/scripts/test_ros.sh
+
+!/tests/
+!/tests/*.py
+
+!/docs/
+!/docs/extrinsic_calibration.md
+
+!/artifacts/
 !/artifacts/.gitkeep
-/config/environment.local
-/.venv/
-__pycache__/
-*.py[cod]
+!/artifacts/gemini2_to_base_v2.yaml
+!/artifacts/calibration_config_v2.yaml
