@@ -19,11 +19,13 @@ def model_source(explicit=""):
             raise RuntimeError(f"MoveIt CAD model does not exist: {result}")
         return result
     relative = Path("Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf")
+    repo_relative = Path("开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf")
+    repo_assets = Path("assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf")
     for start in (Path(__file__).resolve(), Path.cwd()):
         for parent in start.parents:
-            candidate = parent / relative
-            if candidate.is_file():
-                return candidate
+            for candidate in (parent / relative, parent / repo_relative, parent / repo_assets):
+                if candidate.is_file():
+                    return candidate
     raise RuntimeError("Cannot find Dexterous-Hand CAD; set moveit_model_source launch argument")
 
 

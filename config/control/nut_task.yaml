@@ -66,7 +66,7 @@
     # RPY retains the Arm_Tip convention; convert palm XYZ to driver XYZ.
     # The numeric saved z now denotes palm height, not flange height.
     approach_target_is_tcp: true
-    approach_reference_z_rpy: [-0.3655917354267519, 1.0796495600495548, 0.12230988346329275, -1.184440455645692]
+    approach_reference_z_rpy: [-0.3655917354267519, 0.9096495600495548, 0.12230988346329275, -1.184440455645692]
     # Explicit LARGE-only sequence after successful approach.
     # Z below is the web-displayed Arm_Tip height, not palm height.
     # Hand values are device units 0..255, not radians.
@@ -102,7 +102,7 @@
     # Capture this fresh cloud with calibrated TF before the first enter move.
     # All post-lift MoveIt segments use the same static obstacle snapshot.
     # Missing/old cloud or missing TF aborts before enter; no empty-scene fallback.
-    moveit_point_cloud_enabled: true
+    moveit_point_cloud_enabled: false
     moveit_point_cloud_topic: /camera/depth/points
     moveit_point_cloud_resolution_m: 0.015
     moveit_point_cloud_padding_m: 0.015
