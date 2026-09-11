@@ -40,14 +40,14 @@ struct NutSequenceSnapshot {
 
 // Stage-aware identity for the fixed large->medium->small task. This is not a
 // generic spatial tracker: each stage re-ranks the remaining observations by
-// pixel radius. Only explicit events advance task state.
+// rectified outer-contour size in mm. Only explicit events advance task state.
 class NutSequence {
 public:
   explicit NutSequence(const NutSequenceConfig &config);
 
   const NutSequenceSnapshot &observe(
       std::int64_t stamp_ms, bool frame_found, cv::Size image_size,
-      const std::vector<cv::Vec3f> &observations);
+      const std::vector<cv::Vec3f> &observations, const std::vector<double> &sizes_mm);
   const NutSequenceSnapshot &snapshot() const { return snapshot_; }
 
   // Used by adapters when the source image itself is stale or invalid.
@@ -62,6 +62,7 @@ private:
   struct OrderedObservation {
     int input_index{-1};
     cv::Vec3f circle{};
+    double size_mm{0};
   };
   struct Confirmation {
     std::int64_t stamp_ms;
@@ -85,7 +86,7 @@ private:
   bool same_layout(const std::vector<cv::Vec3f> &a,
                    const std::vector<cv::Vec3f> &b) const;
   std::vector<OrderedObservation> order_by_size(
-      const std::vector<cv::Vec3f> &observations) const;
+      const std::vector<cv::Vec3f> &observations, const std::vector<double> &sizes_mm) const;
 };
 
 }  // namespace lbot_vision

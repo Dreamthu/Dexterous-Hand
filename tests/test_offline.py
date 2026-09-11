@@ -33,7 +33,12 @@ class OfflineConfigurationTests(unittest.TestCase):
         self.assertEqual(params["min_frame_area_ratio"], 0.01)
         self.assertNotIn("depth_topic", params)
         self.assertFalse(params["enable_hough_fallback"])
-        self.assertEqual(len(params), 27)
+        self.assertEqual(params["frame_size_mm"], 190.0)
+        self.assertEqual(params["frame_inner_scale"], 1.0)
+        self.assertEqual(params["slot_axis"], "robot_x")
+        self.assertEqual(params["blue_s_max"], 240)
+        self.assertEqual(params["blue_v_max"], 255)
+        self.assertEqual(len(params), 31)
         sequence = sequence_parameters(config["detector_config"])
         self.assertEqual(sequence["sequence_stable_frames"], 3)
         self.assertEqual(sequence["sequence_min_size_gap_ratio"], 0.0)
@@ -44,6 +49,18 @@ class OfflineConfigurationTests(unittest.TestCase):
         path = self.yaml_file({"nut_detector_node": {"ros__parameters": {}}})
         with self.assertRaisesRegex(ConfigurationError, "black_v_max"):
             detector_parameters(path)
+
+    def test_legacy_blue_upper_limits_and_overrides(self):
+        config = settings("config/vision/offline.yaml")
+        document = yaml.safe_load(config["detector_config"].read_text(encoding="utf-8"))
+        params = document["nut_detector_node"]["ros__parameters"]
+        del params["blue_s_max"]
+        del params["blue_v_max"]
+        effective = detector_parameters(self.yaml_file(document))
+        self.assertEqual((effective["blue_s_max"], effective["blue_v_max"]), (255, 255))
+        params.update(blue_s_max=200, blue_v_max=220)
+        effective = detector_parameters(self.yaml_file(document))
+        self.assertEqual((effective["blue_s_max"], effective["blue_v_max"]), (200, 220))
 
     def test_missing_sequence_field(self):
         config = settings("config/vision/offline.yaml")
@@ -56,6 +73,7 @@ class OfflineConfigurationTests(unittest.TestCase):
         config = settings("config/vision/offline.yaml")
         document = yaml.safe_load(config["detector_config"].read_text(encoding="utf-8"))
         for name, value in (("black_v_max", True), ("adaptive_block_size", 3.5),
+                            ("blue_s_max", None), ("blue_v_max", True),
                             ("hough_param2", float("nan")), ("enable_hough_fallback", 0),
                             ("basket_side", None), ("sequence_stable_frames", True),
                              ("sequence_max_gap_ms", float("nan"))):

@@ -1,13 +1,17 @@
-// Field schema only. Values live in config/vision/nut_detector.yaml.
+// Values live in config/vision/nut_detector.yaml. DEFAULT fields retain legacy behavior when absent.
 LBOT_DETECTOR_FIELD(int, black_v_max)
 LBOT_DETECTOR_FIELD(bool, debug_black_frame)
 LBOT_DETECTOR_FIELD(int, blue_h_min)
 LBOT_DETECTOR_FIELD(int, blue_h_max)
 LBOT_DETECTOR_FIELD(int, blue_s_min)
+LBOT_DETECTOR_FIELD_DEFAULT(int, blue_s_max, 255)
 LBOT_DETECTOR_FIELD(int, blue_v_min)
+LBOT_DETECTOR_FIELD_DEFAULT(int, blue_v_max, 255)
 LBOT_DETECTOR_FIELD(double, min_frame_area_ratio)
 LBOT_DETECTOR_FIELD(double, max_frame_area_ratio)
 LBOT_DETECTOR_FIELD(double, min_basket_area_ratio)
+LBOT_DETECTOR_FIELD(double, min_basket_rectangularity)
+LBOT_DETECTOR_FIELD(double, frame_size_mm)
 LBOT_DETECTOR_FIELD(double, frame_inner_scale)
 LBOT_DETECTOR_FIELD(double, min_nut_radius_px)
 LBOT_DETECTOR_FIELD(double, max_nut_radius_px)

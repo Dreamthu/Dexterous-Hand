@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -47,6 +48,19 @@ RosLeftArmMotionConfig load_config(const rclcpp::Node::SharedPtr &node)
   config.joint_speed = node->declare_parameter("joint_speed", config.joint_speed);
   config.joint_acceleration = node->declare_parameter(
     "joint_acceleration", config.joint_acceleration);
+  config.joint_limit_margin_rad = node->declare_parameter(
+    "joint_limit_margin_rad", config.joint_limit_margin_rad);
+  auto read_limits = [&](const char *name, std::array<double, 7> &destination) {
+    const auto values = node->declare_parameter<std::vector<double>>(
+      name, std::vector<double>(destination.begin(), destination.end()));
+    if (values.size() != 7) throw std::runtime_error(std::string(name) + " must contain 7 values");
+    std::copy(values.begin(), values.end(), destination.begin());
+  };
+  read_limits("left_joint_min", config.left_joint_min);
+  read_limits("left_joint_max", config.left_joint_max);
+  if (!std::isfinite(config.joint_limit_margin_rad) || config.joint_limit_margin_rad < 0.0) {
+    throw std::runtime_error("joint_limit_margin_rad must be finite and non-negative");
+  }
   config.waypoint_tolerance_rad = node->declare_parameter(
     "waypoint_tolerance_rad", config.waypoint_tolerance_rad);
   config.stable_joint_samples = static_cast<std::size_t>(node->declare_parameter<int64_t>(

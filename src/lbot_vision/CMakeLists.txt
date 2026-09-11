@@ -53,6 +53,14 @@ if(BUILD_TESTING)
   add_executable(nut_sequence_test tests/nut_sequence_test.cpp)
   target_link_libraries(nut_sequence_test PRIVATE lbot_vision_sequence)
   add_test(NAME nut_sequence_test COMMAND nut_sequence_test)
+  add_executable(planar_geometry_test tests/planar_geometry_test.cpp)
+  target_link_libraries(planar_geometry_test PRIVATE lbot_vision_detector)
+  add_test(NAME planar_geometry_test COMMAND planar_geometry_test)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(NAME slot_observation_test
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/slot_observation_test.py
+      $<TARGET_FILE:nut_detector_node> ${CMAKE_CURRENT_SOURCE_DIR}/../../config/vision/nut_detector.yaml)
+  set_tests_properties(slot_observation_test PROPERTIES TIMEOUT 45)
 endif()
 
 install(

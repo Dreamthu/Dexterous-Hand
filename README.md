@@ -91,6 +91,9 @@ Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测
 被 Git 忽略的 `artifacts/offline_detection/`。
 
 静态离线回放仍是逐张独立检测，不输出可执行抓取坐标。ROS 感知节点另外接入了固定任务专用的
+视觉几何：使用 190×190 mm 黑框校正后的轮廓尺寸区分大中小，蓝筐通过矩形筛选后沿机器人 X 轴三等分。
+详见 [尺寸校正与分格说明](docs/perspective_sizing_and_robot_x_slots.md)。
+
 阶段顺序模块：初始稳定识别三颗后固定 `nut_large/nut_medium/nut_small`，只有外部明确的
 `start/complete/retry/reset` 反馈才推进 3→2→1 阶段，目标消失不会自动判定完成。它不是
 通用空间跟踪器，剩余目标仍按当前像素尺寸重新排序。详见

@@ -83,15 +83,15 @@ bool NutSequence::same_layout(
 }
 
 std::vector<NutSequence::OrderedObservation> NutSequence::order_by_size(
-    const std::vector<cv::Vec3f> &observations) const
+    const std::vector<cv::Vec3f> &observations, const std::vector<double> &sizes_mm) const
 {
   std::vector<OrderedObservation> ordered;
   ordered.reserve(observations.size());
   for (std::size_t i = 0; i < observations.size(); ++i) {
-    ordered.push_back({static_cast<int>(i), observations[i]});
+    ordered.push_back({static_cast<int>(i), observations[i], sizes_mm[i]});
   }
   std::sort(ordered.begin(), ordered.end(), [](const auto &a, const auto &b) {
-    return a.circle[2] > b.circle[2];
+    return a.size_mm > b.size_mm;
   });
   return ordered;
 }
@@ -111,7 +111,7 @@ void NutSequence::invalidate(const std::string &reason, bool clear_confirmation)
 
 const NutSequenceSnapshot &NutSequence::observe(
     std::int64_t stamp_ms, bool frame_found, cv::Size image_size,
-    const std::vector<cv::Vec3f> &observations)
+    const std::vector<cv::Vec3f> &observations, const std::vector<double> &sizes_mm)
 {
   snapshot_.observed_count = observations.size();
   snapshot_.expected_count = 3 - completed_count();
@@ -156,6 +156,13 @@ const NutSequenceSnapshot &NutSequence::observe(
       return snapshot_;
     }
   }
+  if (sizes_mm.size() != observations.size() ||
+      !std::all_of(sizes_mm.begin(), sizes_mm.end(), [](double size) {
+        return std::isfinite(size) && size > 0.0;
+      })) {
+    invalidate("invalid_rectified_sizes");
+    return snapshot_;
+  }
 
   if (observations.size() != snapshot_.expected_count) {
     invalidate("observation_count_mismatch", !windowed);
@@ -167,12 +174,12 @@ const NutSequenceSnapshot &NutSequence::observe(
     return snapshot_;
   }
 
-  auto ordered = order_by_size(observations);
+  auto ordered = order_by_size(observations, sizes_mm);
   for (std::size_t i = 1; i < ordered.size(); ++i) {
-    const double larger = ordered[i - 1].circle[2];
-    const double gap = (larger - ordered[i].circle[2]) / larger;
+    const double larger = ordered[i - 1].size_mm;
+    const double gap = (larger - ordered[i].size_mm) / larger;
     if (gap < config_.sequence_min_size_gap_ratio) {
-      invalidate("ambiguous_pixel_sizes", !windowed);
+      invalidate("ambiguous_rectified_sizes", !windowed);
       return snapshot_;
     }
   }
@@ -191,14 +198,20 @@ const NutSequenceSnapshot &NutSequence::observe(
     bool stable = stability_seed_.size() == ordered.size();
     if (stable) {
       for (std::size_t i = 0; i < ordered.size(); ++i) {
-        if (!matches(stability_seed_[i], ordered[i].circle)) {
+        auto metric_observation = ordered[i].circle;
+        metric_observation[2] = static_cast<float>(ordered[i].size_mm);
+        if (!matches(stability_seed_[i], metric_observation)) {
           stable = false;
           break;
         }
       }
     }
     stability_seed_.clear();
-    for (const auto &item : ordered) stability_seed_.push_back(item.circle);
+    for (const auto &item : ordered) {
+      auto metric_observation = item.circle;
+      metric_observation[2] = static_cast<float>(item.size_mm);
+      stability_seed_.push_back(metric_observation);
+    }
     stable_count_ = stable ? std::min(stable_count_ + 1, config_.sequence_stable_frames) : 1;
     snapshot_.status = snapshot_.initialized ? "stabilizing_stage" : "stabilizing_three";
   }

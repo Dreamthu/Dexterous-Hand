@@ -10,10 +10,13 @@
 #include <string>
 
 #include "lbot_arm_interfaces/srv/inverse_kinematics.hpp"
+#include "lbot_arm_interfaces/msg/follow_joint.hpp"
+#include "lbot_arm_interfaces/srv/forward_kinematics.hpp"
 #include "lbot_arm_interfaces/srv/move_j.hpp"
 #include "lbot_arm_interfaces/srv/move_jp.hpp"
 #include "lbot_arm_interfaces/srv/move_l.hpp"
 #include "lbot_arm_interfaces/srv/set_emergency.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_msgs/msg/u_int8_multi_array.hpp"
@@ -46,6 +49,14 @@ struct DeviceResult
   static DeviceResult fail(const std::string &message) {return {false, message};}
 };
 
+struct LeftJointFeedback
+{
+  bool available{false};
+  std::array<double, 7> joints{};
+  std::uint64_t sequence{0};
+  std::chrono::steady_clock::duration age{};
+};
+
 // Narrow ROS adapter for this competition task:
 // - commands only the left arm and left O6 hand;
 // - contains no task state machine or task-specific waypoint logic.
@@ -59,12 +70,25 @@ public:
     std::chrono::milliseconds service_timeout = std::chrono::milliseconds(30000));
 
   bool wait_for_state();
+  bool wait_for_fresh_state();
   std::array<double, 7> left_joints() const;
+  // One atomic snapshot, including monotonic receipt age for fault diagnostics.
+  LeftJointFeedback left_joint_feedback() const;
+  // Arrival time is monotonic and independent of the controller's wall clock.
+  bool fresh_left_joints(std::array<double, 7> &joints, std::chrono::milliseconds max_age,
+    std::uint64_t *sequence = nullptr) const;
+  bool wait_for_joint_follow_subscriber();
+  DeviceResult joint_follow(const std::array<double, 7> &target);
   bool wait_until_left_joints(
     const std::array<double, 7> &target,
     double tolerance_rad,
     std::chrono::milliseconds timeout,
     std::size_t stable_samples = 3);
+  DeviceResult wait_until_left_pose(
+    const CartesianPose &target, const std::string &frame,
+    double position_tolerance_m, double orientation_tolerance_rad,
+    std::chrono::milliseconds timeout, std::size_t stable_samples = 3,
+    CartesianPose *reached_pose = nullptr);
 
   DeviceResult move_joints(
     const std::array<double, 7> &target,
@@ -82,6 +106,8 @@ public:
     const CartesianPose &target,
     const std::array<double, 7> &seed,
     std::array<double, 7> &solution);
+  DeviceResult forward_kinematics(
+    const std::array<double, 7> &joints, CartesianPose &pose);
   DeviceResult set_hand(
     const std::array<uint8_t, 6> &positions,
     uint8_t speed,
@@ -94,6 +120,7 @@ private:
   using MoveJP = lbot_arm_interfaces::srv::MoveJP;
   using MoveL = lbot_arm_interfaces::srv::MoveL;
   using InverseKinematics = lbot_arm_interfaces::srv::InverseKinematics;
+  using ForwardKinematics = lbot_arm_interfaces::srv::ForwardKinematics;
   using SetEmergency = lbot_arm_interfaces::srv::SetEmergency;
 
   std::string endpoint(const std::string &suffix) const;
@@ -105,10 +132,13 @@ private:
   std::chrono::milliseconds service_timeout_;
 
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr left_state_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr left_pose_sub_;
   rclcpp::Client<MoveJ>::SharedPtr move_j_client_;
+  rclcpp::Publisher<lbot_arm_interfaces::msg::FollowJoint>::SharedPtr joint_follow_pub_;
   rclcpp::Client<MoveJP>::SharedPtr move_jp_client_;
   rclcpp::Client<MoveL>::SharedPtr move_l_client_;
   rclcpp::Client<InverseKinematics>::SharedPtr ik_client_;
+  rclcpp::Client<ForwardKinematics>::SharedPtr fk_client_;
   rclcpp::Client<SetEmergency>::SharedPtr emergency_client_;
   rclcpp::Publisher<std_msgs::msg::UInt8MultiArray>::SharedPtr hand_speed_pub_;
   rclcpp::Publisher<std_msgs::msg::UInt8MultiArray>::SharedPtr hand_force_pub_;
@@ -119,6 +149,9 @@ private:
   std::array<double, 7> left_joints_{};
   bool left_state_ready_{false};
   std::uint64_t left_state_sequence_{0};
+  std::chrono::steady_clock::time_point left_state_received_{};
+  geometry_msgs::msg::PoseStamped::ConstSharedPtr left_pose_;
+  std::uint64_t left_pose_sequence_{0};
 };
 
 }  // namespace lbot_motion

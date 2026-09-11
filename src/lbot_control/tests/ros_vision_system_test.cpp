@@ -28,6 +28,7 @@ int main(int argc, char **argv)
       std::chrono::steady_clock::now().time_since_epoch().count());
     config.sequence_topic = prefix + "/sequence";
     config.slots_topic = prefix + "/slots";
+    config.large_target_topic = prefix + "/large";
     config.event_service = prefix + "/event";
     config.wait_timeout = 1000ms;
     lbot_control::RosVisionSystem vision(node, config);
@@ -93,6 +94,86 @@ int main(int argc, char **argv)
     const auto scene = result.get();
     require(scene.success && scene.scene.frame_id == "base_link", "valid scene result is wrong");
     require(scene.scene.targets[0].nut.x == 0.1, "scene used invalid or stale coordinates");
+    auto large = node->create_publisher<geometry_msgs::msg::PointStamped>(config.large_target_topic, 1);
+    auto fresh = std::async(std::launch::async, [&]() {return vision.capture_large_target();});
+    require(fresh.wait_for(20ms) == std::future_status::timeout,
+            "single-target capture reused the old full scene");
+    geometry_msgs::msg::PointStamped point;
+    point.header.stamp = node->now();
+    point.header.frame_id = "camera_color_optical_frame";
+    point.point.x = 0.12;
+    large->publish(point);
+    executor.spin_some();
+    require(fresh.wait_for(10ms) == std::future_status::timeout,
+            "camera-frame target accepted");
+    point.header.frame_id = "base_link";
+    point.point.x = std::numeric_limits<double>::quiet_NaN();
+    large->publish(point);
+    executor.spin_some();
+    require(fresh.wait_for(10ms) == std::future_status::timeout, "invalid target accepted");
+    point.point.x = 0.12;
+    point.header.stamp.sec -= 2;
+    large->publish(point);
+    executor.spin_some();
+    require(fresh.wait_for(10ms) == std::future_status::timeout, "stale target accepted");
+    point.header.stamp = node->now();
+    large->publish(point);
+    executor.spin_some();
+    require(fresh.wait_for(500ms) == std::future_status::ready, "single valid target did not finish capture");
+    const auto saved = fresh.get();
+    require(saved.success && saved.pose.x == 0.12, "single target capture is incorrect");
+    point.point.x = 0.5;
+    large->publish(point);
+    executor.spin_some();
+    require(saved.pose.x == 0.12, "later vision changed the saved target");
+    auto slot_capture = std::async(std::launch::async, [&]() {return vision.capture_farthest_slot();});
+    require(slot_capture.wait_for(20ms) == std::future_status::timeout,
+            "slot capture reused an old scene");
+    auto reject_slots = [&]() {
+      slots->publish(slot_message);
+      executor.spin_some();
+      require(slot_capture.wait_for(10ms) == std::future_status::timeout,
+              "invalid or incomplete slot observation was accepted");
+    };
+    slot_message.header.stamp = node->now();
+    slot_message.poses.resize(2);
+    reject_slots();
+    slot_message.poses.resize(3);
+    slot_message.header.frame_id = "camera_link";
+    reject_slots();
+    slot_message.header.frame_id = "base_link";
+    slot_message.header.stamp.sec -= 2;
+    reject_slots();
+    slot_message.header.stamp = node->now();
+    slot_message.poses[2].position.x = std::numeric_limits<double>::quiet_NaN();
+    reject_slots();
+    slot_message.poses[0].position.x = 0.65;
+    slot_message.poses[0].position.y = 0.1;
+    slot_message.poses[1].position.x = 0.2;
+    slot_message.poses[1].position.y = -0.7;
+    slot_message.poses[2].position.x = 0.3;
+    slot_message.poses[2].position.y = -0.4;
+    slots->publish(slot_message);
+    executor.spin_some();
+    require(slot_capture.wait_for(500ms) == std::future_status::ready,
+            "one valid three-slot observation did not complete capture");
+    const auto saved_slot = slot_capture.get();
+    require(saved_slot.success && saved_slot.index == 2 && saved_slot.pose.y == -0.7,
+            "farthest slot must use base XY distance, not index or X alone");
+    slot_message.poses[1].position.y = 0.0;
+    slots->publish(slot_message);
+    executor.spin_some();
+    require(saved_slot.pose.y == -0.7, "later vision changed the saved slot");
+    auto max_x = std::async(std::launch::async, [&]() {return vision.capture_max_x_slot();});
+    require(max_x.wait_for(20ms) == std::future_status::timeout, "max X capture reused old slots");
+    slot_message.poses[1].position.y = -0.7;
+    slot_message.header.stamp = node->now();
+    slots->publish(slot_message);
+    executor.spin_some();
+    require(max_x.wait_for(500ms) == std::future_status::ready, "max X capture did not finish");
+    const auto selected_x = max_x.get();
+    require(selected_x.success && selected_x.index == 1 && selected_x.pose.x == 0.65,
+            "max X selection used radial distance or array index");
     rclcpp::shutdown();
     std::cout << "Vision scene wait accepts coherent 3D results after interim updates\n";
     return 0;

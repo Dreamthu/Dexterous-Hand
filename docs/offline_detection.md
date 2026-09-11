@@ -9,13 +9,14 @@
 明确没有完成的内容：
 
 - ROS 节点中的阶段状态/service 回放；静态工具只输出每张图片的 0..3 个二维观测。
-- 像素到真实尺寸的分类、相机移动补偿、抓取姿态、真实隔板识别。
+- 相机移动补偿、抓取姿态、真实隔板识别。
 - 原始深度离线定位、RGB/depth 时间同步、TF 混合坐标问题的修复。
 - 自动现场录制器、ROS bag 解码器、视频解码器。本入口接收图片或有序图片清单。
 
 因此，“按序回放”仍是**逐张独立检测**，不运行阶段状态机；离线输出不含有效抓取坐标或完成判断。
 ROS 侧固定任务顺序模块见 [螺母顺序身份与状态](nut_sequence.md)。
-原 ROS 路径的恰好三目标门槛、每帧像素排序和旧有定位限制仍然存在。
+当前支持 190×190 mm 黑框透视校正尺寸；蓝筐三格必须在机器人坐标系中计算，离线不估计格子。
+详细算法与限制见 [尺寸校正与机器人 X 轴分格](perspective_sizing_and_robot_x_slots.md)。
 不得据此版本直接接入自动抓取。
 
 ## 2. 结构与调用链
@@ -43,7 +44,8 @@ scripts/run_detector.sh（现场原入口，不改用法）
 ## 3. 配置：不新增第二份阈值
 
 识别阈值唯一来源仍是 `config/vision/nut_detector.yaml`。
-`detector_fields.inc` 只列出二维参数名称和类型，不包含默认值。
+`detector_fields.inc` 列出二维参数名称和类型；新增 `blue_s_max`、`blue_v_max`
+带有兼容默认值 255，使旧配置保持原有筛选范围，其余参数仍由配置提供。
 ROS 显式声明这些必需参数；离线 Python 从同一 YAML 提取字段并生成 JSON 传输快照。
 C++ 的 `DetectorConfig::validate()` 统一检查数值范围、奇数核大小和枚举值。
 
@@ -172,7 +174,7 @@ artifacts/offline_detection/<run>/
   000000/
     input.jpg / input.png   原输入编码字节原样保存；其他未知扩展名保存为 input.bin
     result.json             几何、候选、原因、有效性；没有机器人抓取坐标
-    annotated.png           被选中的目标、黑框、蓝筐与估计格子位置
+    annotated.png           被选中的目标、校正尺寸、黑框和蓝筐四边形
     rejected.png            橙色候选标注及对应 candidates 数组索引/拒绝原因
     black_mask.png          黑色 HSV 掩膜
     blue_mask.png           蓝色 HSV 掩膜
@@ -193,7 +195,7 @@ artifacts/offline_detection/<run>/
 
 `frame_not_found` 是无法观察黑框，不等于黑框为空；`observed_2d` 只代表在检测到的黑框内
 执行了二维算法，不代表通过竞赛规则或通过三维安全检查。`basket_found` 单独检查。
-格子位置仍是蓝筐旋转矩形长轴三等分的估计，不是真实隔板，也不确认比赛要求的放置顺序。
+离线不输出格子位置。ROS 节点用深度和 TF 将蓝框转换到 base_link 后沿 X 轴等分，编号按 X 递增；不识别真实隔板。
 
 原图不旋转、不缩放、不重新压缩；忽略照片 EXIF 自动旋转，以免像素坐标与原始相机图不一致。
 无法读取的图片产生 `processing_error` 和错误日志，继续处理后续帧，整个命令最终返回 1；
@@ -220,7 +222,7 @@ artifacts/offline_detection/<run>/
 
 ## 9. ROS 行为变化与回归风险
 
-- 原有检测/格子 PoseArray 话题名称和已成功定位时的像素排序保持不变。
+- 原有检测/格子 PoseArray 话题名称保持不变；螺母按校正毫米尺寸排序，格子按机器人 X 递增排列。
 - 二维计算移到深度检查前；缺深度/CameraInfo 新状态为 `localization_inputs_missing`。
 - 显式报告 `invalid_color_image`、`detection_2d_failed`、`invalid_depth_image`、
   `unsupported_depth_encoding`；这些状态不会生成假的三维坐标。

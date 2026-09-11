@@ -41,7 +41,7 @@ parameters:
   # timestamp-compatible fallback for image-conditioned calibration.
   time_domain: global
   timestamp_clock_type: realtime
-  enable_point_cloud: false
+  enable_point_cloud: true
   enable_colored_point_cloud: false
   # Keep the raw color stream. lbot_vision uses CameraInfo K and D to correct
   # detected pixels before 3-D back-projection without breaking depth alignment.

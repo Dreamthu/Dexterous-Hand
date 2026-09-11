@@ -63,12 +63,13 @@ def detector_parameters(path: Path) -> dict:
     if not isinstance(params, dict):
         raise ConfigurationError(f"ros__parameters must be a mapping: {path}")
     schema = (REPOSITORY_ROOT / "src/lbot_vision/include/lbot_vision/detector_fields.inc").read_text(encoding="utf-8")
-    fields = re.findall(r"LBOT_DETECTOR_FIELD\((bool|int|double|std::string), (\w+)\)", schema)
+    fields = re.findall(
+        r"LBOT_DETECTOR_FIELD(?:_DEFAULT)?\((bool|int|double|std::string), (\w+)(?:, (\d+))?\)", schema)
     if not fields:
         raise ConfigurationError("Empty detector field schema")
     effective = {}
-    for kind, name in fields:
-        value = params.get(name)
+    for kind, name, fallback in fields:
+        value = params.get(name, int(fallback) if fallback else None)
         if kind == "std::string":
             valid = isinstance(value, str)
         elif kind == "bool":

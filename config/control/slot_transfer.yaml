@@ -1,0 +1,30 @@
+# One MoveJ to the user-selected, IK/FK-checked slot-above pose.
+# Arm_Tip XYZ [m]: [0.384756135462, -0.083085915495, -0.140000000000]
+# Arm_Tip RPY [rad]: [1.570796326795, 0.200000000000, -2.600000000000]
+# Fixed snapshot: palm XY corresponds to slot_3 at [0.439364, -0.192205].
+# current_hold records the inspected starting state. Only the second point
+# is commanded; there is no return to natural_down or another taught route.
+/**:
+  ros__parameters:
+    execute_motion: false
+    mode: check
+    robot_namespace: /robot1
+    table_route_calibrated: true
+    route:
+      names: [current_hold, verified_slot_target]
+      current_hold: [1.090867042542, 0.926985740662, -0.438391685486, -1.772640228271, 0.453955650330, 0.308041572571, 0.123407363892]
+      verified_slot_target: [1.902050018311, 3.179294824600, -1.479330778122, -1.214593529701, 0.443060249090, 0.292914509773, 0.134126946330]
+
+    # Keep the user's existing grasp. Do not send any hand commands.
+    route_control_hand: false
+    # Use the existing absolute joint limits with no additional margin.
+    # Joint 2 remains below its 3.20 rad upper limit.
+    joint_limit_margin_rad: 0.0
+    joint_speed: 0.08
+    joint_acceleration: 0.08
+    waypoint_tolerance_rad: 0.003
+    stable_joint_samples: 3
+    waypoint_timeout_ms: 60000
+    waypoint_settle_ms: 300
+    state_timeout_ms: 3000
+    service_timeout_ms: 30000

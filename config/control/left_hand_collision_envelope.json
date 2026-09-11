@@ -1,0 +1,362 @@
+{
+  "source_urdf": "/home/wyt06/lbot/Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf",
+  "source_sha256": "270d07c1f65647263f7f5dcdd04989caf558dd2fdd9de6420dfd48bb6ab2626a",
+  "frame": "arm_left_L8_Link / Arm_Tip",
+  "padding_m": 0.01,
+  "method": "per-link convex hull of analytically enclosed joint subintervals; independent mimic supersets; cube Minkowski padding",
+  "angle_step_rad": 0.2,
+  "collision_meshes": [
+    {
+      "link": "hand_left_lh_hand_base_link",
+      "file": "left_hand_collision_meshes/hand_left_lh_hand_base_link.stl",
+      "sha256": "68188704bf3952ded1e1e6abe1c3c5aa0c3d960043ddfc3bca115ebf2954c880"
+    },
+    {
+      "link": "hand_left_lh_thumb_metacarpals_base2",
+      "file": "left_hand_collision_meshes/hand_left_lh_thumb_metacarpals_base2.stl",
+      "sha256": "0d3d34c0812cab473edd1aba1d851d1e241661e079c6a3985d0df7ab8ea1f5df"
+    },
+    {
+      "link": "hand_left_lh_thumb_metacarpals",
+      "file": "left_hand_collision_meshes/hand_left_lh_thumb_metacarpals.stl",
+      "sha256": "c534d6173812677c9dba3178cc2415d950c6f929ccbd58b4881fe4d848fe84a0"
+    },
+    {
+      "link": "hand_left_lh_thumb_distal",
+      "file": "left_hand_collision_meshes/hand_left_lh_thumb_distal.stl",
+      "sha256": "c688c1e6c0cbe41bde93ef672d50c94812ba17ffd0781bbdf7fe18bf0e66ff9d"
+    },
+    {
+      "link": "hand_left_lh_index_proximal",
+      "file": "left_hand_collision_meshes/hand_left_lh_index_proximal.stl",
+      "sha256": "f6ea194dae871f82fee8d6af0b4e4f695d8fba91375973e8e409078b8b8763d7"
+    },
+    {
+      "link": "hand_left_lh_index_distal",
+      "file": "left_hand_collision_meshes/hand_left_lh_index_distal.stl",
+      "sha256": "9fd17392c24304169c681fbb5e4679385a1bbaaa11424916df5acea585cf3792"
+    },
+    {
+      "link": "hand_left_lh_middle_proximal",
+      "file": "left_hand_collision_meshes/hand_left_lh_middle_proximal.stl",
+      "sha256": "1871243c2eebc9b59023cddd0aea875993256d473949d878603b8bbc2234124e"
+    },
+    {
+      "link": "hand_left_lh_middle_distal",
+      "file": "left_hand_collision_meshes/hand_left_lh_middle_distal.stl",
+      "sha256": "5d24fbbdc272dd15254b42642426fbfbb26c55bd3c0f349f8baf86982e2998f2"
+    },
+    {
+      "link": "hand_left_lh_ring_proximal",
+      "file": "left_hand_collision_meshes/hand_left_lh_ring_proximal.stl",
+      "sha256": "290492ca970aad453718ffa34125014bda1a2bb1f53288d0565567ac3294730c"
+    },
+    {
+      "link": "hand_left_lh_ring_distal",
+      "file": "left_hand_collision_meshes/hand_left_lh_ring_distal.stl",
+      "sha256": "47f8798ea3b83b65e5686cd17dee904e7e31b957c4f67fcbf14e4d2cc85f22c5"
+    },
+    {
+      "link": "hand_left_lh_pinky_proximal",
+      "file": "left_hand_collision_meshes/hand_left_lh_pinky_proximal.stl",
+      "sha256": "c41a9ebcfda6a09d731a4cde20071fefc02668cd1a04307875f90197397d9140"
+    },
+    {
+      "link": "hand_left_lh_pinky_distal",
+      "file": "left_hand_collision_meshes/hand_left_lh_pinky_distal.stl",
+      "sha256": "43e06b5b08c15e4066528be9201710a97c80de25ec64bd4f7eb938cdfd2d4f6c"
+    }
+  ],
+  "collision_hull": {
+    "file": "left_hand_collision_meshes/hand_swept_envelope.stl",
+    "sha256": "377b35318c987133976afc480d30a470c7606f93efd758a7abfa7ffd599b3f21",
+    "vertices": 126
+  },
+  "bounds_m": [
+    [
+      -0.05100158666068808,
+      -0.1350851495766046,
+      -0.1879349134266111
+    ],
+    [
+      0.12847056191202474,
+      0.03000014324043046,
+      0.010000276107047297
+    ]
+  ],
+  "envelope": [
+    0.038734487625668335,
+    -0.052542503168087076,
+    -0.0889673186597819,
+    0.17947214857271282,
+    0.16508529281703507,
+    0.19793518953365838
+  ],
+  "joint_ranges_rad": {
+    "hand_left_lh_thumb_cmc_yaw": [
+      0.0,
+      1.3
+    ],
+    "hand_left_lh_thumb_cmc_pitch": [
+      0.0,
+      0.58
+    ],
+    "hand_left_lh_thumb_ip": [
+      0.0,
+      1.3281999999999998
+    ],
+    "hand_left_lh_index_mcp_pitch": [
+      0.0,
+      1.6
+    ],
+    "hand_left_lh_index_dip": [
+      0.0,
+      1.43
+    ],
+    "hand_left_lh_middle_mcp_pitch": [
+      0.0,
+      1.6
+    ],
+    "hand_left_lh_middle_dip": [
+      0.0,
+      1.43
+    ],
+    "hand_left_lh_ring_mcp_pitch": [
+      0.0,
+      1.6
+    ],
+    "hand_left_lh_ring_dip": [
+      0.0,
+      1.43
+    ],
+    "hand_left_lh_pinky_mcp_pitch": [
+      0.0,
+      1.6
+    ],
+    "hand_left_lh_pinky_dip": [
+      0.0,
+      1.43
+    ]
+  },
+  "links": [
+    {
+      "link": "hand_left_lh_hand_base_link",
+      "bounds_arm_tip_m": [
+        [
+          -0.049117845572483554,
+          -0.029994024450472417,
+          -0.12273028381495325
+        ],
+        [
+          0.047596400930545936,
+          0.03000014324043046,
+          0.010000276107047297
+        ]
+      ],
+      "interval_cells": 1,
+      "hull_vertices": 8
+    },
+    {
+      "link": "hand_left_lh_thumb_metacarpals_base2",
+      "bounds_arm_tip_m": [
+        [
+          0.001466987614771877,
+          -0.0388441822453379,
+          -0.050493917578967415
+        ],
+        [
+          0.04836459712752675,
+          0.006782175893705818,
+          -0.010593717463584939
+        ]
+      ],
+      "interval_cells": 7,
+      "hull_vertices": 26
+    },
+    {
+      "link": "hand_left_lh_thumb_metacarpals",
+      "bounds_arm_tip_m": [
+        [
+          -0.030931338561331394,
+          -0.09984620559317925,
+          -0.09349391460897703
+        ],
+        [
+          0.09861115636522652,
+          0.013094972434387743,
+          -0.0038516924173345683
+        ]
+      ],
+      "interval_cells": 21,
+      "hull_vertices": 75
+    },
+    {
+      "link": "hand_left_lh_thumb_distal",
+      "bounds_arm_tip_m": [
+        [
+          -0.04204329373917269,
+          -0.1350851495766046,
+          -0.13780942202438368
+        ],
+        [
+          0.12847056191202474,
+          0.018877144824851966,
+          -0.02336948316572801
+        ]
+      ],
+      "interval_cells": 147,
+      "hull_vertices": 127
+    },
+    {
+      "link": "hand_left_lh_index_proximal",
+      "bounds_arm_tip_m": [
+        [
+          0.007299584478620847,
+          -0.05340464574199077,
+          -0.15118009116029324
+        ],
+        [
+          0.042886497198036604,
+          0.020105396229701436,
+          -0.0808087641325816
+        ]
+      ],
+      "interval_cells": 8,
+      "hull_vertices": 36
+    },
+    {
+      "link": "hand_left_lh_index_distal",
+      "bounds_arm_tip_m": [
+        [
+          0.006114833977994566,
+          -0.0914923049346763,
+          -0.18422972668342333
+        ],
+        [
+          0.04421608737409526,
+          0.018310136538974724,
+          -0.05053994535583472
+        ]
+      ],
+      "interval_cells": 64,
+      "hull_vertices": 138
+    },
+    {
+      "link": "hand_left_lh_middle_proximal",
+      "bounds_arm_tip_m": [
+        [
+          -0.010159446376751383,
+          -0.051454536771919065,
+          -0.15481875761825584
+        ],
+        [
+          0.022841108614008305,
+          0.022055500367026158,
+          -0.08505962425995554
+        ]
+      ],
+      "interval_cells": 8,
+      "hull_vertices": 42
+    },
+    {
+      "link": "hand_left_lh_middle_distal",
+      "bounds_arm_tip_m": [
+        [
+          -0.009756193085722129,
+          -0.08954219001933189,
+          -0.1879349134266111
+        ],
+        [
+          0.022436976006492484,
+          0.020260245798640806,
+          -0.05472806666200585
+        ]
+      ],
+      "interval_cells": 64,
+      "hull_vertices": 138
+    },
+    {
+      "link": "hand_left_lh_ring_proximal",
+      "bounds_arm_tip_m": [
+        [
+          -0.02982983112393848,
+          -0.0519545137194377,
+          -0.1511683641052969
+        ],
+        [
+          0.005757017193515432,
+          0.021555532549648735,
+          -0.08079703606257702
+        ]
+      ],
+      "interval_cells": 8,
+      "hull_vertices": 36
+    },
+    {
+      "link": "hand_left_lh_ring_distal",
+      "bounds_arm_tip_m": [
+        [
+          -0.03115975868382699,
+          -0.09004216923153655,
+          -0.1842179848011874
+        ],
+        [
+          0.006940388335007552,
+          0.01976028423894651,
+          -0.05052815788165345
+        ]
+      ],
+      "interval_cells": 64,
+      "hull_vertices": 138
+    },
+    {
+      "link": "hand_left_lh_pinky_proximal",
+      "bounds_arm_tip_m": [
+        [
+          -0.04851759766448576,
+          -0.05340445112423631,
+          -0.14526627591167512
+        ],
+        [
+          -0.011229829074630578,
+          0.02010560114640733,
+          -0.0745634385245083
+        ]
+      ],
+      "interval_cells": 8,
+      "hull_vertices": 36
+    },
+    {
+      "link": "hand_left_lh_pinky_distal",
+      "bounds_arm_tip_m": [
+        [
+          -0.05100158666068808,
+          -0.09149210814529213,
+          -0.17822119438619594
+        ],
+        [
+          -0.008989352371684632,
+          0.01831035700120187,
+          -0.04438245638552221
+        ]
+      ],
+      "interval_cells": 64,
+      "hull_vertices": 138
+    }
+  ],
+  "mesh_sha256": {
+    "../../components/hands/linkerhand_o6/variants/left/meshes/hand_base_link.STL": "2dc0d80eb470c0ccd6e338650f383efea75a5b77eee7e51d2b6a1da553afcdfe",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/thumb_metacarpals_base2.STL": "9e8bd4b4adce43f74df492c1cd3890457b2ac0151c12582c5a8faaf6cdc9f1d9",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/thumb_metacarpals.STL": "c91dc63ccd81ca270d166e9e276665ea3fbe6bb42fbee31d1c7bb545b4238045",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/thumb_distal.STL": "baf3c1b16f94925bcd06768af7ec811de1a97d78f253d26adcd502d35067cf75",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/index_proximal.STL": "dd77da3a5c18d236c46c3adb51e7be8262e64926a0ee9e996741609d5ed0b08d",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/index_distal.STL": "4f2699ea27c60f6c28a3ca0cae64ddab40b24b4929bbc23e112cbe08f7ae311c",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/middle_proximal.STL": "ed2daec64e98506a9fdd3e63708f5644c5d0660ef54c7711c83f15351fc8eb85",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/middle_distal.STL": "b92ed1e3af1d6ef3389287a45c27433a1584a1233fcb0825ee48411b59299697",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/ring_proximal.STL": "d17d67b52a5f02d9ff5dbb0b7315fea055f0ee43a0f2443faf7df28942cf3663",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/ring_distal.STL": "a21ba5ccb885f939788ef701d99a94781d0001ffe2b43a3d79a32c376dab988b",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/pinky_proximal.STL": "8d0a3df9d46abe366d27132a49a45552031b57d1684fdf3adf7969a19faf6bf0",
+    "../../components/hands/linkerhand_o6/variants/left/meshes/pinky_distal.STL": "01a8db3f672c232cd3430c2314e1422cc14950c6f2e03606f9f4d20e66c30311"
+  },
+  "limitations": "CAD mount and joint ranges assumed correct; no finger feedback; cables and grasped-object geometry not reconstructed."
+}

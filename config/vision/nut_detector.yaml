@@ -7,6 +7,8 @@ nut_detector_node:
     target_frame: base_link
     use_tf: true
     detection_topic: /nut_detections
+    # Single-frame largest contour with valid depth/TF, independent of sequence/slots.
+    large_target_topic: /nut_detections/large
     slot_topic: /nut_slots
     debug_image_topic: /nut_detection/debug_image
     publish_rate_hz: 5.0
@@ -35,14 +37,21 @@ nut_detector_node:
     # When true, publish/log black-frame candidate diagnostics.  Offline
     # replay also writes value_channel, pre-close mask and candidate overlay.
     debug_black_frame: true
-    blue_h_min: 90
-    blue_h_max: 140
-    blue_s_min: 70
-    blue_v_min: 35
+    blue_h_min: 104
+    blue_h_max: 113
+    blue_s_min: 81
+    blue_s_max: 240
+    blue_v_min: 96
+    blue_v_max: 255
     min_frame_area_ratio: 0.01
     max_frame_area_ratio: 0.10
     min_basket_area_ratio: 0.01
-    frame_inner_scale: 0.94
+    min_basket_rectangularity: 0.75
+    # Measured outer side of the black square, before ROI shrink.
+    frame_size_mm: 190.0
+    # Use the measured inner border without a proportional exclusion band.
+    # Values below 1.0 deliberately reduce the usable source region.
+    frame_inner_scale: 1.0
     min_nut_radius_px: 5.0
     # The source frame is about 80px wide at the current fixed 640x360 view.
     # 24px excludes a contour made by several merged nuts.
@@ -63,13 +72,14 @@ nut_detector_node:
     min_nut_solidity: 0.45
     min_nut_circularity: 0.25
     min_nut_aspect_ratio: 0.30
-    # Disabled by default: Hough used to pad 0--2 contour detections to three.
+    # Diagnostic only: Hough has no measured outer contour for metric sizing.
     enable_hough_fallback: false
     hough_param2: 13.0
     min_nut_clearance_m: 0.003
     depth_min_m: 0.15
     depth_max_m: 5.0
-    slot_axis: long
+    # Three equal intervals in base_link X; slot 1 has the smallest X.
+    slot_axis: robot_x
     # The competition layout fixes the blue basket on the right side of the
     # black source frame, so reject blue candidates left of the frame centre.
     basket_side: right

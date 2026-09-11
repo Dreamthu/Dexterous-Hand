@@ -22,6 +22,7 @@
 #include "lbot_vision/camera_geometry.hpp"
 #include "lbot_vision/nut_detector.hpp"
 #include "lbot_vision/nut_sequence.hpp"
+#include "lbot_vision/planar_geometry.hpp"
 #include "lbot_vision/msg/nut_sequence_state.hpp"
 #include "lbot_vision/srv/set_nut_state.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -43,6 +44,7 @@ struct Detection {
   float radius_px{0.0F};
   double radius_m{0.0};
   double depth_m{0.0};
+  double size_mm{0.0};
   geometry_msgs::msg::Point point;
   std::string frame_id;
   std::string size_class;
@@ -67,8 +69,11 @@ public:
 
     // Mandatory values come from the same central YAML as the offline adapter.
 #define LBOT_DETECTOR_FIELD(type, name) detector_config_.name = declare_parameter<type>(#name);
+#define LBOT_DETECTOR_FIELD_DEFAULT(type, name, fallback) \
+    detector_config_.name = declare_parameter<type>(#name, fallback);
 #include "lbot_vision/detector_fields.inc"
 #undef LBOT_DETECTOR_FIELD
+#undef LBOT_DETECTOR_FIELD_DEFAULT
     detector_config_.validate();
     detector_ = std::make_unique<lbot_vision::TemporalDetector>(
       detector_config_, declare_parameter("frame_hold_ms", 3000.0));
@@ -119,6 +124,8 @@ public:
       std::bind(&NutDetectorNode::info_callback, this, _1));
 
     detections_pub_ = create_publisher<geometry_msgs::msg::PoseArray>(detection_topic_, 10);
+    large_target_pub_ = create_publisher<geometry_msgs::msg::PointStamped>(
+      declare_parameter("large_target_topic", std::string("/nut_detections/large")), 1);
     slots_pub_ = create_publisher<geometry_msgs::msg::PoseArray>(slot_topic_, 10);
     status_pub_ = create_publisher<std_msgs::msg::String>(detection_topic_ + "/status", 10);
     debug_pub_ = create_publisher<sensor_msgs::msg::Image>(debug_topic_, 2);
@@ -143,6 +150,7 @@ private:
   std::int64_t last_processed_ns_{-1};
   std::optional<geometry_msgs::msg::TransformStamped> frame_tf_;
   rclcpp::Publisher<lbot_vision::msg::NutSequenceState>::SharedPtr sequence_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr large_target_pub_;
   rclcpp::Service<lbot_vision::srv::SetNutState>::SharedPtr sequence_event_service_;
   double min_nut_clearance_m_{0.003}, depth_min_m_{0.15}, depth_max_m_{5.0};
 
@@ -335,7 +343,14 @@ private:
     }
     lbot_vision::Detection2D observation;
     try {
-      observation = detector_->detect(color, stamp_ns / 1000000);
+      lbot_vision::PointNormalizer normalize;
+      if (camera_geometry_ && camera_geometry_->width() == static_cast<std::uint32_t>(color.cols) &&
+          camera_geometry_->height() == static_cast<std::uint32_t>(color.rows)) {
+        normalize = [this](const cv::Point2f &pixel) {
+          return cv::Point2f(camera_geometry_->normalized_point(pixel));
+        };
+      }
+      observation = detector_->detect(color, stamp_ns / 1000000, normalize);
     } catch (const std::exception &error) {
       RCLCPP_ERROR_THROTTLE(get_logger(), *get_clock(), 3000, "2D detection failed: %s", error.what());
       sequence_->invalidate("detection_2d_failed"); publish_sequence_state();
@@ -365,18 +380,10 @@ private:
     const bool frame_valid = observation.frame_found &&
       (!observation.frame_reused || observation.circles.size() == sequence_->snapshot().expected_count);
     const auto &sequence_snapshot = sequence_->observe(
-      stamp_ns / 1000000, frame_valid, color.size(), observation.circles);
+      stamp_ns / 1000000, frame_valid, color.size(), observation.circles, observation.sizes_mm);
     publish_sequence_state();  // 2D identity/state remains available without basket/depth/TF.
-    if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
-      publish_status(sequence_snapshot.status, observation.circles.size());
-      return publish_debug(debug, color_msg_->header);
-    }
     if (!observation.frame_found) {
       publish_status("frame_not_found", 0);
-      return publish_debug(debug, color_msg_->header);
-    }
-    if (!observation.basket_found) {
-      publish_status("basket_not_found", observation.circles.size());
       return publish_debug(debug, color_msg_->header);
     }
     if (!depth_msg_ || !camera_geometry_) {
@@ -422,6 +429,101 @@ private:
 
     const double sx = static_cast<double>(depth.cols) / color.cols;
     const double sy = static_cast<double>(depth.rows) / color.rows;
+    // Initial approach uses the same rectified size metric as the full task.
+    // This stream does not require stable three-nut identity or basket slots.
+    if (!observation.circles.empty()) {
+      const auto largest_index = static_cast<std::size_t>(std::distance(observation.sizes_mm.begin(),
+        std::max_element(observation.sizes_mm.begin(), observation.sizes_mm.end())));
+      const auto &largest = observation.circles.at(largest_index);
+      const cv::Point2f pixel(largest[0], largest[1]);
+      const double z = sample_depth(depth, {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
+      if (valid_depth(z, depth_min_m_, depth_max_m_)) {
+        geometry_msgs::msg::PointStamped target;
+        target.header = color_msg_->header;
+        const auto camera_point = project_pixel(pixel, z);
+        if (transform_point(camera_point, color_msg_->header.frame_id, target.point, target.header.frame_id) &&
+            target.header.frame_id == target_frame_ &&
+            std::isfinite(target.point.x) && std::isfinite(target.point.y) && std::isfinite(target.point.z)) {
+          large_target_pub_->publish(target);
+          cv::putText(debug, "LARGE candidate", pixel + cv::Point2f(8, -8),
+                      cv::FONT_HERSHEY_SIMPLEX, 0.45, cv::Scalar(0, 255, 255), 1);
+        }
+      }
+    }
+    // Localize the rectangular basket boundary first. Robot X is meaningful
+    // only after all four corners have been transformed to base_link.
+    geometry_msgs::msg::PoseArray slots;
+    slots.header = color_msg_->header;
+    slots.header.frame_id = target_frame_;
+    std::ostringstream slots_json;
+    if (observation.basket_found && target_frame_ == "base_link") {
+      std::vector<cv::Point3d> base_corners;
+      std::vector<cv::Point2f> base_xy, image_corners;
+      for (const auto &corner : geometry.basket) {
+        const cv::Point2f pixel(corner);
+        const double z = sample_depth(depth, {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
+        if (!valid_depth(z, depth_min_m_, depth_max_m_)) break;
+        geometry_msgs::msg::Point point;
+        std::string frame;
+        if (!transform_point(project_pixel(pixel, z), color_msg_->header.frame_id, point, frame) ||
+            frame != "base_link") break;
+        base_corners.emplace_back(point.x, point.y, point.z);
+        base_xy.emplace_back(point.x, point.y);
+        image_corners.push_back(pixel);
+      }
+      if (base_corners.size() == 4) {
+        try {
+          auto centers = lbot_vision::basket_slots_robot_x(base_corners);
+          // This inverse planar map is for the debug overlay only. Published
+          // coordinates come directly from the robot-X partition above.
+          const auto to_image = cv::getPerspectiveTransform(base_xy, image_corners);
+          std::vector<cv::Point2f> slot_xy, slot_pixels;
+          for (const auto &center : centers) slot_xy.emplace_back(center.x, center.y);
+          cv::perspectiveTransform(slot_xy, slot_pixels, to_image);
+          // The rim defines the XY footprint, not the compartment floor's
+          // height. Retain center-depth sampling for placement Z, and publish
+          // only a complete set of three valid centers.
+          for (std::size_t i = 0; i < centers.size(); ++i) {
+            const auto &pixel = slot_pixels[i];
+            const double z = sample_depth(depth,
+              {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
+            if (!valid_depth(z, depth_min_m_, depth_max_m_))
+              throw std::invalid_argument("slot center depth unavailable");
+            geometry_msgs::msg::Point floor;
+            std::string frame;
+            if (!transform_point(project_pixel(pixel, z), color_msg_->header.frame_id, floor, frame) ||
+                frame != "base_link" || !std::isfinite(floor.z))
+              throw std::invalid_argument("slot center transform unavailable");
+            centers[i].z = floor.z;
+          }
+          for (std::size_t i = 0; i < centers.size(); ++i) {
+            const auto &center = centers[i];
+            geometry_msgs::msg::Pose pose;
+            pose.position.x = center.x; pose.position.y = center.y; pose.position.z = center.z;
+            pose.orientation.w = 1.0;
+            slots.poses.push_back(pose);
+            if (i) slots_json << ',';
+            slots_json << "{\"x\":" << center.x << ",\"y\":" << center.y << ",\"z\":" << center.z << "}";
+            cv::drawMarker(debug, slot_pixels[i], cv::Scalar(255, 0, 255), cv::MARKER_CROSS, 20, 2);
+            cv::putText(debug, "slot_" + std::to_string(i + 1) + " (+base X)",
+                        slot_pixels[i] + cv::Point2f(5, -5), cv::FONT_HERSHEY_SIMPLEX,
+                        0.4, cv::Scalar(255, 0, 255), 1);
+          }
+          slots_pub_->publish(slots);
+        } catch (const std::exception &error) {
+          RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
+                              "Cannot partition basket along robot X: %s", error.what());
+        }
+      }
+    }
+    if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
+      publish_status(sequence_snapshot.status, observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
+    if (!observation.basket_found) {
+      publish_status("basket_not_found", observation.circles.size());
+      return publish_debug(debug, color_msg_->header);
+    }
     std::vector<Detection> detections;
     for (const auto &track : sequence_snapshot.targets) {
       if (!track.visible || track.state == "completed") continue;
@@ -434,6 +536,7 @@ private:
       d.target_id = track.id; d.size_class = track.size_class;
       d.pixel = px;
       d.radius_px = circle[2];
+      d.size_mm = observation.sizes_mm.at(track.observation_index);
       d.radius_m = camera_geometry_->projected_radius_m(px, circle[2], z);
       d.depth_m = z;
       if (!transform_point(camera_point, color_msg_->header.frame_id, d.point, d.frame_id)) {
@@ -468,8 +571,6 @@ private:
     geometry_msgs::msg::PoseArray poses;
     poses.header = color_msg_->header;
     poses.header.frame_id = frame_tf_ ? target_frame_ : color_msg_->header.frame_id;
-    geometry_msgs::msg::PoseArray slots;
-    slots.header = poses.header;
     std::ostringstream json;
     json << "{\"status\":\"ok\",\"nuts\":[";
     for (size_t i = 0; i < detections.size(); ++i) {
@@ -479,41 +580,23 @@ private:
       pose.orientation.w = 1.0;
       poses.poses.push_back(pose);
       const auto &target = sequence_snapshot.targets.at(static_cast<std::size_t>(d.target_id - 1));
-      cv::putText(debug, d.size_class + ":" + target.state, d.pixel + cv::Point2f(8, 8),
+      cv::putText(debug, d.size_class + ":" + target.state + cv::format(" %.1fmm", d.size_mm), d.pixel + cv::Point2f(8, 8),
                   cv::FONT_HERSHEY_SIMPLEX, 0.65, cv::Scalar(0, 255, 0), 2);
       if (i) json << ',';
       json << "{\"id\":" << d.target_id << ",\"size\":\"" << d.size_class
-           << "\",\"state\":\"" << target.state << "\",\"u\":" << d.pixel.x
+           << "\",\"size_mm\":" << d.size_mm
+           << ",\"state\":\"" << target.state << "\",\"u\":" << d.pixel.x
            << ",\"v\":" << d.pixel.y << ",\"x\":" << d.point.x
            << ",\"y\":" << d.point.y << ",\"z\":" << d.point.z
            << ",\"frame\":\"" << d.frame_id << "\"}";
     }
-    json << "],\"slots\":[";
-    for (size_t i = 0; i < geometry.slots.size(); ++i) {
-      const cv::Point2f px = geometry.slots[i];
-      const double z = sample_depth(depth, {px.x * static_cast<float>(sx), px.y * static_cast<float>(sy)});
-      if (!valid_depth(z, depth_min_m_, depth_max_m_)) {
-        json << (i ? "," : "") << "null";
-        continue;
-      }
-      const auto camera_point = project_pixel(px, z);
-      geometry_msgs::msg::Point slot_point;
-      std::string slot_frame;
-      transform_point(camera_point, color_msg_->header.frame_id, slot_point, slot_frame);
-      geometry_msgs::msg::Pose slot_pose;
-      slot_pose.position = slot_point;
-      slot_pose.orientation.w = 1.0;
-      slots.poses.push_back(slot_pose);
-      json << (i ? "," : "") << "{\"x\":" << slot_point.x << ",\"y\":"
-           << slot_point.y << ",\"z\":" << slot_point.z << "}";
-    }
-    json << "],\"slot_count\":3}";
+    json << "],\"slots\":[" << slots_json.str();
+    json << "],\"slot_count\":" << slots.poses.size() << "}";
     std_msgs::msg::String status;
     status.data = json.str();
     status_pub_->publish(status);
     detections_pub_->publish(poses);
     publish_sequence_state(detections);
-    if (slots.poses.size() == 3) slots_pub_->publish(slots);
     publish_debug(debug, color_msg_->header);
   }
 

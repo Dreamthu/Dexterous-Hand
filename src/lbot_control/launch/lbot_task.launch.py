@@ -1,28 +1,54 @@
 """Start the driver, vision detector, image viewer, and nut task controller."""
 
 import os
+import importlib.util
+import yaml
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandler, OpaqueFunction
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
+
+
+def controller_actions(context):
+    control_share = get_package_share_directory("lbot_control")
+    config = LaunchConfiguration("control_config").perform(context)
+    with open(config, encoding="utf-8") as stream:
+        task = yaml.safe_load(stream)["/**"]["ros__parameters"]
+    backend = LaunchConfiguration("slot_transfer_planner").perform(context) or task.get("slot_transfer_planner", "sdk")
+    extra = {"slot_transfer_planner": backend}
+    use_pointcloud = LaunchConfiguration("use_pointcloud").perform(context).strip().lower()
+    if use_pointcloud:
+        if use_pointcloud not in ("true", "false"):
+            raise RuntimeError("use_pointcloud must be true, false, or empty to use control_config")
+        extra["moveit_point_cloud_enabled"] = use_pointcloud == "true"
+    if backend == "moveit":
+        spec = importlib.util.spec_from_file_location("lbot_moveit_config", os.path.join(control_share, "python", "moveit_config.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        extra.update(module.parameters(task, LaunchConfiguration("moveit_model_source").perform(context)))
+        for name in ("robot_description", "robot_description_semantic"):
+            extra[name] = ParameterValue(extra[name], value_type=str)
+    controller_node = Node(
+        package="lbot_control", executable="nut_task_controller",
+        parameters=[config, extra,
+                    {"robot_namespace": LaunchConfiguration("robot_namespace"),
+                     "execute_task": LaunchConfiguration("execute_task"),
+                     "task_mode": LaunchConfiguration("task_mode")}],
+        output="screen")
+    return [controller_node, RegisterEventHandler(OnProcessExit(target_action=controller_node,
+        on_exit=[EmitEvent(event=Shutdown(reason="nut task controller finished"))]))]
 
 
 def generate_launch_description():
     driver_share = get_package_share_directory("lbot_driver")
     control_share = get_package_share_directory("lbot_control")
     vision_share = get_package_share_directory("lbot_vision")
-    controller_node = Node(
-        package="lbot_control", executable="nut_task_controller",
-        parameters=[LaunchConfiguration("control_config"),
-                    {"robot_namespace": LaunchConfiguration("robot_namespace"),
-                     "execute_task": LaunchConfiguration("execute_task"),
-                     "task_mode": LaunchConfiguration("task_mode")}],
-        output="screen")
 
     return LaunchDescription([
         DeclareLaunchArgument("arm_ip", default_value="192.168.10.21"),
@@ -30,6 +56,12 @@ def generate_launch_description():
         DeclareLaunchArgument("start_driver", default_value="true"),
         DeclareLaunchArgument("execute_task", default_value="false"),
         DeclareLaunchArgument("task_mode", default_value="validate"),
+        DeclareLaunchArgument("slot_transfer_planner", default_value="",
+                              description="moveit or sdk; empty uses control_config"),
+        DeclareLaunchArgument("use_pointcloud", default_value="",
+                              description="true/false overrides point-cloud obstacles for this run; empty uses control_config"),
+        DeclareLaunchArgument("moveit_model_source", default_value="",
+                              description="Optional path to Dexterous-Hand workstation.urdf"),
         DeclareLaunchArgument(
             "show_image", default_value="true",
             description="Open the live image viewer alongside the task"),
@@ -57,9 +89,5 @@ def generate_launch_description():
             arguments=[LaunchConfiguration("image_topic")],
             condition=IfCondition(LaunchConfiguration("show_image")),
             output="screen"),
-        controller_node,
-        RegisterEventHandler(
-            OnProcessExit(
-                target_action=controller_node,
-                on_exit=[EmitEvent(event=Shutdown(reason="nut task controller finished"))])),
+        OpaqueFunction(function=controller_actions),
     ])

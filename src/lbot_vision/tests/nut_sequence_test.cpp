@@ -24,11 +24,21 @@ lbot_vision::NutSequenceConfig config()
   return value;
 }
 
+// Synthetic fixtures assign metric diameters explicitly; production callers
+// must supply the detector's independently rectified sizes.
+void observe(lbot_vision::NutSequence &sequence, std::int64_t stamp, bool frame,
+             cv::Size image_size, const std::vector<cv::Vec3f> &observations)
+{
+  std::vector<double> sizes;
+  for (const auto &observation : observations) sizes.push_back(2.0 * observation[2]);
+  sequence.observe(stamp, frame, image_size, observations, sizes);
+}
+
 void observe_stable(lbot_vision::NutSequence &sequence, std::int64_t first_stamp,
                     const std::vector<cv::Vec3f> &observations)
 {
   for (int i = 0; i < 3; ++i) {
-    sequence.observe(first_stamp + i * 100, true, {640, 480}, observations);
+    observe(sequence, first_stamp + i * 100, true, {640, 480}, observations);
   }
 }
 
@@ -40,10 +50,27 @@ int main()
     const std::vector<cv::Vec3f> three{{100, 100, 30}, {250, 120, 20}, {400, 140, 10}};
     std::string reason;
 
+    // Perspective reverses the pixel-radius order; identities must use mm.
+    lbot_vision::NutSequence perspective(config());
+    for (int i = 0; i < 3; ++i)
+      perspective.observe(i * 100, true, {640, 480}, three, {15.0, 25.0, 40.0});
+    require(perspective.snapshot().observation_valid, "metric sequence did not confirm");
+    require(perspective.snapshot().targets[0].observation_index == 2 &&
+            perspective.snapshot().targets[2].observation_index == 0,
+            "pixel radius overrode rectified size");
+    require(perspective.snapshot().targets[0].last_observation[2] == 10.0F,
+            "metric size corrupted the pixel-radius diagnostic");
+    perspective.observe(300, true, {640, 480}, three, {});
+    require(perspective.snapshot().status == "invalid_rectified_sizes",
+            "missing sizes fell back to pixel classification");
+    perspective.observe(400, true, {640, 480}, three,
+                        {15.0, std::numeric_limits<double>::quiet_NaN(), 40.0});
+    require(!perspective.snapshot().observation_valid, "non-finite size accepted");
+
     lbot_vision::NutSequence cold(config());
-    cold.observe(0, true, {640, 480}, {});
+    observe(cold, 0, true, {640, 480}, {});
     require(!cold.snapshot().initialized, "zero observations initialized the sequence");
-    cold.observe(100, true, {640, 480}, {three[1], three[2]});
+    observe(cold, 100, true, {640, 480}, {three[1], three[2]});
     require(!cold.snapshot().initialized, "two observations initialized the sequence");
     require(cold.snapshot().status == "observation_count_mismatch", "wrong cold-start status");
 
@@ -56,9 +83,9 @@ int main()
     require(initial.targets[1].id == 2 && initial.targets[1].size_class == "nut_medium", "medium ID missing");
     require(initial.targets[2].id == 3 && initial.targets[2].size_class == "nut_small", "small ID missing");
     require(initial.targets[0].observation_index == 2 && initial.targets[1].observation_index == 0 &&
-            initial.targets[2].observation_index == 1, "initial pixel-size ranking is wrong");
+            initial.targets[2].observation_index == 1, "initial metric-size ranking is wrong");
 
-    sequence.observe(300, true, {640, 480}, {three[1], three[2]});
+    observe(sequence, 300, true, {640, 480}, {three[1], three[2]});
     require(sequence.snapshot().current_target_id == 1, "a missing nut advanced the stage");
     require(sequence.snapshot().targets[0].state == "pending", "a missing nut completed large");
     require(!sequence.snapshot().observation_valid, "count mismatch remained graspable");
@@ -66,7 +93,7 @@ int main()
 
     observe_stable(sequence, 400, three);
     require(sequence.event(1, 1, 1, "start", reason), "large did not start");
-    sequence.observe(700, true, {640, 480}, {three[1], three[2]});
+    observe(sequence, 700, true, {640, 480}, {three[1], three[2]});
     require(sequence.snapshot().targets[0].state == "in_progress", "disappearance completed large");
     require(!sequence.snapshot().observation_valid, "in-progress disappearance became valid");
     require(sequence.event(1, 2, 1, "retry", reason), "large retry was rejected");
@@ -102,7 +129,7 @@ int main()
     require(sequence.snapshot().status == "round_completed" && sequence.snapshot().expected_count == 0,
             "round did not complete after explicit feedback");
 
-    sequence.observe(1700, true, {640, 480}, {three[2]});
+    observe(sequence, 1700, true, {640, 480}, {three[2]});
     require(!sequence.snapshot().observation_valid && sequence.snapshot().status == "observation_count_mismatch",
             "visible object after completion was accepted");
     require(sequence.event(1, 9, 0, "reset", reason), "reset failed");
@@ -113,61 +140,61 @@ int main()
 
     lbot_vision::NutSequence ambiguous(config());
     const std::vector<cv::Vec3f> close_sizes{{100, 100, 30}, {200, 100, 29}, {300, 100, 10}};
-    ambiguous.observe(0, true, {640, 480}, close_sizes);
-    require(ambiguous.snapshot().status == "ambiguous_pixel_sizes", "ambiguous sizes were accepted");
+    observe(ambiguous, 0, true, {640, 480}, close_sizes);
+    require(ambiguous.snapshot().status == "ambiguous_rectified_sizes", "ambiguous sizes were accepted");
 
     auto relaxed = config();
     relaxed.sequence_confirmation_window_ms = 3000.0;
     relaxed.sequence_min_size_gap_ratio = 0.0;
     lbot_vision::NutSequence intermittent(relaxed);
-    intermittent.observe(0, true, {640, 480}, close_sizes);
-    intermittent.observe(200, false, {640, 480}, {});
+    observe(intermittent, 0, true, {640, 480}, close_sizes);
+    observe(intermittent, 200, false, {640, 480}, {});
     require(!intermittent.snapshot().observation_valid, "missing frame reused old target positions");
     // Radii may fluctuate and change ranking; spatially matching detections
     // still confirm the same group, even across a gap longer than max_gap_ms.
     auto fluctuating = close_sizes;
     fluctuating[0][2] = 25;
-    intermittent.observe(1600, true, {640, 480}, fluctuating);
+    observe(intermittent, 1600, true, {640, 480}, fluctuating);
     require(!intermittent.snapshot().initialized, "two hits passed the three-hit threshold");
-    intermittent.observe(1700, true, {640, 480}, {close_sizes[0]});
-    intermittent.observe(2500, true, {640, 480}, close_sizes);
+    observe(intermittent, 1700, true, {640, 480}, {close_sizes[0]});
+    observe(intermittent, 2500, true, {640, 480}, close_sizes);
     require(intermittent.snapshot().observation_valid, "nonconsecutive hits did not confirm the group");
     require(intermittent.snapshot().targets[0].last_seen_ms == 2500,
             "confirmation did not use the current observation");
     require(intermittent.event(1, 1, 1, "start", reason), "confirmed target could not start");
     require(intermittent.event(1, 2, 1, "retry", reason), "confirmed target could not retry");
-    intermittent.observe(2600, true, {640, 480}, close_sizes);
+    observe(intermittent, 2600, true, {640, 480}, close_sizes);
     require(!intermittent.snapshot().observation_valid, "retry reused pre-action confirmations");
-    intermittent.observe(2700, true, {640, 480}, close_sizes);
-    intermittent.observe(2800, true, {640, 480}, close_sizes);
+    observe(intermittent, 2700, true, {640, 480}, close_sizes);
+    observe(intermittent, 2800, true, {640, 480}, close_sizes);
     require(intermittent.event(1, 3, 1, "start", reason), "fresh retry confirmations failed");
     require(intermittent.event(1, 4, 1, "complete", reason), "confirmed target could not complete");
-    intermittent.observe(2900, true, {640, 480}, {close_sizes[1], close_sizes[2]});
+    observe(intermittent, 2900, true, {640, 480}, {close_sizes[1], close_sizes[2]});
     require(!intermittent.snapshot().observation_valid, "next stage reused previous target confirmations");
     require(intermittent.event(1, 5, 0, "reset", reason), "windowed reset failed");
-    intermittent.observe(3000, true, {640, 480}, close_sizes);
+    observe(intermittent, 3000, true, {640, 480}, close_sizes);
     require(!intermittent.snapshot().initialized, "reset reused previous-round confirmations");
 
     lbot_vision::NutSequence expired(relaxed);
-    expired.observe(0, true, {640, 480}, three);
-    expired.observe(200, true, {640, 480}, three);
-    expired.observe(3300, true, {640, 480}, three);
+    observe(expired, 0, true, {640, 480}, three);
+    observe(expired, 200, true, {640, 480}, three);
+    observe(expired, 3300, true, {640, 480}, three);
     require(!expired.snapshot().observation_valid, "expired hits counted toward confirmation");
-    expired.observe(3400, true, {640, 480}, three);
+    observe(expired, 3400, true, {640, 480}, three);
     require(!expired.snapshot().observation_valid, "expired history was revived");
-    expired.observe(3500, true, {640, 480}, three);
+    observe(expired, 3500, true, {640, 480}, three);
     require(expired.snapshot().observation_valid, "fresh window did not confirm");
 
     lbot_vision::NutSequence moved(relaxed);
-    moved.observe(0, true, {640, 480}, three);
-    moved.observe(100, true, {640, 480}, three);
+    observe(moved, 0, true, {640, 480}, three);
+    observe(moved, 100, true, {640, 480}, three);
     auto elsewhere = three;
     for (auto &circle : elsewhere) circle[1] += 100;
-    moved.observe(200, true, {640, 480}, elsewhere);
+    observe(moved, 200, true, {640, 480}, elsewhere);
     require(!moved.snapshot().observation_valid, "unrelated target locations shared confirmations");
-    moved.observe(200, true, {640, 480}, elsewhere);
+    observe(moved, 200, true, {640, 480}, elsewhere);
     require(moved.snapshot().status == "non_increasing_timestamp", "duplicate frame counted as a hit");
-    moved.observe(300, true, {640, 480}, elsewhere);
+    observe(moved, 300, true, {640, 480}, elsewhere);
     require(!moved.snapshot().observation_valid, "duplicate frame preserved confirmations");
 
     auto invalid_window = config();

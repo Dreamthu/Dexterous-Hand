@@ -1,0 +1,54 @@
+{
+  "method": "Single-pose XY alignment; minimum change from model TCP; preserve model base-Z component at sampled orientation",
+  "date": "2026-09-10",
+  "arm_sample_time": "2026-09-10T22:54:28.346274+08:00",
+  "frame": "base_link",
+  "tool_frame": "Arm_Tip",
+  "target_source": "nut_task_controller_20292_1789051546762.log, palm TCP target XY at 1789051564.104770529",
+  "target_stationary_confirmed_by_user": true,
+  "nut_xy_m": [
+    0.329154,
+    0.468984
+  ],
+  "measured_arm_tip_xyz_m": [
+    0.2085675585995554,
+    0.4573087466777918,
+    -0.3667916440422662
+  ],
+  "measured_arm_tip_rpy_rad": [
+    1.4929845871312626,
+    -0.012891364710283001,
+    -1.3773622762275965
+  ],
+  "original_model_tcp_m": [
+    -0.0007607737012547839,
+    -0.013984802575456453,
+    -0.05636500385395298
+  ],
+  "model_palm_xyz_at_sample_m": [
+    0.26254634657730064,
+    0.46841675269401967,
+    -0.38512385040026414
+  ],
+  "xy_residual_in_base_m": [
+    0.06660765342269936,
+    0.0005672473059803451
+  ],
+  "updated_tcp_in_arm_tip_m": [
+    0.011485531567894372,
+    -0.009052663438149304,
+    -0.12165361905422836
+  ],
+  "reconstructed_palm_xyz_at_sample_m": [
+    0.329154,
+    0.468984,
+    -0.38512385040026414
+  ],
+  "unchanged_approach_reference_z_rpy": [
+    -0.3655917354267519,
+    1.0796495600495548,
+    0.12230988346329275,
+    -1.184440455645692
+  ],
+  "limitations": "No Z calibration. One pose supplies two constraints, not a complete 3D TCP calibration. The effective offset can absorb visual/model alignment errors; transfer to other orientations has not been measured."
+}

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <future>
+#include <limits>
 
 namespace lbot_control {
 namespace {
@@ -33,6 +34,13 @@ RosVisionSystem::RosVisionSystem(
       condition_.notify_all();
     });
   event_client_ = node_->create_client<SetNutState>(config_.event_service);
+  large_target_sub_ = node_->create_subscription<geometry_msgs::msg::PointStamped>(
+    config_.large_target_topic, rclcpp::QoS(1),
+    [this](geometry_msgs::msg::PointStamped::ConstSharedPtr message) {
+      std::lock_guard<std::mutex> lock(mutex_);
+      large_target_ = std::move(message);
+      condition_.notify_all();
+    });
 }
 
 bool RosVisionSystem::valid_frame(const std::string &frame) const
@@ -66,6 +74,62 @@ bool RosVisionSystem::slot_pose(
   const auto &position = message.poses[index].position;
   pose = pose_from_point(position.x, position.y, position.z);
   return std::isfinite(pose.x) && std::isfinite(pose.y) && std::isfinite(pose.z);
+}
+
+LargeTargetResult RosVisionSystem::capture_large_target()
+{
+  std::unique_lock<std::mutex> lock(mutex_);
+  large_target_.reset();
+  Pose6 captured;
+  const bool ready = condition_.wait_for(lock, config_.wait_timeout, [this, &captured]() {
+    if (!large_target_ || !valid_frame(large_target_->header.frame_id)) return false;
+    const auto &p = large_target_->point;
+    if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) return false;
+    const auto age_ns = node_->now().nanoseconds() - stamp_ns(large_target_->header);
+    if (age_ns < 0 || age_ns > 500000000LL) return false;
+    captured = pose_from_point(p.x, p.y, p.z);
+    return true;
+  });
+  if (!ready) return {false, "timed out waiting for one fresh LARGE target in " + config_.base_frame, {}};
+  return {true, "captured LARGE target before enter", captured};
+}
+
+SlotTargetResult RosVisionSystem::capture_farthest_slot()
+{
+  return capture_slot(false);
+}
+
+SlotTargetResult RosVisionSystem::capture_max_x_slot()
+{
+  return capture_slot(true);
+}
+
+SlotTargetResult RosVisionSystem::capture_slot(bool maximum_x)
+{
+  std::unique_lock<std::mutex> lock(mutex_);
+  slots_.reset();
+  SlotTargetResult captured;
+  const bool ready = condition_.wait_for(lock, config_.wait_timeout, [this, &captured, maximum_x]() {
+    if (!slots_ || slots_->poses.size() != 3 || !valid_frame(slots_->header.frame_id)) return false;
+    const auto age = node_->now().nanoseconds() - stamp_ns(slots_->header);
+    if (age < 0 || age > 500000000LL) return false;
+    double farthest = -std::numeric_limits<double>::infinity();
+    for (std::size_t i = 0; i < slots_->poses.size(); ++i) {
+      Pose6 pose;
+      if (!slot_pose(*slots_, i, pose)) return false;
+      const double distance = maximum_x ? pose.x : std::hypot(pose.x, pose.y);
+      if (distance > farthest) {
+        farthest = distance;
+        captured.pose = pose;
+        captured.index = i + 1;
+      }
+    }
+    return true;
+  });
+  if (!ready) return {false, "timed out waiting for three fresh slot positions in " + config_.base_frame, {}, 0};
+  captured.success = true;
+  captured.message = maximum_x ? "captured maximum-X slot before enter" : "captured farthest slot before enter";
+  return captured;
 }
 
 SceneResult RosVisionSystem::initial_scene()

@@ -12,10 +12,27 @@
   <depend>geometry_msgs</depend>
   <depend>lbot_motion</depend>
   <depend>lbot_vision</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>octomap_msgs</depend>
+  <depend>octomap</depend>
+  <depend>geometric_shapes</depend>
+  <exec_depend>moveit_kinematics</exec_depend>
+  <exec_depend>moveit_planners_ompl</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>rqt_image_view</exec_depend>
   <exec_depend>lbot_driver</exec_depend>
+  <test_depend>rclpy</test_depend>
+  <test_depend>python3-numpy</test_depend>
+  <test_depend>python3-scipy</test_depend>
+  <test_depend>sensor_msgs_py</test_depend>
+  <test_depend>std_msgs</test_depend>
+  <test_depend>lbot_arm_interfaces</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

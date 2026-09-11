@@ -5,7 +5,7 @@
     execute_motion: false
     mode: check  # check | enter | leave | round_trip
     execute_task: false
-    task_mode: validate  # validate | pregrasp | return | full
+    task_mode: validate  # validate | validate_pregrasp | pregrasp | return | full
     robot_namespace: /robot1
 
     # The left arm follows route.names from first to last. The first point is
@@ -15,11 +15,17 @@
     route:
       names: [natural_down, outside_table, above_table]
       natural_down:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-      outside_table: [0.6, 0.0, 0.0, -1.5, 0.0, -1.5, 0.0]
-      above_table:   [-0.7, 0.0, 0.0, -0.8, 1.5, 0.0, 0.0]
+      outside_table: [0.026, -0.033, -1.590, -0.001, 1.529, -0.002, -0.002]
+      above_table:   [-0.010, -0.036, -1.597, -1.489, 1.553, 0.015, 0.086]
+      # [0.186, 1.401, -0.23, 0.0, 0.22, 0.024, 0.131]
 
     joint_speed: 0.2
     joint_acceleration: 0.2
+    # Task-side bounds, not controller limit writes. The user-taught transfer
+    # point has J3=-2.715 (live feedback -2.715038), below the old -2.69 bound.
+    left_joint_min: [-2.91, -0.07, -2.72, -2.05, -2.69, -1.59, -1.59]
+    left_joint_max: [2.91, 3.20, 2.69, 2.05, 2.69, 1.59, 1.59]
+    joint_limit_margin_rad: 0.0
     cartesian_speed: 0.03
     cartesian_acceleration: 0.03
     waypoint_tolerance_rad: 0.03
@@ -36,18 +42,112 @@
     # Keep these false until the corresponding measured values below have
     # been verified. Robot motion beyond the table route is interlocked.
     tool_calibrated: true
-    hand_calibrated: false
+    hand_calibrated: true
     vision_calibrated: true
 
     # All lengths are metres and all angles are radians. TCP offset is the
     # vector from the driver-controlled end-effector origin to the grasp
     # centre, expressed in the tool frame.
-    tcp_offset_x_m: 0.0
-    tcp_offset_y_m: 0.0
-    tcp_offset_z_m: 0.0
-    tool_roll_rad: 0.0
-    tool_pitch_rad: -1.57
-    tool_yaw_offset_rad: 0.0
+    # O6 model TCP refined by user-confirmed XY alignment on 2026-09-10.
+    # See left_palm_tcp_xy_alignment.json for measured pose and saved target.
+    # Z is uncalibrated: preserve the model base-Z component at sampled RPY.
+    # Local XYZ all change when rotating the base-XY correction into Arm_Tip.
+    tcp_offset_x_m: 0.011485531567894372
+    tcp_offset_y_m: -0.009052663438149304
+    tcp_offset_z_m: -0.12165361905422836
+    # Left Arm_Tip RPY read from the web controller on 2026-09-10 21:38:51 +08:00.
+    # Full grasp uses these angles (vision currently supplies zero nut yaw).
+    # Pregrasp uses the separate captured reference below.
+    tool_roll_rad: 1.11332116233439
+    tool_pitch_rad: -0.12826538177690483
+    tool_yaw_offset_rad: -1.1465078720371755
+    # Captured left Arm_Tip on 2026-09-10 22:28:23 +08:00, base_link.
+    # Pregrasp palm XYZ = [saved nut x, saved nut y, saved z].
+    # RPY retains the Arm_Tip convention; convert palm XYZ to driver XYZ.
+    # The numeric saved z now denotes palm height, not flange height.
+    approach_target_is_tcp: true
+    approach_reference_z_rpy: [-0.3655917354267519, 1.0796495600495548, 0.12230988346329275, -1.184440455645692]
+    # Explicit LARGE-only sequence after successful approach.
+    # Z below is the web-displayed Arm_Tip height, not palm height.
+    # Hand values are device units 0..255, not radians.
+    approach_grasp_enabled: true
+    approach_grasp_z_m: -0.400
+    approach_grasp_z_frame: arm_tip
+    # Require fresh measured XYZ/orientation before each hand action.
+    pose_tolerance_m: 0.001
+    pose_tolerance_rad: 0.02
+    pose_arrival_timeout_ms: 10000
+    pose_stable_samples: 3
+    approach_hand_ready: [255, 30, 180, 180, 180, 180]
+    approach_hand_close: [0, 30, 0, 0, 0, 0]
+    # Save the maximum base_link X slot before enter. After closing: lift,
+    # optional taught joint waypoints, then MoveIt from settled current joints,
+    # then timed joint_follow to the saved slot and release after pose arrival.
+    approach_place_enabled: true
+    approach_place_lift_m: 0.12
+    approach_place_slot_selection: max_x
+    # All post-lift transfers, including taught waypoints: MoveIt + joint_follow.
+    # No fallback to SDK IK or MoveJP when MoveIt planning fails.
+    slot_transfer_planner: moveit
+    moveit_joint_velocity_rad_s: 0.12
+    moveit_joint_acceleration_rad_s2: 0.12
+    # Prefer equivalent endpoint IK with some room for measured settling error.
+    # A preference only: model bounds and the original valid IK remain available.
+    moveit_goal_preferred_clearance_rad: 0.005
+    # Each segment stays above min(start Z, goal Z) minus this small allowance.
+    # Independently constrain Arm_Tip and the lowest corner of the hand envelope.
+    # This limits downward detours; it does not model the physical tabletop.
+    moveit_transfer_keep_above: true
+    moveit_transfer_max_drop_m: 0.005
+    # Capture this fresh cloud with calibrated TF before the first enter move.
+    # All post-lift MoveIt segments use the same static obstacle snapshot.
+    # Missing/old cloud or missing TF aborts before enter; no empty-scene fallback.
+    moveit_point_cloud_enabled: true
+    moveit_point_cloud_topic: /camera/depth/points
+    moveit_point_cloud_resolution_m: 0.015
+    moveit_point_cloud_padding_m: 0.015
+    moveit_point_cloud_self_filter_padding_m: 0.03
+    moveit_point_cloud_timeout_ms: 8000
+    moveit_point_cloud_max_age_ms: 1000
+    moveit_point_cloud_min_points: 500
+    # base_link [min_x,min_y,min_z,max_x,max_y,max_z]; metres.
+    moveit_point_cloud_crop: [-0.15, -1.0, -0.8, 1.2, 1.0, 0.6]
+    joint_follow_rate_hz: 50.0
+    joint_follow_start_tolerance_rad: 0.005
+    joint_follow_tracking_tolerance_rad: 0.08
+    joint_follow_goal_tolerance_rad: 0.005
+    joint_follow_feedback_timeout_ms: 200
+    joint_follow_max_lateness_ms: 60
+    # Capture a stationary measured start, then replan from a newly settled
+    # state if it changes before streaming; never jump to an old start point.
+    joint_follow_settle_tolerance_rad: 0.001
+    joint_follow_settle_duration_ms: 500
+    joint_follow_settle_timeout_ms: 5000
+    joint_follow_start_replans: 2
+    # Convex hull enclosing every CAD hand joint position, with 10 mm model padding.
+    # See left_hand_collision_envelope.json; no finger feedback is assumed.
+    moveit_hand_collision_model: cad_swept
+    # Legacy box is used only if moveit_hand_collision_model is explicitly box.
+    moveit_hand_envelope: [0.0, 0.0, -0.105, 0.22, 0.22, 0.23]
+    # Optional measured world boxes in base_link: repeated [x,y,z,sx,sy,sz].
+    # Boxes supplement the cached obstacle cloud.
+    # moveit_obstacle_boxes: [x, y, z, size_x, size_y, size_z]
+    # After lift, visit both taught waypoints in order before planning to the slot.
+    # Every waypoint must stay within the configured software joint limits.
+    approach_place_route:
+      names: [transfer_1, transfer_2]
+      transfer_1: [-0.195, 0.106,-0.146,-1.517,1.426,-0.200, -0.089]
+      transfer_2: [-0.286, 0.032, 0.772, -1.501, 0.947, -0.672, -0.515]
+    # Always use measured post-lift Arm_Tip Z, even after the waypoints change Z.
+    # Try unchanged lift RPY first; user allowed expansion to 100 degrees.
+    # MoveIt searches these exact-height endpoint candidates and checks the path.
+    # Endpoint Z/RPY constraints do not imply constant Z/RPY along the whole path.
+    approach_place_max_orientation_change_rad: 1.7453292519943295
+    approach_place_planning_timeout_ms: 15000
+    approach_place_release_enabled: true
+    approach_hand_release: [240, 30, 180, 180, 180, 180]
+    # Full task: relative pregrasp height. Horizontal pregrasp mode: minimum
+    # TCP clearance above the nut; pregrasp height/orientation use the reference.
     pregrasp_height_m: 0.10
     lift_height_m: 0.15
     slot_release_offset_m: 0.04
@@ -64,6 +164,7 @@
     base_frame: base_link
     sequence_topic: /nut_detections/sequence
     slots_topic: /nut_slots
+    large_target_topic: /nut_detections/large
     event_service: /nut_detections/set_state
     vision_wait_timeout_ms: 30000
     vision_service_timeout_ms: 3000

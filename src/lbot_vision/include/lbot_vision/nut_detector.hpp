@@ -1,25 +1,32 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 #include <opencv2/core.hpp>
 
 namespace lbot_vision {
 
-// Adapters must populate every field from the central YAML before use.
+// Adapters populate fields from the central YAML; optional fields have legacy defaults.
 struct DetectorConfig {
 #define LBOT_DETECTOR_FIELD(type, name) type name{};
+#define LBOT_DETECTOR_FIELD_DEFAULT(type, name, fallback) type name{fallback};
 #include "lbot_vision/detector_fields.inc"
 #undef LBOT_DETECTOR_FIELD
+#undef LBOT_DETECTOR_FIELD_DEFAULT
   void validate() const;
 };
 
 struct SceneGeometry {
+  // Four boundary-ordered corners for the square reference and rectangular basket.
   std::vector<cv::Point> frame;
+  // Measured inner edge of the black stroke, used only for segmentation.
+  // The outer frame remains the 190 mm reference for physical measurements.
+  std::vector<cv::Point> frame_inner;
+  // Robot-X slot centers require depth and TF,
+  // and therefore cannot be inferred by this image-only geometry stage.
   std::vector<cv::Point> basket;
-  // Existing long-axis thirds: estimates, NOT measured compartment centers.
-  std::vector<cv::Point2f> slots;
 };
 
 struct CandidateDiagnostic {
@@ -29,6 +36,7 @@ struct CandidateDiagnostic {
   std::string source;
   std::string reason;
   bool accepted{false};
+  double size_mm{0.0};
 };
 
 // Diagnostics for the black source-frame search.  Entries are recorded once
@@ -52,8 +60,10 @@ struct FrameCandidateDiagnostic {
 
 struct Detection2D {
   SceneGeometry geometry;
-  // At most three accepted observations; optional Hough fallback is reported explicitly.
+  // At most three accepted outer-contour observations. Hough is diagnostic only.
   std::vector<cv::Vec3f> circles;
+  // Aligned with circles, measured on the 190 mm square reference plane.
+  std::vector<double> sizes_mm;
   bool hough_fallback_enabled{false};
   std::vector<CandidateDiagnostic> candidates;
   std::vector<FrameCandidateDiagnostic> frame_candidates;
@@ -65,22 +75,29 @@ struct Detection2D {
   bool basket_found{false};
 };
 
-// BGR8 only. No ROS, depth, intrinsics, filesystem or task-state dependencies.
+// Optional point normalization lets the ROS adapter remove lens distortion
+// using CameraInfo. With no normalizer, input pixels are treated as pinhole.
+using PointNormalizer = std::function<cv::Point2f(const cv::Point2f &)>;
+
+// BGR8 only. No ROS, depth, filesystem or task-state dependencies.
 // Throws std::invalid_argument for an empty/wrong-type image or invalid config.
-Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config);
+Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config,
+                      const PointNormalizer &normalize = {});
 
 // Holds only the frame region through short detection gaps. Nuts and basket
 // are always detected again from the current image; no target poses are cached.
 class TemporalDetector {
 public:
   TemporalDetector(const DetectorConfig &config, double frame_hold_ms);
-  Detection2D detect(const cv::Mat &bgr, std::int64_t stamp_ms);
+  Detection2D detect(const cv::Mat &bgr, std::int64_t stamp_ms,
+                     const PointNormalizer &normalize = {});
 
 private:
   DetectorConfig config_;
   double frame_hold_ms_;
   cv::Size image_size_;
   std::vector<cv::Point> frame_;
+  std::vector<cv::Point> frame_inner_;
   std::int64_t frame_stamp_ms_{-1};
   std::int64_t last_stamp_ms_{-1};
 };

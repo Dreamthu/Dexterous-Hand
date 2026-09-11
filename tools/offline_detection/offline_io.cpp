@@ -46,8 +46,11 @@ DetectorConfig load_config(const std::string &path)
   if (!file.isOpened()) throw std::runtime_error("Cannot open effective config: " + path);
   DetectorConfig config;
 #define LBOT_DETECTOR_FIELD(type, name) read_field(file[#name], config.name, #name);
+#define LBOT_DETECTOR_FIELD_DEFAULT(type, name, fallback) \
+  if (!file[#name].isNone()) read_field(file[#name], config.name, #name);
 #include "lbot_vision/detector_fields.inc"
 #undef LBOT_DETECTOR_FIELD
+#undef LBOT_DETECTOR_FIELD_DEFAULT
   config.validate();
   return config;
 }
@@ -56,14 +59,16 @@ void write_result(const Detection2D &result, const cv::Size &size, const std::st
 {
   cv::FileStorage file(path, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
   if (!file.isOpened()) throw std::runtime_error("Cannot write result: " + path);
-  file << "schema_version" << 1 << "width" << size.width << "height" << size.height;
+  file << "schema_version" << 2 << "width" << size.width << "height" << size.height;
   file << "frame_found" << int(result.frame_found) << "basket_found" << int(result.basket_found);
   file << "status" << (result.frame_found ? "observed_2d" : "frame_not_found");
   file << "selection_policy"
-       << (result.hough_fallback_enabled ? "cap_three_with_hough_fallback" : "cap_three_contours_only");
+       << "cap_three_outer_contours_rectified_size";
+  file << "size_metric" << "rectified_equivalent_outer_diameter_mm";
   file << "hough_fallback_enabled" << int(result.hough_fallback_enabled);
   file << "localization_valid" << 0 << "localization_reason" << "offline_2d_only";
   file << "frame_contour"; points(file, result.geometry.frame);
+  file << "frame_inner_contour"; points(file, result.geometry.frame_inner);
   file << "frame_candidates" << "[";
   for (const auto &candidate : result.frame_candidates) {
     file << "{" << "area" << candidate.area
@@ -83,14 +88,16 @@ void write_result(const Detection2D &result, const cv::Size &size, const std::st
   file << "]";
   file << "basket_contour"; points(file, result.geometry.basket);
   file << "slot_estimates_px" << "[";
-  for (const auto &p : result.geometry.slots) file << "[" << p.x << p.y << "]";
-  file << "]" << "nuts" << "[";
-  for (const auto &c : result.circles)
-    file << "{" << "center_px" << "[" << c[0] << c[1] << "]" << "radius_px" << c[2] << "}";
+  file << "]" << "slots_reason" << "requires_depth_and_robot_frame" << "nuts" << "[";
+  for (std::size_t i = 0; i < result.circles.size(); ++i) {
+    const auto &c = result.circles[i];
+    file << "{" << "center_px" << "[" << c[0] << c[1] << "]" << "radius_px" << c[2]
+         << "size_mm" << result.sizes_mm.at(i) << "}";
+  }
   file << "]" << "candidates" << "[";
   for (const auto &c : result.candidates) {
     file << "{" << "center_px" << "[" << c.center.x << c.center.y << "]"
-         << "radius_px" << c.radius_px << "source" << c.source
+         << "radius_px" << c.radius_px << "size_mm" << c.size_mm << "source" << c.source
          << "accepted" << int(c.accepted) << "reason" << c.reason << "contour";
     points(file, c.contour);
     file << "}";
