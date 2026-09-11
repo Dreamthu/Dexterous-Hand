@@ -1,4 +1,4 @@
-"""Start the driver, vision detector, image viewer, and nut task controller."""
+"""Start the vision detector, image viewer, and nut task controller."""
 
 import os
 import importlib.util
@@ -46,14 +46,11 @@ def controller_actions(context):
 
 
 def generate_launch_description():
-    driver_share = get_package_share_directory("lbot_driver")
     control_share = get_package_share_directory("lbot_control")
     vision_share = get_package_share_directory("lbot_vision")
 
     return LaunchDescription([
-        DeclareLaunchArgument("arm_ip", default_value="192.168.10.21"),
         DeclareLaunchArgument("robot_namespace", default_value="robot1"),
-        DeclareLaunchArgument("start_driver", default_value="true"),
         DeclareLaunchArgument("execute_task", default_value="false"),
         DeclareLaunchArgument("task_mode", default_value="validate"),
         DeclareLaunchArgument("slot_transfer_planner", default_value="",
@@ -61,7 +58,7 @@ def generate_launch_description():
         DeclareLaunchArgument("use_pointcloud", default_value="",
                               description="true/false overrides point-cloud obstacles for this run; empty uses control_config"),
         DeclareLaunchArgument("moveit_model_source", default_value="",
-                              description="Optional path to Dexterous-Hand workstation.urdf"),
+                              description="Optional workstation.urdf override"),
         DeclareLaunchArgument(
             "show_image", default_value="true",
             description="Open the live image viewer alongside the task"),
@@ -72,13 +69,6 @@ def generate_launch_description():
             "control_config", default_value=os.path.join(control_share, "config", "nut_task.yaml")),
         DeclareLaunchArgument(
             "vision_config", default_value=os.path.join(vision_share, "config", "nut_detector.yaml")),
-        Node(
-            package="lbot_driver", executable="lbot_driver",
-            namespace=LaunchConfiguration("robot_namespace"),
-            parameters=[os.path.join(driver_share, "config", "lbot_config.yaml"),
-                        {"arm_ip": LaunchConfiguration("arm_ip")}],
-            condition=IfCondition(LaunchConfiguration("start_driver")),
-            output="screen"),
         Node(
             package="lbot_vision", executable="nut_detector_node",
             parameters=[LaunchConfiguration("vision_config")],

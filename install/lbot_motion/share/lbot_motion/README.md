@@ -1,1 +1,0 @@
-/home/lzy/lbot_ws/src/lbot_motion/README.md

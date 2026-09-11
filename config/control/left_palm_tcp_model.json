@@ -1,6 +1,6 @@
 {
   "status": "model-derived geometric reference; not measured calibration",
-  "source_model": "Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf",
+  "source_model": "开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf",
   "source_urdf_sha256": "270d07c1f65647263f7f5dcdd04989caf558dd2fdd9de6420dfd48bb6ab2626a",
   "mesh_relative_to_workstation": "../../components/hands/linkerhand_o6/variants/left/meshes/hand_base_link.STL",
   "mesh_sha256": "2dc0d80eb470c0ccd6e338650f383efea75a5b77eee7e51d2b6a1da553afcdfe",

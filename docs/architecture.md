@@ -29,7 +29,7 @@ linkerbot/runtime.py      ROS 命令与配置适配边界
 1. `tools/` 可以依赖 ROS 图像消息，但不能依赖比赛任务控制器。
 2. `lbot_vision` 负责输入图像/深度并输出结构化检测，不发送机器人动作。
 3. `lbot_motion` 是底层机器人适配包，只提供左臂/左手命令和左臂状态读取，不包含任务逻辑。
-4. `lbot_control` 保留任务状态机和执行器，通过 `lbot_motion::LeftArmMotionDevice` 访问机器人；
+4. `lbot_control` 保留任务状态机和执行器，通过 `lbot_motion::LeftArmMotionDevice` 访问外部机器人驱动；
    `MOVE_ABOVE_TABLE` 状态内部按配置执行任意数量的关节节点。
 5. `apps/` 只负责组合组件和清理进程，不实现识别或运动算法。
 
@@ -45,9 +45,9 @@ Orbbec 驱动从 Gemini 2 固件读取当前 profile 对应的厂内参和畸变
 
 ## 外部库
 
-`../OrbbecSDK_ROS2` 和外部机器人 SDK 不属于本仓库，也不会由运行脚本更新、拉取或修改。
-构建脚本只读取 `Dexterous-Hand/src/lbot_arm_interfaces` 并把生成物写入本仓库自己的
-`build/install/log`。
+`../OrbbecSDK_ROS2` 不属于本仓库，也不会由运行脚本更新、拉取或修改。
+Dexterous-Hand 的驱动、示例和遥操作包已移除；机器人驱动由外部环境提供。任务所需的
+`lbot_arm_interfaces`、模型资产和 `lbot_motion` 适配层保留在仓库内。
 
 ## 参数
 

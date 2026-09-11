@@ -1,2 +1,0 @@
-[console_scripts]
-nut_sorting_node = nut_sorting_task.nut_sorting_node:main

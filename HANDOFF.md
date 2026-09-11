@@ -5,19 +5,18 @@
 
 ## 不可破坏的目录边界
 
-三个目录必须位于同一父目录下：
+两个目录必须位于同一父目录下：
 
 ```text
 ├── linkerbot_ws/       # 本 Git 仓库
-├── OrbbecSDK_ROS2/     # 静态外部相机依赖
-└── Dexterous-Hand/     # 静态外部机器人依赖
+└── OrbbecSDK_ROS2/     # 静态外部相机依赖
 ```
 
 - 日常功能开发只修改 `linkerbot_ws`。
-- `OrbbecSDK_ROS2` 和外部机器人 SDK 视为只读依赖；运行、构建和测试脚本不得自动拉取、
-  更新或修改它们。
+- `OrbbecSDK_ROS2` 视为只读依赖；运行、构建和测试脚本不得自动拉取、更新或修改它。
+- 机器人驱动由现场外部环境提供，仓库内不再维护驱动、示例或遥操作实现。
 - 外部依赖版本变化必须单独验证，并更新 `docs/provenance.md`。
-- 不得把外部仓库复制进 `linkerbot_ws/src`，也不得提交它们的构建产物。
+- 不得把外部相机仓库复制进 `linkerbot_ws/src`，也不得提交外部仓库或本仓库构建产物。
 
 ## 各目录职责
 
@@ -25,10 +24,17 @@
 - `config/`：所有用户可调参数的唯一来源，按功能分目录维护。
 - `linkerbot/`：可复用的 Python 适配层，负责路径、配置和底层进程命令。
 - `scripts/`：交付给使用者的稳定入口；每个完整功能都必须有对应脚本。
-- `src/`：本仓库维护的 ROS package 和 C++ 代码。
-- `tools/`：外参求解、数据检查等独立工具，不依赖比赛任务状态机。
+- `src/`：本仓库维护的任务、感知、接口和运动适配 ROS package。
+- `src/lbot_arm_interfaces`：任务与外部驱动共同使用的 ROS 2 接口定义，暂保留完整 SDK 接口。
+- `src/lbot_motion`：左臂/左手 ROS 适配层，不包含任务状态机。
+- `src/lbot_control`：唯一连接视觉与左臂运动的任务状态机层。
+- `src/lbot_vision`：相机输入、螺母/蓝筐识别和任务视觉接口。
+- `src/lbot_rerun`：只读三维可视化节点，不发送运动命令。
+- `开发资源/assets/`：唯一模型资产根目录，包含左臂、O6 手、工作站和螺母对象模型。
+- `tools/`：外参求解、离线检测等独立工具，不依赖比赛任务状态机。
 - `tests/`：配置、纯算法和入口契约测试。
-- `artifacts/`：标定结果、采集数据和运行日志，不作为源码目录。
+- `artifacts/`：标定结果、采集数据和运行日志，不作为源码目录；当前任务使用
+  `artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml`。
 - `docs/`：架构决策、接口说明和外部依赖来源。
 
 新文件必须按职责放置，不得为了方便在仓库根目录、ROS package 或脚本中散落配置、
@@ -69,8 +75,9 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
 - 使用原始图像的代码必须同时处理 `CameraInfo.K`、`D` 和 `distortion_model`。公共转换
   统一复用 `lbot_vision::CameraGeometry`，不得在节点中重新手写只使用 `K` 的反投影。
 - 相机到机器人、相机到末端、TCP 和现场基准属于外参。其配置只放在
-  `config/calibration/extrinsics/`，求解工具只放在 `tools/extrinsic_calibration/`，产物只写入
-  `artifacts/calibration/extrinsics/`。
+  `config/calibration/extrinsics.yaml`，求解工具只放在
+  `tools/camera_calibration/calibrate_extrinsics.py`，产物只写入
+  `artifacts/calibration/extrinsics/`；`artifacts/` 是数据目录，不是标定代码目录。
 - 尚未测量的外参不得用单位矩阵、零向量或经验数值冒充有效标定，也不得发布到正式 TF。
 
 ## 用户入口与 ROS 封装
@@ -90,7 +97,8 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
 - topic、service、frame 和 QoS 等外部接口需要在配置或接口文档中说明。
 - 节点输出优先使用结构化消息；临时 JSON/status 文本不得成为跨模块的长期核心协议。
 - 坐标数据必须携带明确的 frame；TF 缺失时不得把相机坐标冒充机器人基座坐标。
-- 实验代码放入 `experimental/` 且默认不参与构建，不得从正式入口调用。
+- 实验代码必须明确隔离且默认不参与构建，不得从正式入口调用。已被移除的旧
+  `nut_task_node` 原型不得恢复为正式任务入口。
 
 ## 可读性与复用性
 
@@ -100,6 +108,9 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
 - 错误不得静默忽略；日志应包含组件、失败对象以及使用者可以采取的下一步。
 - 不得提交注释掉的大段旧实现。仍有参考价值但不安全的原型应明确隔离并写明限制。
 - 运行生成内容只能进入 `artifacts/`、`build/`、`install/` 或 `log/`。
+- `build/`、`install/` 和 `log/` 只作为本地 colcon 目录，已从 Git 索引移除；不要提交，
+  也不要清理或回退其中已有的本地改动。
+- `__pycache__/`、截图、HSV 调参输出和离线数据集不进入版本库。
 
 ## 机械臂安全要求
 
@@ -126,7 +137,10 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
    git status --short
    ```
 
-5. 检查没有绝对个人路径、重复配置、意外生成物或外部仓库改动。
+   当前 `test.sh` 有一个既有错误：`lbot_rerun.core` 缺失导致
+   `tests/test_rerun_core.py` 无法导入。修复该问题前，需确认除该项外其余测试通过。
+5. 检查没有绝对个人路径、重复配置、意外生成物或外部仓库改动；模型路径必须指向
+   `开发资源/assets/`，不得重新引入根目录 `assets/`。
 6. 在提交说明中记录测试环境；涉及硬件时注明设备、固件、profile 和测试时长。
 
 ## 完成定义
@@ -137,6 +151,6 @@ scripts -> apps -> linkerbot 适配层 -> ROS 节点/外部 SDK
 - 参数集中在 `config/` 并经过校验；
 - ROS/SDK 细节没有泄漏到业务算法和用户操作中；
 - 有稳定脚本入口、清晰失败信息和退出清理逻辑；
-- 测试与低并发完整构建通过；
+- 除文档明确记录的既有问题外，测试与低并发完整构建通过；
 - 没有降低机械臂安全默认值；
 - README 或相关文档足以让下一位开发者复现使用方法。

@@ -1,4 +1,0 @@
-source;share/lbot_arm_interfaces/local_setup.bash
-source;share/lbot_arm_interfaces/local_setup.dsv
-source;share/lbot_arm_interfaces/local_setup.sh
-source;share/lbot_arm_interfaces/local_setup.zsh

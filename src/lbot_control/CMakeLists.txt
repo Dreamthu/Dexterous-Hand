@@ -165,6 +165,17 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../config/control/left_hand_collisi
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../config/control/left_hand_collision_meshes
   DESTINATION share/${PROJECT_NAME}/config)
 
+set(LBOT_ASSET_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../开发资源/assets)
+install(FILES
+  ${LBOT_ASSET_ROOT}/workstations/lkls73_i1_o6_bimanual/workstation.urdf
+  DESTINATION share/${PROJECT_NAME}/assets/workstations/lkls73_i1_o6_bimanual)
+install(FILES
+  ${LBOT_ASSET_ROOT}/components/bases/lkls73_torso/variants/default/meshes/base_link.STL
+  DESTINATION share/${PROJECT_NAME}/assets/components/bases/lkls73_torso/variants/default/meshes)
+install(DIRECTORY
+  ${LBOT_ASSET_ROOT}/components/arms/lkls73_arm/variants/left/meshes
+  DESTINATION share/${PROJECT_NAME}/assets/components/arms/lkls73_arm/variants/left)
+
 ament_export_targets(export_lbot_control HAS_LIBRARY_TARGET)
 ament_export_include_directories(include)
 ament_export_dependencies(rclcpp lbot_motion lbot_vision moveit_core moveit_ros_planning moveit_msgs

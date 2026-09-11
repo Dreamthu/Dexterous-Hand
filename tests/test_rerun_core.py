@@ -23,7 +23,7 @@ from lbot_rerun.core import (  # noqa: E402
 class RerunCoreTest(unittest.TestCase):
     def test_left_model_uses_controller_base_as_root(self):
         model = parse_left_urdf(
-            REPOSITORY_ROOT / "assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
+            REPOSITORY_ROOT / "开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
         )
         self.assertEqual(model.root_link, "base_base_link")
         self.assertEqual(model.link_entity_name(model.root_link), "base_link")

@@ -10,7 +10,7 @@
   /nut_slots                 PoseArray（3 个格子，基座坐标）
   /nut_detections/set_state  SetNutState（start/complete/retry/reset）
           ↓
-RosVisionSystem → TaskCoordinator → RosLeftArmMotionSystem → lbot_motion → lbot_driver
+RosVisionSystem → TaskCoordinator → RosLeftArmMotionSystem → lbot_motion → 外部机器人驱动
 ```
 
 ## 状态机与视觉时机
@@ -67,7 +67,7 @@ ros2 launch lbot_control lbot_start_control.launch.py mode:=round_trip execute_m
 连接视觉的完整任务入口：
 
 ```bash
-ros2 launch lbot_control lbot_task.launch.py start_driver:=true execute_task:=true
+ros2 launch lbot_control lbot_task.launch.py execute_task:=true
 ```
 
 `execute_task` 默认是 `false`。执行前必须完成机械臂路线、工具坐标、抓放高度、灵巧手开合值、

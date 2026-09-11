@@ -1,3 +1,0 @@
-/home/lzy/lbot_ws/install/lbot_motion/lib/liblbot_motion.so
-/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/export_lbot_motionExport.cmake
-/home/lzy/lbot_ws/install/lbot_motion/share/lbot_motion/cmake/export_lbot_motionExport-release.cmake
