@@ -156,8 +156,7 @@ public:
       const double short_side = std::min(rr.size.width, rr.size.height);
       const double long_side = std::max(rr.size.width, rr.size.height);
       diagnostic.aspect_ratio = short_side > 1.0 ? long_side / short_side : 0.0;
-      constexpr double kMaxFrameAspectRatio = 4.0;
-      if (short_side <= 1.0 || diagnostic.aspect_ratio > kMaxFrameAspectRatio) {
+      if (short_side <= 1.0 || diagnostic.aspect_ratio > 2.5) {
         diagnostic.reason = "aspect_ratio";
         result_.frame_candidates.push_back(std::move(diagnostic));
         continue;
@@ -186,7 +185,7 @@ public:
       const double normalized_area = (area - min_area) / (max_area - min_area);
       const double area_score = std::clamp(1.0 - std::abs(normalized_area - 0.5) * 2.0, 0.0, 1.0);
       const double shape_score = 1.0 - 0.12 * std::abs(diagnostic.vertex_count - 4);
-      const double aspect_score = std::clamp((kMaxFrameAspectRatio - diagnostic.aspect_ratio) / (kMaxFrameAspectRatio - 1.0), 0.0, 1.0);
+      const double aspect_score = std::clamp((2.5 - diagnostic.aspect_ratio) / 1.5, 0.0, 1.0);
       const double fill_score = std::clamp((rectangularity - 0.55) / 0.45, 0.0, 1.0);
       const double brightness_score = std::clamp((mean_intensity - 120.0) / 135.0, 0.0, 1.0);
       diagnostic.score = shape_score + aspect_score + fill_score + brightness_score + area_score;
@@ -278,25 +277,13 @@ public:
           refined.emplace_back(cvRound(a[2] + t * a[0]), cvRound(a[3] + t * a[1]));
         }
       }
-      if (fitted && cv::isContourConvex(refined)) {
-        quad = std::move(refined);
-      } else {
-        // When line-fitting fails (e.g. a large nut indentation leaves
-        // too few support points on one side), the hull quad is a usable
-        // fallback. Its corners may be 1–2 px off but it preserves the
-        // straight inner edges that a nut cannot bend.
-        quad.clear();
-        cv::approxPolyDP(hull, quad, 0.02 * cv::arcLength(hull, true), true);
-        if (quad.size() != 4 || !cv::isContourConvex(quad)) continue;
-      }
+      if (fitted && cv::isContourConvex(refined)) quad = std::move(refined);
       const double area = cv::contourArea(quad);
       // Local thresholding can split a reflective stroke into two nested
       // rings. The innermost frame-sized hole is the paper, not the bright
       // stripe inside the stroke. Nut holes are excluded by the area bound.
-      // Relax inner-frame area floor: a large nut against the frame
-      // can cover up to 65 % of the visible paper surface.
-      if (area >= best_area || area < outer_area * 0.35 ||
-          area < cv::contourArea(hull) * 0.85) continue;
+      if (area >= best_area || area < outer_area * 0.45 ||
+          area < cv::contourArea(hull) * 0.9) continue;
       if (!std::all_of(quad.begin(), quad.end(), [&](const auto &p) {
             return cv::pointPolygonTest(outer, p, true) >= -1.5;
           })) continue;
@@ -370,71 +357,35 @@ public:
       geometry.frame_inner = fallback_inner;
       result_.frame_reused = true;
     }
+    std::vector<std::vector<cv::Point>> blue_contours;
+    cv::findContours(blue_mask, blue_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     cv::Point2f frame_center(bgr.cols * 0.5F, bgr.rows * 0.5F);
     if (!geometry.frame.empty()) {
       cv::Moments m = cv::moments(geometry.frame);
       if (std::abs(m.m00) > 1e-6) frame_center = {static_cast<float>(m.m10 / m.m00),
                                                    static_cast<float>(m.m01 / m.m00)};
     }
-    // Searches a binary mask for the best basket candidate using the same
-    // geometry checks. Used for the primary and fallback mask passes.
-    auto find_basket_in_mask = [&](const cv::Mat &mask, const std::string &) -> bool {
-      std::vector<std::vector<cv::Point>> contours;
-      cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      double best = image_area * config_.min_basket_area_ratio;
-      bool found = false;
-      for (const auto &contour : contours) {
-        double area = cv::contourArea(contour);
-        cv::Moments m = cv::moments(contour);
-        if (area < best || std::abs(m.m00) < 1e-6) continue;
-        cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
-        if (config_.basket_side == "right" && c.x <= frame_center.x) continue;
-        if (config_.basket_side == "left" && c.x >= frame_center.x) continue;
-        std::vector<cv::Point> approx;
-        cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, true), true);
-        if (approx.size() != 4 || !cv::isContourConvex(approx)) continue;
-        const auto rrect = cv::minAreaRect(contour);
-        const double rectangle_area = rrect.size.area();
-        if (rectangle_area <= 0 || area / rectangle_area < config_.min_basket_rectangularity) continue;
-        std::vector<cv::Point> hull;
-        cv::convexHull(contour, hull);
-        if (area / cv::contourArea(hull) < 0.90 || cv::contourArea(approx) < 0.85 * area) continue;
-        best = area;
-        geometry.basket = approx;
-        // Store the minAreaRect angle for release orientation alignment.
-        geometry.basket_angle_deg = rrect.angle;
-        if (rrect.size.width < rrect.size.height) geometry.basket_angle_deg += 90;
-        while (geometry.basket_angle_deg < -45) geometry.basket_angle_deg += 180;
-        while (geometry.basket_angle_deg > 135) geometry.basket_angle_deg -= 180;
-        found = true;
-      }
-      return found;
-    };
-    bool basket_found = find_basket_in_mask(blue_mask, "blue_hsv");
-    if (!basket_found) {
-      // The configured narrow blue range can miss the basket under varying
-      // light. Broaden S and V thresholds; tight H still prevents false
-      // positives from non-blue table/floor regions.
-      cv::Mat fallback_blue;
-      cv::inRange(hsv,
-        cv::Scalar(config_.blue_h_min, std::max(20, config_.blue_s_min - 40),
-                   std::max(30, config_.blue_v_min - 40)),
-        cv::Scalar(config_.blue_h_max, 255, 255), fallback_blue);
-      cv::morphologyEx(fallback_blue, fallback_blue, cv::MORPH_CLOSE,
-                       cv::getStructuringElement(cv::MORPH_RECT, {7, 7}));
-      basket_found = find_basket_in_mask(fallback_blue, "blue_fallback");
+    double best_area = image_area * config_.min_basket_area_ratio;
+    for (const auto &contour : blue_contours) {
+      double area = cv::contourArea(contour);
+      cv::Moments m = cv::moments(contour);
+      if (area < best_area || std::abs(m.m00) < 1e-6) continue;
+      cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
+      if (config_.basket_side == "right" && c.x <= frame_center.x) continue;
+      if (config_.basket_side == "left" && c.x >= frame_center.x) continue;
+      std::vector<cv::Point> approx;
+      cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, true), true);
+      if (approx.size() != 4 || !cv::isContourConvex(approx)) continue;
+      const double rectangle_area = cv::minAreaRect(contour).size.area();
+      if (rectangle_area <= 0 || area / rectangle_area < config_.min_basket_rectangularity) continue;
+      // Reject irregular shapes even if polygon simplification hid small dents.
+      std::vector<cv::Point> hull;
+      cv::convexHull(contour, hull);
+      if (area / cv::contourArea(hull) < 0.90 || cv::contourArea(approx) < 0.85 * area) continue;
+      best_area = area;
+      geometry.basket = approx;
     }
-    if (!basket_found) {
-      // Last resort: the basket rim is a large bright rectangle in the
-      // grayscale image. Adaptive threshold + area filtering can catch it
-      // when color segmentation fails entirely.
-      cv::Mat adaptive_basket;
-      cv::adaptiveThreshold(gray, adaptive_basket, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-                            cv::THRESH_BINARY, 31, -8.0);
-      cv::morphologyEx(adaptive_basket, adaptive_basket, cv::MORPH_CLOSE,
-                       cv::getStructuringElement(cv::MORPH_RECT, {5, 5}));
-      basket_found = find_basket_in_mask(adaptive_basket, "adaptive_basket");
-    }
+
     debug = bgr.clone();
     if (config_.debug_black_frame) {
       for (const auto &candidate : result_.frame_candidates) {
@@ -475,16 +426,14 @@ public:
       inner.emplace_back(cv::Point(cvRound(q.x), cvRound(q.y)));
     }
     cv::fillConvexPoly(roi, inner, 255);
-    // Minimal 1-px erosion: removes the black stroke edge that findContours
-    // includes in the hole boundary. A nut flush against the frame loses
-    // only its outermost pixel; the fractional edge-clip check below
-    // determines whether the result is usable.
-    cv::erode(roi, roi, cv::getStructuringElement(cv::MORPH_RECT, {1, 1}));
+    // A hole contour includes its adjacent foreground boundary pixel. Remove
+    // just that pixel of black stroke, not four extra pixels of usable paper.
+    cv::erode(roi, roi, cv::getStructuringElement(cv::MORPH_RECT, {3, 3}));
     cv::Mat edge_distance;
     cv::distanceTransform(roi, edge_distance, cv::DIST_L2, cv::DIST_MASK_PRECISE);
-    // Keep raw (un-blurred) gray inside a narrow border band so Gaussian
-    // smoothing cannot merge a near-border nut with the black stroke.
-    raw_gray.copyTo(gray, edge_distance <= 1.5);
+    // Gaussian smoothing across a 1--2 px gap can join a nut to the black line.
+    // Retain the original contrast at the inner edge; smooth the interior as before.
+    raw_gray.copyTo(gray, edge_distance <= 4.0);
 
     // Reference images show hexagonal nuts with circular holes. Detect the outer
     // silhouette first, so size classification is not driven by the inner hole.
@@ -497,6 +446,7 @@ public:
     cv::adaptiveThreshold(gray, adaptive_mask, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
                           cv::THRESH_BINARY_INV, block_size, config_.adaptive_c);
     cv::bitwise_and(adaptive_mask, roi, adaptive_mask);
+    const cv::Mat adaptive_raw = adaptive_mask.clone();
     cv::morphologyEx(adaptive_mask, adaptive_mask, cv::MORPH_OPEN,
                      cv::getStructuringElement(cv::MORPH_ELLIPSE,
                                                 {config_.nut_mask_open_kernel_size,
@@ -514,6 +464,7 @@ public:
                                                 {blackhat_size, blackhat_size}));
     cv::threshold(blackhat, blackhat_mask, config_.blackhat_threshold, 255, cv::THRESH_BINARY);
     cv::bitwise_and(blackhat_mask, roi, blackhat_mask);
+    const cv::Mat blackhat_raw = blackhat_mask.clone();
     cv::morphologyEx(blackhat_mask, blackhat_mask, cv::MORPH_OPEN,
                      cv::getStructuringElement(cv::MORPH_ELLIPSE,
                                                 {config_.nut_mask_open_kernel_size,
@@ -525,24 +476,6 @@ public:
 
     cv::bitwise_and(adaptive_mask, roi, adaptive_mask);
     cv::bitwise_and(blackhat_mask, roi, blackhat_mask);
-    // A finer-scale adaptive pass helps separate adjacent nuts that the
-    // large-block threshold merges into a single component.
-    cv::Mat fine_adaptive_mask;
-    {
-      const int fine_block = std::max(3, config_.adaptive_block_size / 2);
-      cv::adaptiveThreshold(gray, fine_adaptive_mask, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-                            cv::THRESH_BINARY_INV, fine_block | 1, config_.adaptive_c);
-      cv::bitwise_and(fine_adaptive_mask, roi, fine_adaptive_mask);
-      cv::morphologyEx(fine_adaptive_mask, fine_adaptive_mask, cv::MORPH_OPEN,
-                       cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                  {config_.nut_mask_open_kernel_size,
-                                                   config_.nut_mask_open_kernel_size}));
-      cv::morphologyEx(fine_adaptive_mask, fine_adaptive_mask, cv::MORPH_CLOSE,
-                       cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                  {config_.nut_mask_close_kernel_size,
-                                                   config_.nut_mask_close_kernel_size}));
-      cv::bitwise_and(fine_adaptive_mask, roi, fine_adaptive_mask);
-    }
     result_.roi_mask = roi.clone();
     result_.adaptive_mask = adaptive_mask.clone();
     result_.blackhat_mask = blackhat_mask.clone();
@@ -550,62 +483,21 @@ public:
     int mask_index = 0;
     // Black-hat handles the large illumination gradient in the sample photos;
     // adaptive thresholding is retained for cases where the nut has weak edges.
-    // The fine-scale adaptive pass catches nuts that the large-block threshold merges.
-    for (const cv::Mat &candidate_mask : {blackhat_mask, adaptive_mask, fine_adaptive_mask}) {
-
+    for (const cv::Mat &candidate_mask : {blackhat_mask, adaptive_mask}) {
+      // Remember boundary-connected fragments before opening can round off
+      // their clipped edge and make them look like a complete smaller nut.
+      const cv::Mat &raw_mask = mask_index == 0 ? blackhat_raw : adaptive_raw;
+      cv::Mat labels;
+      const int label_count = cv::connectedComponents(raw_mask, labels, 8, CV_32S);
+      std::vector<bool> clipped(static_cast<std::size_t>(label_count), false);
+      for (int y = 0; y < roi.rows; ++y) {
+        const auto *distance = edge_distance.ptr<float>(y);
+        const auto *row = labels.ptr<int>(y);
+        for (int x = 0; x < roi.cols; ++x)
+          if (row[x] != 0 && distance[x] <= 1.0F) clipped[row[x]] = true;
+      }
       std::vector<std::vector<cv::Point>> contours;
       cv::findContours(candidate_mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-      // When two nuts touch, the single large contour encloses both. Split
-      // oversized blobs with a distance-transform watershed so that each
-      // sub-region can be classified independently.
-      {
-        constexpr double kOversizeAreaFactor = 2.0;
-        std::vector<std::vector<cv::Point>> split_contours;
-        for (const auto &c : contours) {
-          const double c_area = cv::contourArea(c);
-          if (c_area > config_.min_nut_area_px * kOversizeAreaFactor) {
-            cv::Rect bbox = cv::boundingRect(c);
-            bbox &= cv::Rect(0, 0, candidate_mask.cols, candidate_mask.rows);
-            if (bbox.area() <= 0) { split_contours.push_back(c); continue; }
-            cv::Mat local_mask = cv::Mat::zeros(bbox.size(), CV_8UC1);
-            std::vector<std::vector<cv::Point>> shifted{{}};
-            for (const auto &p : c) shifted.back().push_back(p - bbox.tl());
-            cv::drawContours(local_mask, shifted, 0, 255, cv::FILLED);
-            cv::Mat dist;
-            cv::distanceTransform(local_mask, dist, cv::DIST_L2, cv::DIST_MASK_PRECISE);
-            double dmin, dmax;
-            cv::Point dmin_loc, dmax_loc;
-            cv::minMaxLoc(dist, &dmin, &dmax, &dmin_loc, &dmax_loc);
-            if (dmax < 2.0) { split_contours.push_back(c); continue; }
-            // Find seed regions on the 8-bit threshold before converting
-            // to CV_32S for watershed. findContours only supports CV_8UC1.
-            cv::Mat mark8;
-            cv::threshold(dist, mark8, dmax * 0.45, 255, cv::THRESH_BINARY);
-            mark8.convertTo(mark8, CV_8UC1);
-            std::vector<std::vector<cv::Point>> mark_contours;
-            cv::findContours(mark8, mark_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-            if (mark_contours.size() < 2) { split_contours.push_back(c); continue; }
-            mark8.convertTo(mark8, CV_32S);
-            for (std::size_t mi = 0; mi < mark_contours.size(); ++mi)
-              cv::drawContours(mark8, mark_contours, static_cast<int>(mi), cv::Scalar(mi + 1), cv::FILLED);
-            cv::Mat ws_input;
-            cv::cvtColor(local_mask, ws_input, cv::COLOR_GRAY2BGR);
-            cv::watershed(ws_input, mark8);
-            for (int label = 1; label <= static_cast<int>(mark_contours.size()); ++label) {
-              cv::Mat component = (mark8 == label);
-              std::vector<std::vector<cv::Point>> sub;
-              cv::findContours(component, sub, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-              for (auto &sc : sub) {
-                for (auto &p : sc) p += bbox.tl();
-                if (cv::contourArea(sc) >= config_.min_nut_area_px * 0.5) split_contours.push_back(sc);
-              }
-            }
-          } else {
-            split_contours.push_back(c);
-          }
-        }
-        contours = std::move(split_contours);
-      }
       const std::string source = mask_index++ == 0 ? "blackhat" : "adaptive";
       for (const auto &contour : contours) {
         CandidateDiagnostic candidate;
@@ -614,16 +506,10 @@ public:
         cv::minEnclosingCircle(contour, candidate.center, candidate.radius_px);
         result_.candidates.push_back(candidate);
         auto &diagnostic = result_.candidates.back();
-        // A nut touching the frame has a few contour points near the ROI
-        // edge; a true frame fragment has most of its points there.  Only
-        // reject when >40 % of the contour lies within 2 px of the border.
-        {
-          std::size_t clipped_pts = 0;
-          for (const auto &p : contour)
-            if (edge_distance.at<float>(p) <= 2.0F) ++clipped_pts;
-          if (static_cast<double>(clipped_pts) / contour.size() > 0.40) {
-            diagnostic.reason = "contour_clipped_by_frame"; continue;
-          }
+        if (std::any_of(contour.begin(), contour.end(), [&](const auto &p) {
+              return edge_distance.at<float>(p) <= 1.0F || clipped[labels.at<int>(p)];
+            })) {
+          diagnostic.reason = "contour_clipped_by_frame"; continue;
         }
         const double area = cv::contourArea(contour);
         if (area < config_.min_nut_area_px || area > config_.max_nut_area_px) {
@@ -749,7 +635,7 @@ Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config, const Po
 }
 
 TemporalDetector::TemporalDetector(const DetectorConfig &config, double frame_hold_ms)
-: config_(config), frame_hold_ms_(frame_hold_ms), basket_hold_ms_(frame_hold_ms * 2.0)
+: config_(config), frame_hold_ms_(frame_hold_ms)
 {
   config_.validate();
   if (!std::isfinite(frame_hold_ms_) || frame_hold_ms_ < 0.0)
@@ -765,10 +651,6 @@ Detection2D TemporalDetector::detect(const cv::Mat &bgr, std::int64_t stamp_ms,
     frame_.clear();
     frame_inner_.clear();
   }
-  if (basket_hold_ms_ == 0.0 || static_cast<double>(stamp_ms - basket_stamp_ms_) > basket_hold_ms_) {
-    basket_.clear();
-    basket_angle_deg_ = 0;
-  }
   image_size_ = bgr.size();
   last_stamp_ms_ = stamp_ms;
   auto result = detect_with_frame(bgr, config_, frame_, frame_inner_, normalize);
@@ -776,19 +658,6 @@ Detection2D TemporalDetector::detect(const cv::Mat &bgr, std::int64_t stamp_ms,
     frame_ = result.geometry.frame;
     frame_inner_ = result.geometry.frame_inner;
     frame_stamp_ms_ = stamp_ms;
-  }
-  // Hold the basket across short detection gaps. The physical basket
-  // never moves, so a single missed frame should not drop slot positions.
-  if (result.basket_found) {
-    basket_ = result.geometry.basket;
-    basket_angle_deg_ = result.geometry.basket_angle_deg;
-    basket_stamp_ms_ = stamp_ms;
-    result.basket_reused = false;
-  } else if (!basket_.empty()) {
-    result.geometry.basket = basket_;
-    result.geometry.basket_angle_deg = basket_angle_deg_;
-    result.basket_found = true;
-    result.basket_reused = true;
   }
   return result;
 }

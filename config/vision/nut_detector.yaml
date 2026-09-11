@@ -13,7 +13,7 @@ nut_detector_node:
     debug_image_topic: /nut_detection/debug_image
     publish_rate_hz: 5.0
     # Briefly retain the detected frame region; re-detect nuts in each new image.
-    frame_hold_ms: 3000.0
+    frame_hold_ms: 8000.0
 
     # Stage-aware large -> medium -> small identity/status output. The count
     # validates the current stage; only the event service advances the stage.
@@ -33,7 +33,7 @@ nut_detector_node:
     # HSV/geometry values; tune only if the lighting or materials change.
     # A small, slightly reflective black source frame.  Treat all low-value
     # HSV pixels as candidates; geometric checks below reject shadows/objects.
-    black_v_max: 170
+    black_v_max: 190
     # When true, publish/log black-frame candidate diagnostics.  Offline
     # replay also writes value_channel, pre-close mask and candidate overlay.
     debug_black_frame: true
@@ -60,9 +60,9 @@ nut_detector_node:
     # Position-only mode: keep small/partially reflective nut silhouettes.
     min_nut_area_px: 50.0
     max_nut_area_px: 100000.0
-    adaptive_block_size: 51
+    adaptive_block_size: 31
     adaptive_c: 8.0
-    blackhat_kernel_size: 51
+    blackhat_kernel_size: 31
     blackhat_threshold: 25.0
     # A light opening removes binary bridges/noise before the local close.
     nut_mask_open_kernel_size: 3

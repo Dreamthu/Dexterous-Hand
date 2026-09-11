@@ -104,7 +104,10 @@ public:
         } else {
           response->accepted = sequence_->event(request->round_id, request->event_sequence,
               request->target_id, request->action, response->reason);
-          if (response->accepted && request->action == "reset") last_processed_ns_ = -1;
+          if (response->accepted && request->action == "reset") {
+            last_processed_ns_ = -1;
+            cached_slots_.reset();
+          }
         }
         response->round_id = sequence_->snapshot().round;
         clear_poses(); publish_sequence_state();
@@ -166,6 +169,11 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+
+  // The blue basket is physically fixed. Once three valid slot positions
+  // have been computed in base_link, they are cached and re-published with
+  // every frame until a reset. Transient depth/TF failures never drop slots.
+  std::optional<geometry_msgs::msg::PoseArray> cached_slots_;
 
   void color_callback(sensor_msgs::msg::Image::ConstSharedPtr msg) { color_msg_ = msg; }
   void depth_callback(sensor_msgs::msg::Image::ConstSharedPtr msg) { depth_msg_ = msg; }
@@ -267,6 +275,8 @@ private:
     if (color_msg_) empty.header = color_msg_->header;
     detections_pub_->publish(empty); slots_pub_->publish(empty);
   }
+
+  void clear_cached_slots() { cached_slots_.reset(); }
 
   void publish_sequence_state(const std::vector<Detection> &positions = {})
   {
@@ -452,6 +462,9 @@ private:
     }
     // Localize the rectangular basket boundary first. Robot X is meaningful
     // only after all four corners have been transformed to base_link.
+    // Once a valid set of three slot positions has been computed, it is
+    // cached and re-published. The blue basket is stationary; transient
+    // detection gaps must not cause slot loss.
     geometry_msgs::msg::PoseArray slots;
     slots.header = color_msg_->header;
     slots.header.frame_id = target_frame_;
@@ -459,17 +472,65 @@ private:
     if (observation.basket_found && target_frame_ == "base_link") {
       std::vector<cv::Point3d> base_corners;
       std::vector<cv::Point2f> base_xy, image_corners;
+      std::vector<double> corner_depths;
       for (const auto &corner : geometry.basket) {
         const cv::Point2f pixel(corner);
-        const double z = sample_depth(depth, {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
-        if (!valid_depth(z, depth_min_m_, depth_max_m_)) break;
+        double z = sample_depth(depth, {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
+        // A single bad pixel should not kill the entire slot set. Try a
+        // small neighbourhood around the corner, then fall back to the
+        // median of the already-accepted corners.
+        if (!valid_depth(z, depth_min_m_, depth_max_m_) && !corner_depths.empty()) {
+          constexpr int kRadius = 5;
+          std::vector<double> neighbours;
+          for (int dy = -kRadius; dy <= kRadius; ++dy) {
+            for (int dx = -kRadius; dx <= kRadius; ++dx) {
+              double nz = sample_depth(depth,
+                {(pixel.x + dx) * static_cast<float>(sx), (pixel.y + dy) * static_cast<float>(sy)});
+              if (valid_depth(nz, depth_min_m_, depth_max_m_)) neighbours.push_back(nz);
+            }
+          }
+          if (!neighbours.empty()) {
+            std::nth_element(neighbours.begin(), neighbours.begin() + neighbours.size() / 2, neighbours.end());
+            z = neighbours[neighbours.size() / 2];
+          }
+        }
+        if (!valid_depth(z, depth_min_m_, depth_max_m_)) {
+          if (!corner_depths.empty()) {
+            std::nth_element(corner_depths.begin(), corner_depths.begin() + corner_depths.size() / 2, corner_depths.end());
+            z = corner_depths[corner_depths.size() / 2];
+          } else {
+            continue;
+          }
+        }
         geometry_msgs::msg::Point point;
         std::string frame;
         if (!transform_point(project_pixel(pixel, z), color_msg_->header.frame_id, point, frame) ||
-            frame != "base_link") break;
+            frame != "base_link") {
+          // Single-corner TF failure: try the next-nearest pixel with valid depth.
+          bool recovered = false;
+          for (int radius = 1; radius <= 8 && !recovered; ++radius) {
+            for (int dy = -radius; dy <= radius && !recovered; ++dy) {
+              for (int dx = -radius; dx <= radius && !recovered; ++dx) {
+                if (std::abs(dx) != radius && std::abs(dy) != radius) continue;
+                double nz = sample_depth(depth,
+                  {(pixel.x + dx) * static_cast<float>(sx), (pixel.y + dy) * static_cast<float>(sy)});
+                if (!valid_depth(nz, depth_min_m_, depth_max_m_)) continue;
+                geometry_msgs::msg::Point trial;
+                std::string trial_frame;
+                if (transform_point(project_pixel({pixel.x + dx, pixel.y + dy}, nz),
+                                    color_msg_->header.frame_id, trial, trial_frame) &&
+                    trial_frame == "base_link") {
+                  point = trial; frame = trial_frame; z = nz; recovered = true;
+                }
+              }
+            }
+          }
+          if (!recovered) continue;
+        }
         base_corners.emplace_back(point.x, point.y, point.z);
         base_xy.emplace_back(point.x, point.y);
         image_corners.push_back(pixel);
+        corner_depths.push_back(z);
       }
       if (base_corners.size() == 4) {
         try {
@@ -485,10 +546,18 @@ private:
           // only a complete set of three valid centers.
           for (std::size_t i = 0; i < centers.size(); ++i) {
             const auto &pixel = slot_pixels[i];
-            const double z = sample_depth(depth,
+            double z = sample_depth(depth,
               {pixel.x * static_cast<float>(sx), pixel.y * static_cast<float>(sy)});
-            if (!valid_depth(z, depth_min_m_, depth_max_m_))
-              throw std::invalid_argument("slot center depth unavailable");
+            if (!valid_depth(z, depth_min_m_, depth_max_m_)) {
+              // Fall back to the median of all valid corner depths. The
+              // basket plane is flat; a missing centre pixel should not
+              // drop every slot position.
+              if (corner_depths.empty())
+                throw std::invalid_argument("slot center depth unavailable");
+              std::nth_element(corner_depths.begin(), corner_depths.begin() + corner_depths.size() / 2,
+                               corner_depths.end());
+              z = corner_depths[corner_depths.size() / 2];
+            }
             geometry_msgs::msg::Point floor;
             std::string frame;
             if (!transform_point(project_pixel(pixel, z), color_msg_->header.frame_id, floor, frame) ||
@@ -509,11 +578,23 @@ private:
                         slot_pixels[i] + cv::Point2f(5, -5), cv::FONT_HERSHEY_SIMPLEX,
                         0.4, cv::Scalar(255, 0, 255), 1);
           }
+          // Cache the valid slot set so it survives transient failures.
+          cached_slots_ = slots;
           slots_pub_->publish(slots);
         } catch (const std::exception &error) {
           RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
                               "Cannot partition basket along robot X: %s", error.what());
+          if (cached_slots_) {
+            auto slots = *cached_slots_;
+            slots.header = color_msg_->header;
+            slots_pub_->publish(slots);
+          }
         }
+      } else if (cached_slots_) {
+        // Fewer than 4 corners localized; republish cached slots.
+        auto slots = *cached_slots_;
+        slots.header = color_msg_->header;
+        slots_pub_->publish(slots);
       }
     }
     if (!sequence_snapshot.initialized || !sequence_snapshot.observation_valid) {
@@ -521,6 +602,12 @@ private:
       return publish_debug(debug, color_msg_->header);
     }
     if (!observation.basket_found) {
+      if (cached_slots_) {
+        // Basket is stationary; keep publishing the last known positions.
+        auto slots = *cached_slots_;
+        slots.header = color_msg_->header;
+        slots_pub_->publish(slots);
+      }
       publish_status("basket_not_found", observation.circles.size());
       return publish_debug(debug, color_msg_->header);
     }

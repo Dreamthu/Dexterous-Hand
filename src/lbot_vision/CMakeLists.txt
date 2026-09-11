@@ -72,6 +72,7 @@ install(
   INCLUDES DESTINATION include)
 install(TARGETS nut_detector_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../config/vision/
   DESTINATION share/${PROJECT_NAME}/config)
 

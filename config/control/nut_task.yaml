@@ -19,7 +19,7 @@
       above_table:   [-0.010, -0.036, -1.597, -1.489, 1.553, 0.015, 0.086]
       # [0.186, 1.401, -0.23, 0.0, 0.22, 0.024, 0.131]
 
-    joint_speed: 0.2
+    joint_speed: 0.5
     joint_acceleration: 0.2
     # Task-side bounds, not controller limit writes. The user-taught transfer
     # point has J3=-2.715 (live feedback -2.715038), below the old -2.69 bound.
@@ -52,9 +52,9 @@
     # See left_palm_tcp_xy_alignment.json for measured pose and saved target.
     # Z is uncalibrated: preserve the model base-Z component at sampled RPY.
     # Local XYZ all change when rotating the base-XY correction into Arm_Tip.
-    tcp_offset_x_m: 0.011485531567894372
+    tcp_offset_x_m: 0.010185531567894372
     tcp_offset_y_m: -0.009052663438149304
-    tcp_offset_z_m: -0.12165361905422836
+    tcp_offset_z_m: -0.12065361905422836
     # Left Arm_Tip RPY read from the web controller on 2026-09-10 21:38:51 +08:00.
     # Full grasp uses these angles (vision currently supplies zero nut yaw).
     # Pregrasp uses the separate captured reference below.
@@ -66,12 +66,12 @@
     # RPY retains the Arm_Tip convention; convert palm XYZ to driver XYZ.
     # The numeric saved z now denotes palm height, not flange height.
     approach_target_is_tcp: true
-    approach_reference_z_rpy: [-0.3655917354267519, 0.9096495600495548, 0.12230988346329275, -1.184440455645692]
+    approach_reference_z_rpy: [-0.3655917354267519, 0.8496495600495548, 0.12230988346329275, -1.184440455645692]
     # Explicit LARGE-only sequence after successful approach.
     # Z below is the web-displayed Arm_Tip height, not palm height.
     # Hand values are device units 0..255, not radians.
     approach_grasp_enabled: true
-    approach_grasp_z_m: -0.400
+    approach_grasp_z_m: -0.380
     approach_grasp_z_frame: arm_tip
     # Require fresh measured XYZ/orientation before each hand action.
     pose_tolerance_m: 0.001
@@ -89,7 +89,7 @@
     # All post-lift transfers, including taught waypoints: MoveIt + joint_follow.
     # No fallback to SDK IK or MoveJP when MoveIt planning fails.
     slot_transfer_planner: moveit
-    moveit_joint_velocity_rad_s: 0.12
+    moveit_joint_velocity_rad_s: 0.18
     moveit_joint_acceleration_rad_s2: 0.12
     # Prefer equivalent endpoint IK with some room for measured settling error.
     # A preference only: model bounds and the original valid IK remain available.
@@ -98,7 +98,7 @@
     # Independently constrain Arm_Tip and the lowest corner of the hand envelope.
     # This limits downward detours; it does not model the physical tabletop.
     moveit_transfer_keep_above: true
-    moveit_transfer_max_drop_m: 0.005
+    moveit_transfer_max_drop_m: 0.04
     # Capture this fresh cloud with calibrated TF before the first enter move.
     # All post-lift MoveIt segments use the same static obstacle snapshot.
     # Missing/old cloud or missing TF aborts before enter; no empty-scene fallback.

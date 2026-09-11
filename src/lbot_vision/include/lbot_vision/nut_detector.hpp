@@ -27,6 +27,9 @@ struct SceneGeometry {
   // Robot-X slot centers require depth and TF,
   // and therefore cannot be inferred by this image-only geometry stage.
   std::vector<cv::Point> basket;
+  // minAreaRect angle in degrees; positive is clockwise around the image centre.
+  // Used by the task planner to align the release orientation with the basket.
+  double basket_angle_deg{0};
 };
 
 struct CandidateDiagnostic {
@@ -73,6 +76,7 @@ struct Detection2D {
   bool frame_found{false};
   bool frame_reused{false};
   bool basket_found{false};
+  bool basket_reused{false};
 };
 
 // Optional point normalization lets the ROS adapter remove lens distortion
@@ -95,10 +99,14 @@ public:
 private:
   DetectorConfig config_;
   double frame_hold_ms_;
+  double basket_hold_ms_;
   cv::Size image_size_;
   std::vector<cv::Point> frame_;
   std::vector<cv::Point> frame_inner_;
+  std::vector<cv::Point> basket_;
+  double basket_angle_deg_{0};
   std::int64_t frame_stamp_ms_{-1};
+  std::int64_t basket_stamp_ms_{-1};
   std::int64_t last_stamp_ms_{-1};
 };
 
