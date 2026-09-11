@@ -107,6 +107,7 @@ Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测
 - `config/vision/nut_detector.yaml`：识别阈值、话题和目标坐标系。
 - `config/vision/offline.yaml`：离线构建目录、输出目录和低并发构建设置。
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
+- `config/viewer/rerun.yaml`：Rerun 三维任务观察节点的话题、点云限额和 O6 显示参数。
 - `config/control/nut_task.yaml`：桌面上方关节路线和机械臂速度。
 - `config/experimental/nut_task.yaml`：旧运动原型参数，仅供参考。
 
@@ -133,6 +134,14 @@ ros2 launch lbot_control lbot_start_control.launch.py mode:=enter execute_motion
 # 视觉已接入的完整任务入口（execute_task 默认 false）
 ros2 launch lbot_control lbot_task.launch.py start_driver:=true execute_task:=true
 ```
+
+任务执行的三维观察可另开终端启动，不会发送机械臂命令：
+
+```bash
+ros2 launch lbot_rerun lbot_rerun.launch.py
+```
+
+详见 [Rerun 任务可视化](docs/rerun_visualization.md)。
 
 ## 安全边界
 

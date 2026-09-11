@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="hex_nut">
+  <!-- M33 nut. Origin is at the nut centre; STL dimensions are in metres. -->
+  <link name="nut">
+    <inertial><origin xyz="0 0 0"/><mass value="0.012"/><inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/></inertial>
+    <visual><geometry><mesh filename="nut_m33.stl"/></geometry><material name="cast_steel"><color rgba="0.25 0.27 0.30 1"/></material></visual>
+    <collision><geometry><mesh filename="nut_m33.stl"/></geometry></collision>
+  </link>
+</robot>
