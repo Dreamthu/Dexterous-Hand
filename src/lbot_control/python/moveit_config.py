@@ -93,7 +93,17 @@ def parameters(task, source=""):
         if manifest is None:
             raise RuntimeError("Missing O6 swept collision model; rebuild lbot_control")
         report = json.loads(manifest.read_text())
-        if report["source_sha256"] != hashlib.sha256(path.read_bytes()).hexdigest():
+        source_data = path.read_bytes()
+        # The collision report may have been generated from the same XML with
+        # CRLF endings, while Git or an editor saved the current file as LF.
+        # Treat those as identical; any semantic byte change still changes both
+        # hashes and keeps the stale-model check effective.
+        normalized_data = source_data.replace(b"\r\n", b"\n")
+        source_digests = {
+            hashlib.sha256(normalized_data).hexdigest(),
+            hashlib.sha256(normalized_data.replace(b"\n", b"\r\n")).hexdigest(),
+        }
+        if report["source_sha256"] not in source_digests:
             raise RuntimeError("O6 collision envelope is stale for this CAD; regenerate with scripts/derive_hand_envelope.py")
         for relative, expected in report['mesh_sha256'].items():
             if hashlib.sha256((path.parent/relative).read_bytes()).hexdigest() != expected:

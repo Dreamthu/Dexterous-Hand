@@ -26,48 +26,60 @@
 | `linkerbot/` | 配置加载、命令适配、外参算法和离线回放共享库 |
 | `开发资源/assets/` | 唯一的模型资产根目录，包含左臂、O6 手、工作站和螺母对象 |
 
-## 快速开始
+## 脚本启用入口
 
-首次构建：
+所有脚本都在工作区根目录执行。需要 ROS 的脚本会自动读取
+`config/workspace.env`，因此只需保证其中的 Jazzy 路径和 `../orbbec_ws` 相机工作区路径与
+现场机器一致。机械臂路线和完整任务保持 ROS 2 `launch` 入口，不通过独立脚本启动。
+
+首次使用或源码变更后，先构建：
 
 ```bash
 ./scripts/build.sh
 ```
 
-一条命令启动相机和螺母识别：
+常规现场感知在第一个终端启动：
 
 ```bash
 ./scripts/run_perception.sh
 ```
 
-该脚本会先启动相机，再自动发布已标定的
-`base_link -> camera_link` 静态 TF，最后启动螺母识别。保持它运行，再在另一个终端启动查看器：
+它会依次启动相机、发布已标定的 `base_link -> camera_link` 静态 TF 并启动螺母检测。
+保持该终端运行，另开一个终端查看原始彩色画面：
 
 ```bash
 ./scripts/show_camera.sh
 ```
 
-默认查看 `/camera/color/image_raw`；查看识别标注画面：
+查看识别标注画面时改用：
 
 ```bash
 ./scripts/show_camera.sh --topic /nut_detection/debug_image
 ```
 
-也可以分别启动组件：
+需要拆开调试相机和检测器时，分别使用：
 
 ```bash
 ./scripts/run_camera.sh
 ./scripts/run_detector.sh
 ```
 
-如果单独运行检测节点，而不是使用 `run_perception.sh`，需要另开终端发布已标定的外参：
+单独运行检测器时，`run_perception.sh` 的自动外参发布不会存在，因此还需另开终端发布当前标定结果：
 
 ```bash
 ./scripts/calibrate_extrinsics.sh publish \
   --result artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml
 ```
 
-躯干固定 Gemini2 的 R8 定位板外参标定、A4 打印和离线求解见 [相机外参标定](docs/camera_extrinsic_calibration.md)。入口为 `./scripts/calibrate_extrinsics.sh`，默认不发送机械臂运动命令。
+查看指定配置或跳过外参的启动方式：
+
+```bash
+./scripts/run_perception.sh \
+  --camera-config config/camera/gemini2.yaml \
+  --vision-config config/vision/nut_detector.yaml \
+  --extrinsics-result artifacts/calibration/extrinsics/20260910_eye_to_hand_v2/extrinsics.yaml
+./scripts/run_perception.sh --skip-extrinsics
+```
 
 运行仓库自检：
 
@@ -75,8 +87,27 @@
 ./scripts/test.sh
 ```
 
-遇到灰色窗口、深度流未启动或 rqt 卸载警告时，参见
+前台脚本按 `Ctrl+C` 退出；`run_perception.sh` 会同时停止它启动的相机、TF 和检测进程。
+
+其他入口如下表。标定板生成、单图求解、实时采集和 IMU 检查的完整流程见
+[相机外参标定](docs/camera_extrinsic_calibration.md)；灰色窗口、深度流未启动或 rqt 卸载警告见
 [运行与故障排查](docs/troubleshooting.md)。
+
+| 功能 | 启用命令 | 说明 |
+| --- | --- | --- |
+| 只启动相机 | `./scripts/run_camera.sh` | 单独调试相机流；可用 `--config <camera.yaml>` 或 `--dry-run`。 |
+| 只启动检测器 | `./scripts/run_detector.sh` | 适用于复用外部相机进程；可用 `--config <vision.yaml>` 或 `--dry-run`。 |
+| 查看图像 | `./scripts/show_camera.sh` | 默认显示 `/camera/color/image_raw`；可加 `--topic <image_topic>`。 |
+| 发布外参 TF | `./scripts/calibrate_extrinsics.sh publish --result <extrinsics.yaml>` | 单独运行检测器时必须执行；`run_perception.sh` 已自动发布。 |
+| 标定板生成/求解/采集 | `./scripts/calibrate_extrinsics.sh <generate|solve|capture> ...` | 也支持 `check-imu`；默认不发送机械臂运动命令。 |
+| 仓库测试 | `./scripts/test.sh` | 运行 Python 单元测试；已知 `test_rerun_core.py` 缺模块，详见文末状态。 |
+| 离线检测 | `bash scripts/build_offline.sh && bash scripts/run_detector_offline.sh <image>` | 无需 ROS、相机或机器人；先构建，再传入图片。 |
+| 离线检测测试 | `bash scripts/test_offline.sh` | 无硬件回归测试。 |
+| 蓝筐 HSV 调参 | `python3 scripts/tune_blue_hsv.py` | 需要 GUI；可加 `--image <图片>` 走无 ROS 单图模式。 |
+| 左掌 TCP 模型推导 | `python3 scripts/derive_palm_tcp.py --workstation <workstation.urdf> --output <json>` | 只读模型，不发送 ROS 命令；可加 `--plot <图片>`。 |
+| 左手碰撞包生成 | `python3 scripts/derive_hand_envelope.py --workstation <workstation.urdf> --output <json>` | 只读 CAD，输出碰撞模型和校验值。 |
+| RGB-D 诊断采集 | `python3 scripts/capture_rgbd_diagnostic.py --output <目录> --regions <regions.json>` | 只读录制相机数据；`--regions` 为分析 ROI 文件，可另加 `--frames`、`--max-delta-ms`。 |
+| RGB-D 高度分析 | `python3 scripts/analyze_rgbd_height.py <目录> --regions <regions.json>` | 离线分析已录制目录，输出统计、CSV 和高度图。 |
 
 ## 无硬件二维识别调试
 
