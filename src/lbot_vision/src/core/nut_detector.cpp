@@ -139,7 +139,7 @@ public:
         }
       }
       if (approx.size() != 4 || !cv::isContourConvex(approx) ||
-          cv::contourArea(approx) < 0.85 * area) {
+          cv::contourArea(approx) < 0.75 * area) {
         diagnostic.reason = "not_quadrilateral";
         result_.frame_candidates.push_back(std::move(diagnostic));
         continue;
@@ -174,7 +174,7 @@ public:
       diagnostic.mean_gray = mean_intensity;
       // The line frame surrounds a bright sheet. This rejects black equipment,
       // floor areas and labels that happen to form large quadrilaterals.
-      if (mean_intensity < 120.0) {
+      if (mean_intensity < 90.0) {
         diagnostic.reason = "low_mean_gray";
         result_.frame_candidates.push_back(std::move(diagnostic));
         continue;
@@ -188,7 +188,7 @@ public:
       const double shape_score = 1.0 - 0.12 * std::abs(diagnostic.vertex_count - 4);
       const double aspect_score = std::clamp((kMaxFrameAspectRatio - diagnostic.aspect_ratio) / (kMaxFrameAspectRatio - 1.0), 0.0, 1.0);
       const double fill_score = std::clamp((rectangularity - 0.55) / 0.45, 0.0, 1.0);
-      const double brightness_score = std::clamp((mean_intensity - 120.0) / 135.0, 0.0, 1.0);
+      const double brightness_score = std::clamp((mean_intensity - 90.0) / 165.0, 0.0, 1.0);
       diagnostic.score = shape_score + aspect_score + fill_score + brightness_score + area_score;
       diagnostic.reason = diagnostic.hull_stabilized ? "eligible_hull_stabilized" : "eligible";
       result_.frame_candidates.push_back(std::move(diagnostic));
@@ -294,9 +294,9 @@ public:
       // rings. The innermost frame-sized hole is the paper, not the bright
       // stripe inside the stroke. Nut holes are excluded by the area bound.
       // Relax inner-frame area floor: a large nut against the frame
-      // can cover up to 65 % of the visible paper surface.
-      if (area >= best_area || area < outer_area * 0.35 ||
-          area < cv::contourArea(hull) * 0.85) continue;
+      // can cover up to 75 % of the visible paper surface.
+      if (area >= best_area || area < outer_area * 0.25 ||
+          area < cv::contourArea(hull) * 0.75) continue;
       if (!std::all_of(quad.begin(), quad.end(), [&](const auto &p) {
             return cv::pointPolygonTest(outer, p, true) >= -1.5;
           })) continue;

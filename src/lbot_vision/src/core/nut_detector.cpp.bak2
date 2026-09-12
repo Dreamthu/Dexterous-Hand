@@ -370,35 +370,71 @@ public:
       geometry.frame_inner = fallback_inner;
       result_.frame_reused = true;
     }
-    std::vector<std::vector<cv::Point>> blue_contours;
-    cv::findContours(blue_mask, blue_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     cv::Point2f frame_center(bgr.cols * 0.5F, bgr.rows * 0.5F);
     if (!geometry.frame.empty()) {
       cv::Moments m = cv::moments(geometry.frame);
       if (std::abs(m.m00) > 1e-6) frame_center = {static_cast<float>(m.m10 / m.m00),
                                                    static_cast<float>(m.m01 / m.m00)};
     }
-    double best_area = image_area * config_.min_basket_area_ratio;
-    for (const auto &contour : blue_contours) {
-      double area = cv::contourArea(contour);
-      cv::Moments m = cv::moments(contour);
-      if (area < best_area || std::abs(m.m00) < 1e-6) continue;
-      cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
-      if (config_.basket_side == "right" && c.x <= frame_center.x) continue;
-      if (config_.basket_side == "left" && c.x >= frame_center.x) continue;
-      std::vector<cv::Point> approx;
-      cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, true), true);
-      if (approx.size() != 4 || !cv::isContourConvex(approx)) continue;
-      const double rectangle_area = cv::minAreaRect(contour).size.area();
-      if (rectangle_area <= 0 || area / rectangle_area < config_.min_basket_rectangularity) continue;
-      // Reject irregular shapes even if polygon simplification hid small dents.
-      std::vector<cv::Point> hull;
-      cv::convexHull(contour, hull);
-      if (area / cv::contourArea(hull) < 0.90 || cv::contourArea(approx) < 0.85 * area) continue;
-      best_area = area;
-      geometry.basket = approx;
+    // Searches a binary mask for the best basket candidate using the same
+    // geometry checks. Used for the primary and fallback mask passes.
+    auto find_basket_in_mask = [&](const cv::Mat &mask, const std::string &) -> bool {
+      std::vector<std::vector<cv::Point>> contours;
+      cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+      double best = image_area * config_.min_basket_area_ratio;
+      bool found = false;
+      for (const auto &contour : contours) {
+        double area = cv::contourArea(contour);
+        cv::Moments m = cv::moments(contour);
+        if (area < best || std::abs(m.m00) < 1e-6) continue;
+        cv::Point2f c(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
+        if (config_.basket_side == "right" && c.x <= frame_center.x) continue;
+        if (config_.basket_side == "left" && c.x >= frame_center.x) continue;
+        std::vector<cv::Point> approx;
+        cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, true), true);
+        if (approx.size() != 4 || !cv::isContourConvex(approx)) continue;
+        const auto rrect = cv::minAreaRect(contour);
+        const double rectangle_area = rrect.size.area();
+        if (rectangle_area <= 0 || area / rectangle_area < config_.min_basket_rectangularity) continue;
+        std::vector<cv::Point> hull;
+        cv::convexHull(contour, hull);
+        if (area / cv::contourArea(hull) < 0.90 || cv::contourArea(approx) < 0.85 * area) continue;
+        best = area;
+        geometry.basket = approx;
+        // Store the minAreaRect angle for release orientation alignment.
+        geometry.basket_angle_deg = rrect.angle;
+        if (rrect.size.width < rrect.size.height) geometry.basket_angle_deg += 90;
+        while (geometry.basket_angle_deg < -45) geometry.basket_angle_deg += 180;
+        while (geometry.basket_angle_deg > 135) geometry.basket_angle_deg -= 180;
+        found = true;
+      }
+      return found;
+    };
+    bool basket_found = find_basket_in_mask(blue_mask, "blue_hsv");
+    if (!basket_found) {
+      // The configured narrow blue range can miss the basket under varying
+      // light. Broaden S and V thresholds; tight H still prevents false
+      // positives from non-blue table/floor regions.
+      cv::Mat fallback_blue;
+      cv::inRange(hsv,
+        cv::Scalar(config_.blue_h_min, std::max(20, config_.blue_s_min - 40),
+                   std::max(30, config_.blue_v_min - 40)),
+        cv::Scalar(config_.blue_h_max, 255, 255), fallback_blue);
+      cv::morphologyEx(fallback_blue, fallback_blue, cv::MORPH_CLOSE,
+                       cv::getStructuringElement(cv::MORPH_RECT, {7, 7}));
+      basket_found = find_basket_in_mask(fallback_blue, "blue_fallback");
     }
-
+    if (!basket_found) {
+      // Last resort: the basket rim is a large bright rectangle in the
+      // grayscale image. Adaptive threshold + area filtering can catch it
+      // when color segmentation fails entirely.
+      cv::Mat adaptive_basket;
+      cv::adaptiveThreshold(gray, adaptive_basket, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                            cv::THRESH_BINARY, 31, -8.0);
+      cv::morphologyEx(adaptive_basket, adaptive_basket, cv::MORPH_CLOSE,
+                       cv::getStructuringElement(cv::MORPH_RECT, {5, 5}));
+      basket_found = find_basket_in_mask(adaptive_basket, "adaptive_basket");
+    }
     debug = bgr.clone();
     if (config_.debug_black_frame) {
       for (const auto &candidate : result_.frame_candidates) {
@@ -713,7 +749,7 @@ Detection2D detect_2d(const cv::Mat &bgr, const DetectorConfig &config, const Po
 }
 
 TemporalDetector::TemporalDetector(const DetectorConfig &config, double frame_hold_ms)
-: config_(config), frame_hold_ms_(frame_hold_ms)
+: config_(config), frame_hold_ms_(frame_hold_ms), basket_hold_ms_(frame_hold_ms * 2.0)
 {
   config_.validate();
   if (!std::isfinite(frame_hold_ms_) || frame_hold_ms_ < 0.0)
@@ -729,6 +765,10 @@ Detection2D TemporalDetector::detect(const cv::Mat &bgr, std::int64_t stamp_ms,
     frame_.clear();
     frame_inner_.clear();
   }
+  if (basket_hold_ms_ == 0.0 || static_cast<double>(stamp_ms - basket_stamp_ms_) > basket_hold_ms_) {
+    basket_.clear();
+    basket_angle_deg_ = 0;
+  }
   image_size_ = bgr.size();
   last_stamp_ms_ = stamp_ms;
   auto result = detect_with_frame(bgr, config_, frame_, frame_inner_, normalize);
@@ -736,6 +776,19 @@ Detection2D TemporalDetector::detect(const cv::Mat &bgr, std::int64_t stamp_ms,
     frame_ = result.geometry.frame;
     frame_inner_ = result.geometry.frame_inner;
     frame_stamp_ms_ = stamp_ms;
+  }
+  // Hold the basket across short detection gaps. The physical basket
+  // never moves, so a single missed frame should not drop slot positions.
+  if (result.basket_found) {
+    basket_ = result.geometry.basket;
+    basket_angle_deg_ = result.geometry.basket_angle_deg;
+    basket_stamp_ms_ = stamp_ms;
+    result.basket_reused = false;
+  } else if (!basket_.empty()) {
+    result.geometry.basket = basket_;
+    result.geometry.basket_angle_deg = basket_angle_deg_;
+    result.basket_found = true;
+    result.basket_reused = true;
   }
   return result;
 }

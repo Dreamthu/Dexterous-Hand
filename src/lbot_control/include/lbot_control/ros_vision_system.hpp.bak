@@ -1,7 +1,6 @@
 #ifndef LBOT_CONTROL__ROS_VISION_SYSTEM_HPP_
 #define LBOT_CONTROL__ROS_VISION_SYSTEM_HPP_
 
-#include <array>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -58,15 +57,6 @@ public:
   // One fresh complete slot array; choose maximum base-frame hypot(x, y).
   SlotTargetResult capture_farthest_slot();
   SlotTargetResult capture_max_x_slot();
-  struct AllSlotsResult
-  {
-    bool success{false};
-    std::string message;
-    std::array<Pose6, 3> poses{};  // sorted by base_link X ascending: [min_x, mid_x, max_x]
-    std::array<std::size_t, 3> indices{};  // one-based indices matching poses order
-  };
-  AllSlotsResult capture_all_slots();
-
   VisionCommandResult start_target(NutSize size) override;
   PickCheckResult check_nut_in_source(NutSize size) override;
 

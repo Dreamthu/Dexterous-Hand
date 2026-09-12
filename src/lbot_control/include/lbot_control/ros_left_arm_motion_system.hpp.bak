@@ -106,11 +106,9 @@ public:
   // slot_transfer_planner selects SDK MoveJP or local MoveIt + joint_follow
   // for all post-lift transfers. Initial enter / vertical motions are unchanged.
   MotionResult approach_at_table_height(
-    const Pose6 &nut, NutSize size, const MotionPlanOptions &options, bool execute = false,
+    const Pose6 &nut, const MotionPlanOptions &options, bool execute = false,
     const Pose6 *slot = nullptr);
   MotionResult execute(MotionStage stage, const PlannedTarget *target = nullptr) override;
-  // Lift from slot after release, reverse through transfer waypoints, return above table.
-  MotionResult return_from_slot();
   void stop() noexcept override;
 
 private:

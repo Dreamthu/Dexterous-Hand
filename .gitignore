@@ -172,3 +172,6 @@ nohup.out
 # Offline datasets and replay output (may contain private camera images).
 /artifacts/offline_detection/
 /artifacts/datasets/
+
+# Teaching materials (not part of the competition project)
+/teaching/
