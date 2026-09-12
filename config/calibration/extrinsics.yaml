@@ -26,7 +26,7 @@ board:
 # flange outline distinguish the 180-degree ambiguity of four collinear holes.
 # Grid origin: outer bottom-left, at page (35, 185) mm for this layout.
 fixture:
-  source_mesh_path: assets/components/arms/lkls73_arm/variants/right/meshes/R8_Link.STL
+  source_mesh_path: 开发资源/assets/components/arms/lkls73_arm/variants/right/meshes/R8_Link.STL
   source_mesh_sha256: ab9a24b4a90dcdaf88688e63ca9dfd9baf55b3170ef19a2547feb0d7f39eed97
   contact_z_in_flange_m: 0.0
   # Shifted toward the right/bottom paper edge so the docking holes are easy
@@ -47,7 +47,7 @@ fixture:
     - [0.050, 0.030, 0.0]
 
 robot:
-  urdf: assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf
+  urdf: 开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf
 
 quality:
   min_markers: 6

@@ -1,4 +1,0 @@
-Invoking command in '/home/lzy/lbot_ws/build/lbot_arm_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_arm_interfaces -- -j24 -l24
-Invoked command in '/home/lzy/lbot_ws/build/lbot_arm_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/lzy/lbot_ws/build/lbot_arm_interfaces -- -j24 -l24
-Invoking command in '/home/lzy/lbot_ws/build/lbot_arm_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_arm_interfaces
-Invoked command in '/home/lzy/lbot_ws/build/lbot_arm_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/lzy/lbot_ws/build/lbot_arm_interfaces

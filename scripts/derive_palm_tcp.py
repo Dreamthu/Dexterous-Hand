@@ -68,7 +68,7 @@ def main():
     offset = mount_xyz + rotation(mount_rpy) @ palm
     report = {
         'status': 'model-derived geometric reference; not measured calibration',
-        'source_model': 'Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf',
+        'source_model': '开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf',
         'source_urdf_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
         'mesh_relative_to_workstation': mesh_relative,
         'mesh_sha256': hashlib.sha256(raw).hexdigest(),

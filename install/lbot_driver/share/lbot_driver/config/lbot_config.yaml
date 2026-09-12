@@ -1,4 +1,0 @@
-lbot_driver:
-  ros__parameters:
-    #robot param
-    arm_ip: "192.168.10.21"        #设置TCP连接时的IP

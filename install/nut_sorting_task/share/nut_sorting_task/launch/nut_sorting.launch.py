@@ -1,1 +1,0 @@
-/home/lzy/lbot_ws/build/nut_sorting_task/launch/nut_sorting.launch.py

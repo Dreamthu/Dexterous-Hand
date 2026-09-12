@@ -1,1 +1,0 @@
-/home/lzy/lbot_ws/build/lbot_motion/ament_cmake_core/lbot_motionConfig-version.cmake

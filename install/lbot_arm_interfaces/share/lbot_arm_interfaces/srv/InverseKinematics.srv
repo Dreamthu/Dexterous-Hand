@@ -1,6 +1,0 @@
-float32[] joints                      # 此关节角度不设置会默认从机械臂读取当前角度，如果设置则基于此值为初始角度进行逆解
-geometry_msgs/Vector3 position
-geometry_msgs/Vector3 euler
----
-float32[] joints
-bool success

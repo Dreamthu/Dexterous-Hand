@@ -139,9 +139,9 @@ class RerunVisualizerNode:
             try:
                 from ament_index_python.packages import get_package_share_directory
 
-                candidate = Path(get_package_share_directory("lbot_rerun")) / "assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
+                candidate = Path(get_package_share_directory("lbot_rerun")) / "开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
             except Exception:
-                candidate = Path(__file__).resolve().parents[3] / "assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
+                candidate = Path(__file__).resolve().parents[3] / "开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf"
             self.urdf_path = candidate
         return parse_left_urdf(self.urdf_path, root_link="base_base_link", root_alias=self.base_frame)
 

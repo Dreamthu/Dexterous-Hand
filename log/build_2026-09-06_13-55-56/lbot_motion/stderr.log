@@ -1,3 +1,0 @@
-/home/lzy/lbot_ws/src/lbot_motion/src/motion_demo_node.cpp:9:8: warning: ‘double {anonymous}::deg(double)’ defined but not used [-Wunused-function]
-    9 | double deg(double value) { return value * kPi / 180.0; }
-      |        ^~~

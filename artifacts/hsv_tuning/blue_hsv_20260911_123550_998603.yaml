@@ -1,8 +1,0 @@
-nut_detector_node:
-  ros__parameters:
-    blue_h_min: 104
-    blue_h_max: 113
-    blue_s_min: 81
-    blue_s_max: 240
-    blue_v_min: 96
-    blue_v_max: 255

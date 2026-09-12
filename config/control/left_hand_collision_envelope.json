@@ -1,5 +1,5 @@
 {
-  "source_urdf": "/home/wyt06/lbot/Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf",
+  "source_urdf": "开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf",
   "source_sha256": "270d07c1f65647263f7f5dcdd04989caf558dd2fdd9de6420dfd48bb6ab2626a",
   "frame": "arm_left_L8_Link / Arm_Tip",
   "padding_m": 0.01,

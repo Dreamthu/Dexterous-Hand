@@ -1,1 +1,0 @@
-/home/lzy/lbot_ws/src/nut_sorting_task/setup.py

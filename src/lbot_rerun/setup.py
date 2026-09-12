@@ -10,7 +10,7 @@ REPOSITORY_ROOT = PACKAGE_ROOT.parents[1]
 
 def asset_data_files():
     """Install only the URDF meshes that the left-task visualizer consumes."""
-    source_root = REPOSITORY_ROOT / "assets"
+    source_root = REPOSITORY_ROOT / "开发资源" / "assets"
     required = {
         source_root / "workstations/lkls73_i1_o6_bimanual/workstation.urdf",
         source_root / "components/bases/lkls73_torso/variants/default/meshes/base_link.STL",
@@ -25,7 +25,7 @@ def asset_data_files():
     for path in sorted(required):
         relative = path.relative_to(source_root)
         destination = Path("share") / PACKAGE_NAME / "assets" / relative.parent
-        result.append((str(destination), [str(Path("..") / ".." / "assets" / relative)]))
+        result.append((str(destination), [str(Path("..") / ".." / "开发资源" / "assets" / relative)]))
     return result
 
 

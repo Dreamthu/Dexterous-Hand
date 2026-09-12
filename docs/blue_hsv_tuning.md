@@ -4,7 +4,7 @@
 ROS 实时画面另外需要 `rclpy`、`cv_bridge`、`sensor_msgs`，并提前启动相机。
 
 ```bash
-cd /home/wyt06/lbot/linkerbot_ws
+cd .
 source install/setup.bash
 python3 scripts/tune_blue_hsv.py
 ```

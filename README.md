@@ -4,25 +4,27 @@
 
 ## 目录关系
 
-相机 SDK、机器人 SDK 与本仓库应位于同一级目录：
+`linkerbot_ws/` 是主要工作空间；`orbbec_ws/` 相机依赖与 `Dexterous-Hand/` 官方机器人依赖与它同级：
 
 ```text
-├── lbot_ws/            # 本 Git 仓库：比赛代码、配置、工具和入口
-├── OrbbecSDK_ROS2/     # 外部相机 SDK/已编译工作区
-└── Dexterous-Hand/     # 外部机器人 SDK
+├── linkerbot_ws/       # 主要工作空间：比赛代码、配置、工具和入口
+├── orbbec_ws/          # 相机依赖工作空间
+└── Dexterous-Hand/     # 官方机器人依赖
 ```
 
-仓库内的 `apps/` 是应用入口，`config/` 是可调参数的唯一入口，`scripts/` 提供稳定命令，`src/lbot_vision/` 是 ROS 感知适配包，`tools/` 存放独立开发和标定工具，`artifacts/` 保存本地产物。
+仓库内的 `apps/` 是应用入口，`config/` 是可调参数的唯一入口，`scripts/` 提供稳定命令，`linkerbot/` 是可复用 Python 适配层，`src/` 是 ROS 包，`tools/` 存放独立开发和标定工具，`artifacts/` 保存本地产物，`docs/` 保存说明文档。
 
-随仓库提供的机器人 SDK 组件包括：
+任务所需的模型资源与 ROS 接口定义保留在仓库内：
 
 | 路径 | 说明 |
 | --- | --- |
-| `src/lbot_arm_interfaces` | ROS 2 自定义消息和服务 |
-| `src/lbot_driver` | 机械臂驱动、状态发布和服务 |
-| `src/lbot_demo` | 示例程序 |
-| `src/lbot_teleop` | 遥操作示例 |
-| `assets/` | URDF、MJCF 和 STL 模型资源 |
+| `src/lbot_arm_interfaces` | 左臂/左手任务控制链路使用的 ROS 2 接口定义 |
+| `src/lbot_motion` | 左臂/左手 ROS 适配层，不包含任务逻辑 |
+| `src/lbot_control` | 螺母识别抓放状态机与任务控制器 |
+| `src/lbot_vision` | Gemini 2 螺母和蓝筐感知 |
+| `src/lbot_rerun` | 三维任务观察节点，只读视觉与运动状态 |
+| `linkerbot/` | 配置加载、命令适配、外参算法和离线回放共享库 |
+| `开发资源/assets/` | 唯一的模型资产根目录，包含左臂、O6 手、工作站和螺母对象 |
 
 ## 快速开始
 
@@ -109,30 +111,18 @@ Windows 提供同名 `.ps1` 入口。离线和现场 ROS 节点共用 C++ 检测
 - `config/viewer/image.yaml`：图像查看器及默认实时图像话题。
 - `config/viewer/rerun.yaml`：Rerun 三维任务观察节点的话题、点云限额和 O6 显示参数。
 - `config/control/nut_task.yaml`：桌面上方关节路线和机械臂速度。
-- `config/experimental/nut_task.yaml`：旧运动原型参数，仅供参考。
 
-## 机器人 SDK
+## 机器人适配
 
-使用机器人驱动前，请先阅读随 SDK 提供的开发环境、控制接口、机器人模型、灵巧手、相机与视觉传感器、手眼标定和安全操作文档。典型启动流程为：
-
-```bash
-source /opt/ros/jazzy/setup.bash
-cd src/lbot_driver/lib && sudo ./lib_install.sh
-cd ../..
-colcon build
-source install/setup.bash
-ros2 launch lbot_driver lbot_start_driver.launch.py
-```
-
-默认机器人 IP 为 `192.168.10.21`，默认命名空间为 `/robot1`。关节单位为弧度（`rad`），位置单位为米（`m`）。
+Dexterous-Hand 的驱动、示例和遥操作包已从本仓库移除；本仓库只保留任务控制所需接口、模型和适配层。运行完整任务前，由现场提供已构建并运行的机器人驱动节点，其服务/话题命名必须满足 `lbot_motion` 的接口约定。
 
 配置检查、机械臂路线和完整任务运行统一使用 ROS 2 launch；默认只检查、不运动：
 
 ```bash
 ros2 launch lbot_control lbot_start_control.launch.py
 ros2 launch lbot_control lbot_start_control.launch.py mode:=enter execute_motion:=true
-# 视觉已接入的完整任务入口（execute_task 默认 false）
-ros2 launch lbot_control lbot_task.launch.py start_driver:=true execute_task:=true
+# 先启动外部机器人驱动；视觉已接入的完整任务入口（execute_task 默认 false）
+ros2 launch lbot_control lbot_task.launch.py execute_task:=true
 ```
 
 任务执行的三维观察可另开终端启动，不会发送机械臂命令：
@@ -145,8 +135,14 @@ ros2 launch lbot_rerun lbot_rerun.launch.py
 
 ## 安全边界
 
-旧的 `nut_task_node.cpp` 位于 `src/lbot_vision/experimental/`，其中包含占位姿态和坐标，不会被构建或作为比赛运行入口。正式运动控制器为 `lbot_control/nut_task_controller`，通过 `RosVisionSystem` 消费视觉结果，并默认保持 `execute_task` 关闭。
+正式运动控制器为 `lbot_control/nut_task_controller`，通过 `RosVisionSystem` 消费视觉结果，并默认保持 `execute_task` 关闭。旧的实验任务节点和占位配置已移除，不得重新加入正式入口。
 
 运动前确认急停未触发、机械臂已使能、工作区无人；首次运行应使用低速和小幅度动作。
+
+## 仓库产物与已知状态
+
+`build/`、`install/` 和 `log/` 是 colcon 本地生成目录，已从 Git 索引移除但保留在本机。不要提交这些目录，也不要清理或回退其中已有的本地改动。源码树中的 `__pycache__/`、无关截图和本地 HSV 调参产物已移除。
+
+当前 `./scripts/test.sh` 中有一个既有错误：`tests/test_rerun_core.py` 引用的 `lbot_rerun.core` 模块缺失，因此该项测试无法导入；其余测试通过。`./scripts/build.sh` 当前可通过 5 个 ROS 包构建。
 
 继续开发前请阅读 [开发交接规范](HANDOFF.md)。更多信息见[架构说明](docs/architecture.md)、[开发约定](docs/development.md)、[运行与故障排查](docs/troubleshooting.md)和[迁移来源](docs/provenance.md)。

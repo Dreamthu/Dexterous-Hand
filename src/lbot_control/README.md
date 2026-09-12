@@ -103,11 +103,11 @@ ros2 launch lbot_control lbot_start_control.launch.py \
 source /opt/ros/jazzy/setup.bash
 source install/local_setup.bash
 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ros2 launch lbot_control lbot_start_control.launch.py \
-  start_driver:=false mode:=enter execute_motion:=true \
+  mode:=enter execute_motion:=true \
   config_file:="$(pwd)/config/control/slot_transfer.yaml"
 ```
 
-`start_driver:=false` 复用现有驱动。此配置是已检查场景的固定目标，不会重新读取视觉。
+任务 launch 不启动驱动；先在外部环境复用现有驱动。此配置是已检查场景的固定目标，不会重新读取视觉。
 `joint_limit_margin_rad` 默认仍为 `0.05`；本配置按用户选择设为 `0.0`，保留原始关节限位。
 
 当前 `lbot_start_control.launch.py` 用于跑通基础路线；视觉已经通过
@@ -121,7 +121,7 @@ RMW_IMPLEMENTATION=rmw_fastrtps_cpp ros2 launch lbot_control lbot_start_control.
 
 ```bash
 ros2 launch lbot_control lbot_task.launch.py \
-  start_driver:=true execute_task:=true task_mode:=validate
+  execute_task:=true task_mode:=validate
 ```
 
 可加 `show_image:=false` 关闭窗口，或加 `image_topic:=/camera/color/image_raw`
@@ -142,7 +142,7 @@ ros2 launch lbot_control lbot_task.launch.py \
 
 ```bash
 ros2 launch lbot_control lbot_task.launch.py \
-  start_driver:=true execute_task:=true task_mode:=pregrasp
+  execute_task:=true task_mode:=pregrasp
 ```
 
 该模式先检查桌面路线标定和关节限位，等待 `/nut_detections/large` 的一次有效三维观测，
@@ -166,7 +166,7 @@ ros2 launch lbot_control lbot_task.launch.py \
 三个位置分量都参与补偿，RPY 不变。保存的 `z = -0.3655917354267519 m` 现在表示掌心高度，
 不再表示机械臂末端法兰高度；到位后的 FK 高度因此会不同。
 
-掌心参考点根据 `Dexterous-Hand/开发资源/assets` 中 O6 左手模型推导：
+掌心参考点根据 `开发资源/assets/` 中 O6 左手模型推导：
 URDF 没有单独的掌心 TCP，因此取掌体 STL 的 Y/Z 包围盒中心，并沿 +X 掌侧取最外表面交点。
 这是可调整的模型几何参考点，不是模型作者定义的抓取中心，也不是实测标定值。
 手掌坐标系内的点约为 `[0.013985, 0.000761, 0.056365] m`；经过模型的手安装变换
@@ -193,7 +193,7 @@ TCP 的轴方向沿用 Arm_Tip，只有原点平移，并未将 RPY 重新解释
 
 ```bash
 python3 scripts/derive_palm_tcp.py \
-  --workstation ../Dexterous-Hand/开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf \
+  --workstation 开发资源/assets/workstations/lkls73_i1_o6_bimanual/workstation.urdf \
   --output config/control/left_palm_tcp_model.json \
   --plot artifacts/calibration/tool/left_palm_tcp_model.png
 ```
@@ -279,7 +279,7 @@ MoveJP 只约束终点，不保证搬运中途保持水平或固定姿态。
 
 ```bash
 ros2 launch lbot_control lbot_task.launch.py \
-  start_driver:=true execute_task:=true task_mode:=validate_pregrasp
+  execute_task:=true task_mode:=validate_pregrasp
 ```
 
 `validate_pregrasp` 以最后一个示教节点的关节角进行 FK 并计算接近、下降、抬升和坑位目标，
@@ -299,10 +299,10 @@ ros2 launch lbot_control lbot_task.launch.py \
 完整任务启动（默认仍为检查模式，不执行运动）：
 
 ```bash
-ros2 launch lbot_control lbot_task.launch.py start_driver:=false execute_task:=false
+ros2 launch lbot_control lbot_task.launch.py execute_task:=false
 ```
 
-确认所有标定和安全条件后，再设置 `start_driver:=true execute_task:=true`。任务控制器从
+确认所有标定和安全条件后，再设置 `execute_task:=true`。任务控制器从
 `/nut_detections/sequence` 和 `/nut_slots` 获取位姿，并通过 `/nut_detections/set_state` 发送
 `start/complete/retry` 反馈；视觉检查在放置撤离位、返回 `above_table` 前完成。
 
@@ -346,7 +346,7 @@ O6 左手数组顺序固定为：
 source /opt/ros/jazzy/setup.bash
 source install/local_setup.bash
 ros2 launch lbot_control lbot_task.launch.py \
-  start_driver:=true execute_task:=true task_mode:=pregrasp
+  execute_task:=true task_mode:=pregrasp
 ```
 
 `slot_transfer_planner: moveit` 负责抬升后到槽位的搬运；当前按配置依次经过两个过渡点。初始接近仍用 MoveJP，
@@ -354,7 +354,7 @@ ros2 launch lbot_control lbot_task.launch.py \
 显式传 `slot_transfer_planner:=sdk` 可选旧实现，
 但新实现失败时不会自动切回。默认 `execute_task:=false` 不执行动作。
 
-专用模型在启动时从同目录树内的 Dexterous-Hand CAD 生成，不改原始 URDF，也不硬编码用户名。
+专用模型在启动时从仓库内左臂 CAD 生成，不改原始 URDF，也不硬编码用户名。
 找不到模型时传 `moveit_model_source:=/实际路径/workstation.urdf`。
 左臂七个 CAD 轴全部反向，使模型关节角直接对应控制器弧度值；基座根设为 `base_link`，
 末端为 `arm_left_L8_Link`，对应零偏移 Arm_Tip。控制器 FK 一致性检查不通过则拒绝发送轨迹。
