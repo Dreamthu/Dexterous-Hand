@@ -84,20 +84,20 @@
     # optional taught joint waypoints, then MoveIt from settled current joints,
     # then timed joint_follow to the saved slot and release after pose arrival.
     approach_place_enabled: true
-    approach_place_lift_m: 0.18
+    approach_place_lift_m: 0.12
     approach_place_slot_selection: max_x
     # All post-lift transfers, including taught waypoints: MoveIt + joint_follow.
     # No fallback to SDK IK or MoveJP when MoveIt planning fails.
     slot_transfer_planner: moveit
-    moveit_joint_velocity_rad_s: 0.35
-    moveit_joint_acceleration_rad_s2: 0.30
+    moveit_joint_velocity_rad_s: 0.18
+    moveit_joint_acceleration_rad_s2: 0.12
     # Prefer equivalent endpoint IK with some room for measured settling error.
     # A preference only: model bounds and the original valid IK remain available.
     moveit_goal_preferred_clearance_rad: 0.005
     # Each segment stays above min(start Z, goal Z) minus this small allowance.
     # Independently constrain Arm_Tip and the lowest corner of the hand envelope.
     # This limits downward detours; it does not model the physical tabletop.
-    moveit_transfer_keep_above: false
+    moveit_transfer_keep_above: true
     moveit_transfer_max_drop_m: 0.04
     # Capture this fresh cloud with calibrated TF before the first enter move.
     # All post-lift MoveIt segments use the same static obstacle snapshot.
@@ -142,8 +142,8 @@
     # Try unchanged lift RPY first; user allowed expansion to 100 degrees.
     # MoveIt searches these exact-height endpoint candidates and checks the path.
     # Endpoint Z/RPY constraints do not imply constant Z/RPY along the whole path.
-    approach_place_max_orientation_change_rad: 0.5235987755982988
-    approach_place_planning_timeout_ms: 45000
+    approach_place_max_orientation_change_rad: 1.7453292519943295
+    approach_place_planning_timeout_ms: 15000
     approach_place_release_enabled: true
     approach_hand_release: [240, 30, 180, 180, 180, 180]
     # Full task: relative pregrasp height. Horizontal pregrasp mode: minimum

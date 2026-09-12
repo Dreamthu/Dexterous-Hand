@@ -470,203 +470,172 @@ private:
     slots.header.frame_id = target_frame_;
     std::ostringstream slots_json;
     if (observation.basket_found && target_frame_ == "base_link") {
-      // Basket is detected.  Sort corners by angle around centre to get
-      // the proper CCW winding order, then identify the long side (which
-      // corresponds to robot X) and partition into three along it.
-      const cv::Point2f a(geometry.basket[0]), b(geometry.basket[1]);
-      const cv::Point2f c(geometry.basket[2]), d(geometry.basket[3]);
-      const std::vector<cv::Point2f> raw{a, b, c, d};
-      const cv::Point2f centre = (a + b + c + d) * 0.25F;
-      // Sort by angle around centre → CCW winding order.
-      std::vector<std::pair<double, int>> angles;
-      for (int i = 0; i < 4; ++i)
-        angles.push_back({std::atan2(raw[i].y - centre.y, raw[i].x - centre.x), i});
-      std::sort(angles.begin(), angles.end());
-      std::array<cv::Point2f, 4> ordered;
-      for (int i = 0; i < 4; ++i) ordered[i] = raw[angles[i].second];
-
-      // Edges: (0,1) vs (2,3) — one pair; (1,2) vs (3,0) — the other.
-      // Identify which pair is the long side.
-      double len01_23 = cv::norm(ordered[0] - ordered[1]) + cv::norm(ordered[2] - ordered[3]);
-      double len12_30 = cv::norm(ordered[1] - ordered[2]) + cv::norm(ordered[3] - ordered[0]);
-      cv::Point2f edge_a_start, edge_a_end, edge_b_start, edge_b_end;
-      if (len01_23 >= len12_30) {
-        edge_a_start = ordered[0]; edge_a_end = ordered[1];
-        edge_b_start = ordered[3]; edge_b_end = ordered[2];
-      } else {
-        edge_a_start = ordered[1]; edge_a_end = ordered[2];
-        edge_b_start = ordered[0]; edge_b_end = ordered[3];
-      }
-      // Partition along the long side into 3 equal strips.
-      cv::Point2f slot_pixels[3];
-      for (int s = 0; s < 3; ++s) {
-        float t = (static_cast<float>(s) + 0.5F) / 3.0F;
-        cv::Point2f pa = edge_a_start * (1.0F - t) + edge_a_end * t;
-        cv::Point2f pb = edge_b_start * (1.0F - t) + edge_b_end * t;
-        slot_pixels[s] = (pa + pb) * 0.5F;
-      }
-      // Sort by image X so slot[0]=leftmost (small robot X), slot[2]=rightmost.
-      std::sort(slot_pixels, slot_pixels + 3,
-                [](cv::Point2f p, cv::Point2f q) { return p.x < q.x; });
-
-      // --- Robust depth: three-tier fallback ---
+      // Robust depth: sample basket interior for a single shared Z.
+      // Then back-project all 4 corners with that Z and feed them to the
+      // proven basket_slots_robot_x algorithm.
       double basket_z = NAN;
       std::string z_source = "none";
-      std::vector<double> samples;
-
-      // Tier 1: interior centre region
       {
-        cv::Point2f centre = (a + b + c + d) * 0.25F;
+        cv::Point2f centre(0, 0);
+        for (const auto &corner : geometry.basket) centre += cv::Point2f(corner);
+        centre *= 0.25F;
+        std::vector<double> samples;
+        auto push = [&](float u, float v) {
+          double z = sample_depth(depth, {u * static_cast<float>(sx), v * static_cast<float>(sy)});
+          if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
+        };
+        // Centre grid
         for (int dy = -12; dy <= 12; dy += 2)
-          for (int dx = -12; dx <= 12; dx += 2) {
-            float u = std::clamp(centre.x + dx, 0.0F, static_cast<float>(color.cols - 1));
-            float v = std::clamp(centre.y + dy, 0.0F, static_cast<float>(color.rows - 1));
-            double z = sample_depth(depth, {u*static_cast<float>(sx), v*static_cast<float>(sy)});
-            if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
-          }
+          for (int dx = -12; dx <= 12; dx += 2)
+            push(std::clamp(centre.x + dx, 0.0F, static_cast<float>(color.cols - 1)),
+                 std::clamp(centre.y + dy, 0.0F, static_cast<float>(color.rows - 1)));
+        // Diagonals toward corners (interior half)
         for (const auto &corner : geometry.basket) {
-          cv::Point2f dir = cv::Point2f(corner) - centre;
-          for (float t = 0.1F; t <= 0.5F; t += 0.08F) {
-            float u = std::clamp(centre.x + dir.x*t, 0.0F, static_cast<float>(color.cols - 1));
-            float v = std::clamp(centre.y + dir.y*t, 0.0F, static_cast<float>(color.rows - 1));
-            double z = sample_depth(depth, {u*static_cast<float>(sx), v*static_cast<float>(sy)});
-            if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
-          }
+          cv::Point2f d = cv::Point2f(corner) - centre;
+          for (float t = 0.1F; t <= 0.5F; t += 0.08F)
+            push(std::clamp(centre.x + d.x*t, 0.0F, static_cast<float>(color.cols - 1)),
+                 std::clamp(centre.y + d.y*t, 0.0F, static_cast<float>(color.rows - 1)));
         }
         if (!samples.empty()) {
           auto mid = samples.begin() + samples.size() / 2;
           std::nth_element(samples.begin(), mid, samples.end());
           basket_z = *mid;
-          z_source = "interior_centre_" + std::to_string(samples.size());
+          z_source = "interior";
         }
       }
-
-      // Tier 2: whole-basket fill scan
+      // Fill-scan fallback
       if (!std::isfinite(basket_z)) {
-        samples.clear();
+        std::vector<double> samples;
         cv::Mat mask = cv::Mat::zeros(color.rows, color.cols, CV_8UC1);
         std::vector<cv::Point> pts;
         for (const auto &p : geometry.basket) pts.emplace_back(p);
         cv::fillConvexPoly(mask, pts, 255);
-        for (int v = 0; v < color.rows; ++v) {
-          const uint8_t *row = mask.ptr<uint8_t>(v);
+        for (int v = 0; v < color.rows; ++v)
           for (int u = 0; u < color.cols; ++u) {
-            if (!row[u]) continue;
-            double z = sample_depth(depth, {u*static_cast<float>(sx), v*static_cast<float>(sy)});
+            if (!mask.at<uint8_t>(v, u)) continue;
+            double z = sample_depth(depth, {u*sx, v*sy});
             if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
           }
+        if (!samples.empty()) {
+          auto mid = samples.begin() + samples.size() / 2;
+          std::nth_element(samples.begin(), mid, samples.end());
+          basket_z = *mid;
+          z_source = "fillscan";
+        }
+      }
+      // Borrow from frame centre
+      if (!std::isfinite(basket_z)) {
+        std::vector<double> samples;
+        if (!observation.geometry.frame.empty()) {
+          cv::Point2f fc(0, 0);
+          for (const auto &p : observation.geometry.frame) fc += cv::Point2f(p);
+          fc *= 1.0F / static_cast<float>(observation.geometry.frame.size());
+          for (int dy = -15; dy <= 15; dy += 3)
+            for (int dx = -15; dx <= 15; dx += 3) {
+              float u = std::clamp(fc.x + dx, 0.0F, static_cast<float>(color.cols - 1));
+              float v = std::clamp(fc.y + dy, 0.0F, static_cast<float>(color.rows - 1));
+              double z = sample_depth(depth, {u*sx, v*sy});
+              if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
+            }
         }
         if (!samples.empty()) {
           auto mid = samples.begin() + samples.size() / 2;
           std::nth_element(samples.begin(), mid, samples.end());
           basket_z = *mid;
-          z_source = "fillscan_" + std::to_string(samples.size());
+          z_source = "frame";
         }
       }
-
-      // Tier 3: borrow depth from the nut detection region.
-      // If nuts are being found, the depth sensor is working — the basket
-      // may just be at slightly different range. Use the nut Z as fallback.
       if (!std::isfinite(basket_z)) {
-        samples.clear();
-        { // scope to protect frame reference
-          const auto &frame = observation.geometry.frame;
-          if (!frame.empty()) {
-            cv::Point2f fc(0, 0);
-            for (const auto &p : frame) fc += cv::Point2f(p);
-            fc *= 1.0F / static_cast<float>(frame.size());
-            for (int dy = -15; dy <= 15; dy += 3)
-              for (int dx = -15; dx <= 15; dx += 3) {
-                float u = std::clamp(fc.x + dx, 0.0F, static_cast<float>(color.cols - 1));
-                float v = std::clamp(fc.y + dy, 0.0F, static_cast<float>(color.rows - 1));
-                double z = sample_depth(depth, {u*static_cast<float>(sx), v*static_cast<float>(sy)});
-                if (valid_depth(z, depth_min_m_, depth_max_m_)) samples.push_back(z);
+        basket_z = depth_min_m_ + 0.05;
+        z_source = "hard";
+      }
+
+      // --- Back-project all 4 corners with shared Z → base_corners ---
+      std::vector<cv::Point3d> base_corners;
+      std::vector<cv::Point2f> base_xy, image_corners;
+      std::vector<double> corner_depths;
+      for (const auto &corner : geometry.basket) {
+        cv::Point2f px(corner);
+        geometry_msgs::msg::Point point;
+        std::string frame;
+        if (!transform_point(project_pixel(px, basket_z),
+                             color_msg_->header.frame_id, point, frame) ||
+            frame != "base_link") {
+          // Ring recovery
+          bool ok = false;
+          for (int r = 1; r <= 12 && !ok; ++r)
+            for (int dy = -r; dy <= r && !ok; dy += std::max(1, r/3))
+              for (int dx = -r; dx <= r && !ok; dx += std::max(1, r/3)) {
+                if (std::abs(dx) != r && std::abs(dy) != r) continue;
+                geometry_msgs::msg::Point trial;
+                std::string tf;
+                if (transform_point(project_pixel({px.x + dx, px.y + dy}, basket_z),
+                                    color_msg_->header.frame_id, trial, tf) && tf == "base_link") {
+                  point = trial; frame = tf; ok = true;
+                }
               }
+          if (!ok) continue;
+        }
+        base_corners.emplace_back(point.x, point.y, point.z);
+        base_xy.emplace_back(point.x, point.y);
+        image_corners.push_back(px);
+        corner_depths.push_back(basket_z);
+      }
+
+      if (base_corners.size() == 4) {
+        try {
+          auto centers = lbot_vision::basket_slots_robot_x(base_corners);
+          const auto to_image = cv::getPerspectiveTransform(base_xy, image_corners);
+          std::vector<cv::Point2f> slot_xy, slot_pixels;
+          for (const auto &center : centers) slot_xy.emplace_back(center.x, center.y);
+          cv::perspectiveTransform(slot_xy, slot_pixels, to_image);
+          for (std::size_t i = 0; i < centers.size(); ++i) {
+            centers[i].z = corner_depths.empty() ? basket_z :
+              corner_depths[corner_depths.size() / 2];
+          }
+          geometry_msgs::msg::PoseArray slots;
+          slots.header = color_msg_->header;
+          slots.header.frame_id = target_frame_;
+          std::ostringstream slots_json;
+          for (std::size_t i = 0; i < centers.size(); ++i) {
+            geometry_msgs::msg::Pose pose;
+            pose.position.x = centers[i].x;
+            pose.position.y = centers[i].y;
+            pose.position.z = centers[i].z;
+            pose.orientation.w = 1.0;
+            slots.poses.push_back(pose);
+            if (i) slots_json << ',';
+            slots_json << "{\"x\":" << centers[i].x << ",\"y\":" << centers[i].y
+                       << ",\"z\":" << centers[i].z << "}";
+            cv::drawMarker(debug, slot_pixels[i], cv::Scalar(255, 0, 255), cv::MARKER_CROSS, 20, 2);
+            cv::putText(debug, "slot_" + std::to_string(i + 1) + " (+base X)",
+                        slot_pixels[i] + cv::Point2f(5, -5), cv::FONT_HERSHEY_SIMPLEX,
+                        0.4, cv::Scalar(255, 0, 255), 1);
+          }
+          cached_slots_ = slots;
+          slots_pub_->publish(slots);
+          RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
+            "slots via robot_X partition: z=%.4f src=%s count=%zu",
+            basket_z, z_source.c_str(), slots.poses.size());
+        } catch (const std::exception &error) {
+          RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
+            "basket_slots_robot_x failed: %s (z=%.4f src=%s corners=%zu)",
+            error.what(), basket_z, z_source.c_str(), base_corners.size());
+          if (cached_slots_) {
+            auto slots = *cached_slots_;
+            slots.header = color_msg_->header;
+            slots_pub_->publish(slots);
           }
         }
-        if (!samples.empty()) {
-          auto mid = samples.begin() + samples.size() / 2;
-          std::nth_element(samples.begin(), mid, samples.end());
-          basket_z = *mid;
-          z_source = "frame_centre_" + std::to_string(samples.size());
+      } else {
+        RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 3000,
+          "only %zu/4 basket corners localized (z=%.4f src=%s)",
+          base_corners.size(), basket_z, z_source.c_str());
+        if (cached_slots_) {
+          auto slots = *cached_slots_;
+          slots.header = color_msg_->header;
+          slots_pub_->publish(slots);
         }
-      }
-
-      // Tier 4: absolute fallback — use configured depth minimum.
-      // The basket sits on the table at a known distance.
-      if (!std::isfinite(basket_z)) {
-        basket_z = depth_min_m_ + 0.05;  // 0.20 m rough estimate
-        z_source = "hard_fallback_" + std::to_string(depth_min_m_ + 0.05);
-      }
-
-      RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
-        "basket slot attempt: z=%.4f source=%s frame=%s",
-        basket_z, z_source.c_str(), target_frame_.c_str());
-
-      // --- Publish 3 slots.  Always draw markers on debug so we can see
-      // the division; failure is only logged, never silent. ---
-      for (int s = 0; s < 3; ++s) {
-        cv::drawMarker(debug, slot_pixels[s], cv::Scalar(255, 0, 255), cv::MARKER_CROSS, 20, 2);
-        cv::putText(debug, "slot_" + std::to_string(s + 1),
-                    slot_pixels[s] + cv::Point2f(5, -5), cv::FONT_HERSHEY_SIMPLEX,
-                    0.4, cv::Scalar(255, 0, 255), 1);
-      }
-
-      geometry_msgs::msg::PoseArray slots;
-      slots.header = color_msg_->header;
-      slots.header.frame_id = target_frame_;
-      std::ostringstream slots_json;
-      for (int s = 0; s < 3; ++s) {
-        cv::Point2f px = slot_pixels[s];
-        auto try_pixel = [&](cv::Point2f p) -> std::optional<geometry_msgs::msg::Point> {
-          geometry_msgs::msg::Point cam = project_pixel(p, basket_z);
-          geometry_msgs::msg::Point out;
-          std::string out_frame;
-          if (transform_point(cam, color_msg_->header.frame_id, out, out_frame) &&
-              out_frame == "base_link" &&
-              std::isfinite(out.x) && std::isfinite(out.y) && std::isfinite(out.z))
-            return out;
-          return std::nullopt;
-        };
-        auto opt = try_pixel(px);
-        if (!opt) {
-          // Ring recovery with expanding radius
-          for (int r = 1; r <= 20 && !opt; ++r)
-            for (int dy = -r; dy <= r && !opt; dy += std::max(1, r / 3))
-              for (int dx = -r; dx <= r && !opt; dx += std::max(1, r / 3)) {
-                if (std::abs(dx) != r && std::abs(dy) != r) continue;
-                opt = try_pixel({px.x + dx, px.y + dy});
-              }
-        }
-        if (!opt) {
-          RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
-            "slot_%d TF failed at image (%.0f,%.0f) z=%.4f", s + 1, px.x, px.y, basket_z);
-          // Fallback: publish camera-frame point so slot isn't empty.
-          geometry_msgs::msg::Pose pose;
-          auto cam = project_pixel(px, basket_z);
-          pose.position = cam;
-          pose.position.z = basket_z;
-          pose.orientation.w = 1.0;
-          slots.header.frame_id = color_msg_->header.frame_id;
-          slots.poses.push_back(pose);
-        } else {
-          geometry_msgs::msg::Pose pose;
-          pose.position = *opt;
-          pose.orientation.w = 1.0;
-          slots.poses.push_back(pose);
-        }
-        if (s) slots_json << ',';
-        slots_json << "{\"x\":" << slots.poses.back().position.x
-                   << ",\"y\":" << slots.poses.back().position.y
-                   << ",\"z\":" << slots.poses.back().position.z << "}";
-      }
-      {
-        slots.header.frame_id = target_frame_;
-        cached_slots_ = slots;
-        slots_pub_->publish(slots);
-        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
-          "slots published: %zu poses, z=%.4f src=%s, frame=%s",
-          slots.poses.size(), basket_z, z_source.c_str(), slots.header.frame_id.c_str());
       }
     }
     if (!cached_slots_ && !observation.basket_found) {
