@@ -92,7 +92,7 @@ MotionResult RosLeftArmMotionSystem::prepare(const MotionPlan &plan)
 }
 
 MotionResult RosLeftArmMotionSystem::approach_at_table_height(
-  const Pose6 &nut, NutSize size, const MotionPlanOptions &options, bool execute, const Pose6 *slot)
+  const Pose6 &nut, const MotionPlanOptions &options, bool execute, const Pose6 *slot)
 {
   if (config_.approach_place_enabled && (!config_.approach_grasp_enabled || !slot ||
       !finite_pose(*slot) || !std::isfinite(config_.approach_place_lift_m) ||
@@ -251,7 +251,7 @@ MotionResult RosLeftArmMotionSystem::approach_at_table_height(
   if (!result.success) return result;
   result = confirm_pose(vertical.goal, "vertical MoveL before hand close");
   if (!result.success) return result;
-  result = hand_step(config_.hand_closed[static_cast<std::size_t>(size)], (std::string(to_string(size)) + " hand close after vertical move").c_str());
+  result = hand_step(config_.approach_hand_close, "LARGE hand close after vertical move");
   if (!result.success || !config_.approach_place_enabled) return result;
   // Re-read settled feedback after closing so the 12 cm is relative to the
   // actual Arm_Tip position, including any small settling error.
@@ -891,52 +891,6 @@ MotionResult RosLeftArmMotionSystem::finish_task()
 {
   if (!motion_started_) return MotionResult::ok("no motion started; no hand cleanup needed");
   return open_hand_for_cleanup(true);
-}
-MotionResult RosLeftArmMotionSystem::return_from_slot()
-{
-  if (!route_prepared_) return MotionResult::fail("table route has not been prepared");
-  if (!motion_started_) return MotionResult::fail("no motion started; cannot return from slot");
-  // After release at the slot: lift, reverse through transfer waypoints, then return above table.
-  if (!device_->wait_for_fresh_state()) {
-    return MotionResult::fail("no fresh left arm state before slot retreat");
-  }
-  auto current = device_->left_joints();
-  lbot_motion::CartesianPose position;
-  const auto fk = device_->forward_kinematics(current, position);
-  if (!fk.success) return from_device_result(fk);
-  Pose6 retreat{position.x, position.y, position.z + config_.approach_place_lift_m,
-                position.roll, position.pitch, position.yaw};
-  RCLCPP_INFO(node_->get_logger(),
-    "slot retreat MoveL: Arm_Tip z %.6f -> %.6f (+%.3f mm); X/Y/RPY unchanged",
-    position.z, retreat.z, config_.approach_place_lift_m * 1000);
-  auto result = move_linear(retreat, "retreat from slot after release");
-  if (!result.success) return result;
-  // Reverse through transfer waypoints if configured
-  if (!config_.approach_place_waypoints.empty()) {
-    RCLCPP_INFO(node_->get_logger(),
-      "reversing through %zu transfer waypoints before returning above table",
-      config_.approach_place_waypoints.size());
-    for (int i = static_cast<int>(config_.approach_place_waypoints.size()) - 1; i >= 0; --i) {
-      const auto &waypoint = config_.approach_place_waypoints[static_cast<std::size_t>(i)];
-      const auto label = "post-release return waypoint " + std::to_string(i + 1) + "/" +
-        std::to_string(config_.approach_place_waypoints.size()) + " (" + waypoint.name + ")";
-      // MoveJ from current position to the waypoint
-      result = move_joints(waypoint.joints, label);
-      if (!result.success) return result;
-      if (!device_->wait_until_left_joints(
-          waypoint.joints, config_.waypoint_tolerance_rad,
-          config_.waypoint_timeout, config_.stable_joint_samples)) {
-        return MotionResult::fail("left arm did not settle at " + label);
-      }
-      if (config_.waypoint_settle.count() > 0) {
-        std::this_thread::sleep_for(config_.waypoint_settle);
-      }
-      RCLCPP_INFO(node_->get_logger(), "reached %s", label.c_str());
-    }
-  }
-  // Return to above-table taught waypoint
-  RCLCPP_INFO(node_->get_logger(), "returning above table from slot retreat position");
-  return execute(MotionStage::ReturnAboveTable);
 }
 
 void RosLeftArmMotionSystem::stop() noexcept

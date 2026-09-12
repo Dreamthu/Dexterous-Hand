@@ -132,41 +132,6 @@ SlotTargetResult RosVisionSystem::capture_slot(bool maximum_x)
   return captured;
 }
 
-RosVisionSystem::AllSlotsResult RosVisionSystem::capture_all_slots()
-{
-  std::unique_lock<std::mutex> lock(mutex_);
-  slots_.reset();
-  AllSlotsResult result;
-  const bool ready = condition_.wait_for(lock, config_.wait_timeout, [this, &result]() {
-    if (!slots_ || slots_->poses.size() != 3 || !valid_frame(slots_->header.frame_id)) return false;
-    const auto age = node_->now().nanoseconds() - stamp_ns(slots_->header);
-    if (age < 0 || age > 500000000LL) return false;
-    // Sort by base_link X ascending: [min_x, mid_x, max_x]
-    std::array<std::pair<double, std::size_t>, 3> sorted{};
-    for (std::size_t i = 0; i < 3; ++i) {
-      Pose6 pose;
-      if (!slot_pose(*slots_, i, pose)) return false;
-      sorted[i] = {pose.x, i};
-    }
-    std::sort(sorted.begin(), sorted.end());
-    for (std::size_t i = 0; i < 3; ++i) {
-      slot_pose(*slots_, sorted[i].second, result.poses[i]);
-      result.indices[i] = sorted[i].second + 1;
-    }
-    return true;
-  });
-  if (!ready) {
-    result.success = false;
-    result.message = "timed out waiting for three fresh slot positions in " + config_.base_frame;
-    return result;
-  }
-  result.success = true;
-  result.message = "captured all three slots before enter: X=[" +
-    std::to_string(result.poses[0].x) + "," + std::to_string(result.poses[1].x) + "," +
-    std::to_string(result.poses[2].x) + "]";
-  return result;
-}
-
 SceneResult RosVisionSystem::initial_scene()
 {
   std::unique_lock<std::mutex> lock(mutex_);

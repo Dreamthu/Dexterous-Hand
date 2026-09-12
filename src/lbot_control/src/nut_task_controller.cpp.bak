@@ -341,132 +341,64 @@ int main(int argc, char **argv)
       lbot_control::MotionResult result;
       try {
         result = motion->prepare_table_route();
-
-        // Capture the large-nut position first. This gives the vision node
-        // time to detect the blue basket and stabilise slot publishing before
-        // we capture all three slots below.
-        lbot_control::RosVisionSystem::AllSlotsResult all_slots;
+        lbot_control::LargeTargetResult captured;
+        lbot_control::SlotTargetResult saved_slot;
         if (result.success) {
           RCLCPP_INFO(node->get_logger(),
-            "waiting for a visible nut (largest contour) to let vision settle");
-          const auto warmup = vision->capture_large_target();
-          if (!warmup.success) {
-            RCLCPP_WARN(node->get_logger(),
-              "initial large-target capture before slot query: %s; proceeding anyway",
-              warmup.message.c_str());
+            "waiting for one current LARGE nut position before enter; no sequence confirmation required");
+          captured = vision->capture_large_target();
+          if (!captured.success) {
+            result = lbot_control::MotionResult::fail(captured.message);
           } else {
-            RCLCPP_INFO(node->get_logger(),
-              "initial target at xyz=[%.4f,%.4f,%.4f]; vision warmed up, now capturing slots",
-              warmup.pose.x, warmup.pose.y, warmup.pose.z);
+            RCLCPP_INFO(node->get_logger(), "saved LARGE target in %s: xyz=[%.4f,%.4f,%.4f]",
+              vision_config.base_frame.c_str(), captured.pose.x, captured.pose.y, captured.pose.z);
           }
         }
-
-        // Capture all three slot positions once before enter.
-        // Sorted by base_link X ascending: [min_x, mid_x, max_x].
-        // Large nut → rightmost (max X), Medium → middle, Small → leftmost (min X).
         if (result.success && motion_config.approach_place_enabled) {
           RCLCPP_INFO(node->get_logger(),
-            "waiting for all three slot positions before enter");
-          all_slots = vision->capture_all_slots();
-          if (!all_slots.success) {
-            result = lbot_control::MotionResult::fail(all_slots.message);
+            "waiting for one current three-slot observation before enter; selection=%s", slot_selection.c_str());
+          saved_slot = slot_selection == "max_x" ? vision->capture_max_x_slot() : vision->capture_farthest_slot();
+          if (!saved_slot.success) {
+            result = lbot_control::MotionResult::fail(saved_slot.message);
           } else {
             RCLCPP_INFO(node->get_logger(),
-              "captured all slots in %s: slot_%zu (x=%.6f), slot_%zu (x=%.6f), slot_%zu (x=%.6f)",
-              vision_config.base_frame.c_str(),
-              all_slots.indices[0], all_slots.poses[0].x,
-              all_slots.indices[1], all_slots.poses[1].x,
-              all_slots.indices[2], all_slots.poses[2].x);
+              "saved %s slot_%zu in %s: xyz=[%.6f,%.6f,%.6f], base XY distance=%.6f m; no vision after enter",
+              slot_selection.c_str(), saved_slot.index, vision_config.base_frame.c_str(), saved_slot.pose.x, saved_slot.pose.y,
+              saved_slot.pose.z, std::hypot(saved_slot.pose.x, saved_slot.pose.y));
           }
         }
-
         if (result.success && move && motion_config.approach_place_enabled) {
           result = motion->capture_transfer_obstacles();
         }
-
-        // Single enter to above_table. Subsequent nuts resume from the
-        // return position after each slot retreat.
         if (result.success && move) {
           RCLCPP_INFO(node->get_logger(),
-            "starting taught MoveJ enter route to above table position");
+            "starting taught MoveJ enter route; MoveJP target will be computed after settling");
           if (motion_config.route_control_hand) result = motion->begin_route_motion();
           if (result.success) result = motion->execute(lbot_control::MotionStage::MoveAboveTable);
           if (result.success && motion_config.route_control_hand) result = motion->finish_route_motion();
         }
-
-        // Three-nut loop: Large → Medium → Small.
-        // After each pick the largest visible nut is the next target.
-        const std::array<lbot_control::NutSize, 3> nut_order{
-          lbot_control::NutSize::Large,
-          lbot_control::NutSize::Medium,
-          lbot_control::NutSize::Small};
-        for (std::size_t i = 0; i < nut_order.size() && result.success; ++i) {
-          const auto size = nut_order[i];
-          const bool is_last = (i == nut_order.size() - 1);
-
-          // The /nut_detections/large topic publishes the largest visible
-          // contour. When the previous nut has been removed this is the
-          // next target. No sequence confirmation is needed.
+        if (result.success) {
           RCLCPP_INFO(node->get_logger(),
-            "waiting for %s nut position (largest visible contour)",
-            to_string(size));
-          const auto captured = vision->capture_large_target();
-          if (!captured.success) {
-            result = lbot_control::MotionResult::fail(
-              std::string(to_string(size)) + " target capture failed: " + captured.message);
-            break;
-          }
-          RCLCPP_INFO(node->get_logger(), "saved %s target in %s: xyz=[%.4f,%.4f,%.4f]",
-            to_string(size), vision_config.base_frame.c_str(),
-            captured.pose.x, captured.pose.y, captured.pose.z);
-
-          // Slot assignment: Large → rightmost (max_X=index 2), Medium → middle (index 1),
-          // Small → leftmost (min_X=index 0).
-          const std::size_t slot_idx = 2 - static_cast<std::size_t>(size);
-
-          RCLCPP_INFO(node->get_logger(),
-            "%s assigned slot_%zu (x=%.6f)", to_string(size),
-            all_slots.indices[slot_idx], all_slots.poses[slot_idx].x);
-
-          if (move) {
-            RCLCPP_INFO(node->get_logger(),
-              "starting %s approach, grasp, lift, transfer, and release",
-              to_string(size));
-            result = motion->approach_at_table_height(
-              captured.pose, size, plan_options, move,
-              motion_config.approach_place_enabled ? &all_slots.poses[slot_idx] : nullptr);
-
-            if (result.success) {
-              RCLCPP_INFO(node->get_logger(),
-                "%s placed; retreating from slot%s", to_string(size),
-                is_last ? " to above table, then final retract" : " for next nut");
-              result = motion->return_from_slot();
-            }
-          }
-        }
-
-        // Final retract after all three nuts
-        if (result.success && move) {
-          RCLCPP_INFO(node->get_logger(),
-            "all three nuts completed; retracting to natural_down");
-          result = motion->execute(lbot_control::MotionStage::Retract);
-        }
-
-        if (result.success && !move) {
-          RCLCPP_INFO(node->get_logger(),
-            "taught route, all three slots, and configured approach/grasp/placement targets "
-            "checked; no commands sent; reachability/path not validated");
+            "preparing MoveJP to the saved LARGE target; no further vision wait");
+          result = motion->approach_at_table_height(captured.pose, plan_options, move,
+            motion_config.approach_place_enabled ? &saved_slot.pose : nullptr);
         }
       } catch (const std::exception &error) {
         result = lbot_control::MotionResult::fail(error.what());
       }
       if (!result.success) {
-        RCLCPP_ERROR(node->get_logger(), "three-nut task failed: %s", result.message.c_str());
+        RCLCPP_ERROR(node->get_logger(), "LARGE grasp/place sequence failed: %s", result.message.c_str());
         motion->stop();
       } else {
-        RCLCPP_INFO(node->get_logger(), "%s",
-          move ? "three-nut task completed successfully" :
-                 "validation passed; no motion sent");
+        RCLCPP_INFO(node->get_logger(), "%s", move ?
+          (motion_config.approach_place_enabled ?
+            (motion_config.approach_place_release_enabled ?
+              "LARGE sequence finished at saved slot and released; grasp/release not sensor-verified" :
+              "LARGE sequence finished at saved slot; slot release disabled; task cleanup will open hand") :
+           motion_config.approach_grasp_enabled ?
+            "LARGE sequence finished: approach, ready hand, vertical MoveL, close hand; stopped without lift; grasp not sensor-verified" :
+            "reached approach target above saved LARGE nut; no descent or grasp; use task_mode:=return to retract") :
+          "taught route and configured approach/grasp/placement targets checked; no commands sent; reachability/path not validated");
       }
       const bool succeeded = cleanup.finish(result.success);
       rclcpp::shutdown();
